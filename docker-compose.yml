@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+
+  # ─────────────────────────────────────────
+  # PostgreSQL 16
+  # ─────────────────────────────────────────
+  db:
+    image: postgres:16
+    container_name: odoo19_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: odoo
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - odoo19_db_data:/var/lib/postgresql/data
+    networks:
+      - odoo19_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────
+  # Odoo 19
+  # ─────────────────────────────────────────
+  odoo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: odoo19_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Host 8070 → Container 8069
+      # Évite le conflit avec ton Odoo local sur 8069
+      - "8070:8069"
+    environment:
+      HOST: db
+      PORT: 5432
+      USER: odoo
+      PASSWORD: odoo
+    volumes:
+      # Custom addons (live reload en dev)
+      - ./custom_addons:/mnt/extra-addons
+      # Odoo filestore & sessions
+      - odoo19_web_data:/var/lib/odoo
+      # Config
+      - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
+    networks:
+      - odoo19_net
+
+# ─────────────────────────────────────────
+# Volumes persistants
+# ─────────────────────────────────────────
+volumes:
+  odoo19_db_data:
+    name: odoo19_db_data
+  odoo19_web_data:
+    name: odoo19_web_data
+
+# ─────────────────────────────────────────
+# Réseau isolé
+# ─────────────────────────────────────────
+networks:
+  odoo19_net:
+    name: odoo19_net
+    driver: bridge
