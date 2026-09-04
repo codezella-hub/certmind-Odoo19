@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+<t t-name="digii_lms.Dashboard">
+    <Layout display="display" className="'o_digii_dashboard h-100 overflow-auto'">
+    <div class="digii-dashboard">
+
+        <!-- ── LOADER ── -->
+        <div t-if="state.loading"
+             class="d-flex justify-content-center align-items-center"
+             style="height:60vh;">
+            <div class="text-center">
+                <i class="fa fa-spinner fa-spin fa-3x text-primary mb-3"/>
+                <p class="text-muted fw-semibold">Chargement du dashboard...</p>
+            </div>
+        </div>
+
+        <div t-else="" class="p-4">
+
+            <!-- ── HEADER ── -->
+            <div class="digii-header mb-4 p-4 rounded-4"
+                 style="background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #EC4899 100%);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h1 class="text-white fw-bold mb-1" style="font-size:2rem;">
+                            <i class="fa fa-tachometer me-3"/>
+                            Smart LMS Dashboard
+                        </h1>
+                        <p class="text-white opacity-75 mb-0">
+                            Vue d'ensemble de votre plateforme d'apprentissage
+                        </p>
+                    </div>
+                    <div class="text-white opacity-75">
+                        <i class="fa fa-graduation-cap" style="font-size:5rem;"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── KPI CARDS ── -->
+            <div class="row g-3 mb-4">
+
+                <!-- Cours -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="digii-kpi-card card border-0 shadow-sm h-100"
+                         style="background:linear-gradient(135deg,#4F46E5,#7C3AED);
+                                border-radius:20px; cursor:pointer;"
+                         t-on-click="goToCourses">
+                        <div class="card-body p-4 text-white">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="digii-kpi-icon"
+                                     style="background:rgba(255,255,255,0.2);
+                                            border-radius:14px; padding:14px; width:52px; height:52px;
+                                            display:flex; align-items:center; justify-content:center;">
+                                    <i class="fa fa-graduation-cap fa-lg"/>
+                                </div>
+                                <span class="badge"
+                                      style="background:rgba(255,255,255,0.25);
+                                             border-radius:8px; font-size:0.75rem;">
+                                    <t t-esc="state.stats.published_courses"/> publiés
+                                </span>
+                            </div>
+                            <div class="digii-kpi-value fw-bold mb-1"
+                                 style="font-size:2.5rem; line-height:1;">
+                                <t t-esc="state.stats.total_courses"/>
+                            </div>
+                            <div class="opacity-75 small">Total Cours</div>
+                            <div class="mt-2 pt-2"
+                                 style="border-top:1px solid rgba(255,255,255,0.2);">
+                                <small class="opacity-75">
+                                    <i class="fa fa-times-circle me-1"/>
+                                    <t t-esc="state.stats.unpublished_courses"/> non publiés
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leçons -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="digii-kpi-card card border-0 shadow-sm h-100"
+                         style="background:linear-gradient(135deg,#059669,#10B981);
+                                border-radius:20px; cursor:pointer;"
+                         t-on-click="goToSlides">
+                        <div class="card-body p-4 text-white">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div style="background:rgba(255,255,255,0.2);
+                                            border-radius:14px; padding:14px; width:52px; height:52px;
+                                            display:flex; align-items:center; justify-content:center;">
+                                    <i class="fa fa-book fa-lg"/>
+                                </div>
+                                <span class="badge"
+                                      style="background:rgba(255,255,255,0.25); border-radius:8px;">
+                                    <t t-esc="state.stats.published_slides"/> publiées
+                                </span>
+                            </div>
+                            <div class="fw-bold mb-1" style="font-size:2.5rem; line-height:1;">
+                                <t t-esc="state.stats.total_slides"/>
+                            </div>
+                            <div class="opacity-75 small">Total Leçons</div>
+                            <div class="mt-2 pt-2"
+                                 style="border-top:1px solid rgba(255,255,255,0.2);">
+                                <small class="opacity-75">
+                                    <i class="fa fa-eye me-1"/>
+                                    <t t-esc="state.stats.total_views"/> vues totales
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Apprenants -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="digii-kpi-card card border-0 shadow-sm h-100"
+                         style="background:linear-gradient(135deg,#D97706,#F59E0B);
+                                border-radius:20px; cursor:pointer;"
+                         t-on-click="goToLearners">
+                        <div class="card-body p-4 text-white">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div style="background:rgba(255,255,255,0.2);
+                                            border-radius:14px; padding:14px; width:52px; height:52px;
+                                            display:flex; align-items:center; justify-content:center;">
+                                    <i class="fa fa-users fa-lg"/>
+                                </div>
+                                <span class="badge"
+                                      style="background:rgba(255,255,255,0.25); border-radius:8px;">
+                                    <t t-esc="state.stats.completed_learners"/> complétés
+                                </span>
+                            </div>
+                            <div class="fw-bold mb-1" style="font-size:2.5rem; line-height:1;">
+                                <t t-esc="state.stats.total_learners"/>
+                            </div>
+                            <div class="opacity-75 small">Total Apprenants</div>
+                            <div class="mt-2 pt-2"
+                                 style="border-top:1px solid rgba(255,255,255,0.2);">
+                                <small class="opacity-75">
+                                    <i class="fa fa-flag-checkered me-1"/>
+                                    Taux de complétion
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catégories -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="digii-kpi-card card border-0 shadow-sm h-100"
+                         style="background:linear-gradient(135deg,#DC2626,#EF4444);
+                                border-radius:20px; cursor:pointer;"
+                         t-on-click="goToCategories">
+                        <div class="card-body p-4 text-white">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div style="background:rgba(255,255,255,0.2);
+                                            border-radius:14px; padding:14px; width:52px; height:52px;
+                                            display:flex; align-items:center; justify-content:center;">
+                                    <i class="fa fa-folder fa-lg"/>
+                                </div>
+                                <span class="badge"
+                                      style="background:rgba(255,255,255,0.25); border-radius:8px;">
+                                    Actives
+                                </span>
+                            </div>
+                            <div class="fw-bold mb-1" style="font-size:2.5rem; line-height:1;">
+                                <t t-esc="state.stats.total_categories"/>
+                            </div>
+                            <div class="opacity-75 small">Catégories</div>
+                            <div class="mt-2 pt-2"
+                                 style="border-top:1px solid rgba(255,255,255,0.2);">
+                                <small class="opacity-75">
+                                    <i class="fa fa-tags me-1"/>
+                                    Tags et classifications
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── ROW GRAPHIQUES 1 ── -->
+            <div class="row g-3 mb-4">
+
+                <!-- Pie — Cours par catégorie -->
+                <div class="col-xl-6">
+                    <div class="card border-0 shadow-sm h-100"
+                         style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#EEF2FF; border-radius:10px;
+                                            padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-pie-chart text-primary"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">Cours par Catégorie</h6>
+                            </div>
+                            <canvas t-ref="chartCategories" style="max-height:280px;"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bar — Leçons par type -->
+                <div class="col-xl-6">
+                    <div class="card border-0 shadow-sm h-100"
+                         style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#ECFDF5; border-radius:10px;
+                                            padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-bar-chart text-success"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">Leçons par Type de Contenu</h6>
+                            </div>
+                            <canvas t-ref="chartSlideTypes" style="max-height:280px;"/>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── ROW GRAPHIQUES 2 ── -->
+            <div class="row g-3 mb-4">
+
+                <!-- Doughnut — Difficulté -->
+                <div class="col-xl-4">
+                    <div class="card border-0 shadow-sm h-100"
+                         style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#FFFBEB; border-radius:10px;
+                                            padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-signal text-warning"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">Niveaux de Difficulté</h6>
+                            </div>
+                            <canvas t-ref="chartDifficulty" style="max-height:250px;"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doughnut — Statut apprenants -->
+                <div class="col-xl-4">
+                    <div class="card border-0 shadow-sm h-100"
+                         style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#EFF6FF; border-radius:10px;
+                                            padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-users text-info"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">Statut des Apprenants</h6>
+                            </div>
+                            <canvas t-ref="chartStatus" style="max-height:250px;"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bar — Langues -->
+                <div class="col-xl-4">
+                    <div class="card border-0 shadow-sm h-100"
+                         style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#FEF2F2; border-radius:10px;
+                                            padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-language text-danger"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">Cours par Langue</h6>
+                            </div>
+                            <canvas t-ref="chartLanguages" style="max-height:250px;"/>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── ROW GRAPHIQUE 3 — Top Cours ── -->
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm"
+                         style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#FFFBEB; border-radius:10px;
+                                            padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-trophy text-warning"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">
+                                    Top 5 Cours — Inscrits vs Complétés
+                                </h6>
+                            </div>
+                            <canvas t-ref="chartTopCourses" style="max-height:300px;"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </Layout>
+</t>
+
+</templates>

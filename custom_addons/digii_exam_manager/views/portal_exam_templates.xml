@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!-- Lien "Mes examens" dans le menu portail -->
+    <template id="portal_my_home_exams"
+              inherit_id="portal.portal_my_home"
+              name="Examens dans le portail"
+              priority="35">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/digii_exam_manager/static/description/icon.png'"/>
+                <t t-set="title">Mes examens</t>
+                <t t-set="url" t-value="'/my/exams'"/>
+                <t t-set="text">Accédez à vos examens et sessions de proctoring</t>
+                <t t-set="placeholder_count" t-value="'exam_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- ============================================================ -->
+    <!-- Page : Liste des examens — DESIGN LIGHT + PAGINATION          -->
+    <!-- ============================================================ -->
+    <template id="portal_my_exams" name="Mes examens">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <style>
+                :root {
+                    --ex-accent:       #2C5F8D;
+                    --ex-accent-h:     #1A3A5C;
+                    --ex-accent-light: #EAF2F9;
+                    --ex-success:      #059669;
+                    --ex-warning:      #D97706;
+                    --ex-border:       #E2E8F0;
+                    --ex-surface:      #F8FAFC;
+                    --ex-text:         #1E293B;
+                    --ex-muted:        #64748B;
+                    --ex-radius:       14px;
+                }
+
+                /* ── PAGE HEADER ── */
+                .ex-header {
+                    background: linear-gradient(135deg,#FAFCFE,#F2F7FB);
+                    border: 1px solid #D6E3F0;
+                    border-radius: 18px;
+                    padding: 28px 32px;
+                    margin-bottom: 28px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+                .ex-header-left {}
+                .ex-eyebrow {
+                    font-size: 10px; font-weight: 700;
+                    letter-spacing: 2px; text-transform: uppercase;
+                    color: var(--ex-accent); margin-bottom: 5px;
+                }
+                .ex-title {
+                    font-size: 24px; font-weight: 700;
+                    color: var(--ex-text); margin: 0 0 4px;
+                    letter-spacing: -0.4px;
+                }
+                .ex-sub { font-size: 13px; color: var(--ex-muted); margin: 0; }
+                .ex-header-icon {
+                    width: 52px; height: 52px; border-radius: 14px;
+                    background: linear-gradient(135deg, #2C5F8D, #1A3A5C);
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 22px; flex-shrink: 0;
+                    box-shadow: 0 4px 14px rgba(79,70,229,.28);
+                }
+
+                /* ── STATS BAR ── */
+                .ex-stats {
+                    display: flex; gap: 12px;
+                    margin-bottom: 24px; flex-wrap: wrap;
+                }
+                .ex-stat {
+                    background: #fff;
+                    border: 1px solid var(--ex-border);
+                    border-radius: 12px;
+                    padding: 12px 18px;
+                    display: flex; align-items: center; gap: 10px;
+                    font-size: 13px;
+                }
+                .ex-stat-num {
+                    font-size: 20px; font-weight: 800;
+                    color: var(--ex-text); font-family: monospace;
+                    line-height: 1;
+                }
+                .ex-stat-label { color: var(--ex-muted); font-size: 12px; }
+
+                /* ── CARDS GRID ── */
+                .ex-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 18px;
+                    margin-bottom: 32px;
+                }
+                @media (max-width: 1100px) { .ex-grid { grid-template-columns: repeat(2,1fr); } }
+                @media (max-width: 680px)  { .ex-grid { grid-template-columns: 1fr; } }
+
+                /* ── EXAM CARD ── */
+                .exam-card {
+                    background: #fff;
+                    border: 1.5px solid var(--ex-border);
+                    border-radius: var(--ex-radius);
+                    overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                    transition: all .22s cubic-bezier(.4,0,.2,1);
+                    position: relative;
+                }
+                .exam-card:hover {
+                    border-color: #C9D8E8;
+                    box-shadow: 0 10px 32px rgba(79,70,229,.10), 0 2px 8px rgba(0,0,0,.04);
+                    transform: translateY(-3px);
+                }
+                /* Stripe colorée en haut de la card */
+                .exam-card::before {
+                    content: '';
+                    position: absolute; top: 0; left: 0; right: 0;
+                    height: 3px;
+                    background: linear-gradient(90deg, #2C5F8D, #1A3A5C);
+                }
+                .exam-card.proctored-card::before {
+                    background: linear-gradient(90deg, #2C5F8D, #1A3A5C);
+                }
+                .exam-card.standard-card::before {
+                    background: linear-gradient(90deg, #059669, #0D9488);
+                }
+                .exam-card.completed-card::before {
+                    background: linear-gradient(90deg, #94A3B8, #CBD5E1);
+                }
+                .exam-card.rejected-card::before {
+                    background: linear-gradient(90deg, #DC2626, #B91C1C);
+                }
+                .exam-card.rejected-card {
+                    border-color: #FECACA;
+                }
+
+                /* Card top */
+                .exam-card-top {
+                    padding: 22px 22px 14px;
+                    flex: 1;
+                }
+                .exam-card-badge {
+                    display: inline-flex; align-items: center; gap: 6px;
+                    padding: 3px 10px; border-radius: 20px;
+                    font-size: 10px; font-weight: 700;
+                    text-transform: uppercase; letter-spacing: .5px;
+                    margin-bottom: 12px;
+                }
+                .exam-card-badge.proctored {
+                    background: #EAF2F9; color: #2C5F8D;
+                    border: 1px solid #C9D8E8;
+                }
+                .exam-card-badge.standard {
+                    background: #ECFDF5; color: #059669;
+                    border: 1px solid #A7F3D0;
+                }
+                .exam-card-badge.rejected {
+                    background: #FEF2F2; color: #DC2626;
+                    border: 1px solid #FECACA;
+                }
+                .exam-status-chip.rejected {
+                    background: #FEF2F2; color: #DC2626;
+                    border: 1px solid #FECACA;
+                }
+                .exam-reject-reason {
+                    margin-top: 8px;
+                    display: flex; align-items: flex-start; gap: 6px;
+                    font-size: 11px; color: #B91C1C;
+                    background: #FEF2F2; border: 1px solid #FECACA;
+                    border-radius: 8px; padding: 7px 10px;
+                    line-height: 1.5;
+                }
+                .exam-reject-reason i { margin-top: 1px; }
+                .exam-card-badge .dot {
+                    width: 5px; height: 5px;
+                    border-radius: 50%; background: currentColor;
+                    animation: pulse-dot 2s infinite;
+                }
+                @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+                .exam-card-title {
+                    font-size: 16px; font-weight: 700;
+                    color: var(--ex-text); margin: 0 0 7px;
+                    line-height: 1.35;
+                }
+                .exam-card-desc {
+                    font-size: 12px; color: var(--ex-muted);
+                    line-height: 1.55; margin: 0 0 13px;
+                }
+
+                /* Méta-données */
+                .exam-meta-row {
+                    display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 6px;
+                }
+                .exam-meta-item {
+                    display: flex; align-items: center; gap: 5px;
+                    font-size: 11px; color: var(--ex-muted);
+                }
+                .exam-meta-item i { font-size: 11px; opacity: .6; }
+
+                /* Score précédent */
+                .exam-past-score {
+                    margin-top: 8px;
+                    display: flex; align-items: center; gap: 5px;
+                    font-size: 11px; color: var(--ex-muted);
+                }
+                .exam-past-score strong {
+                    color: #059669; font-size: 13px; font-family: monospace;
+                }
+
+                /* Card footer (actions) */
+                .exam-card-actions {
+                    padding: 13px 22px;
+                    background: var(--ex-surface);
+                    border-top: 1px solid var(--ex-border);
+                    display: flex; gap: 10px; align-items: center;
+                }
+
+                /* Bouton entrer */
+                .btn-exam-enter {
+                    display: inline-flex; align-items: center; gap: 7px;
+                    padding: 9px 20px;
+                    background: var(--ex-accent); color: #fff;
+                    border: none; border-radius: 10px;
+                    font-size: 12px; font-weight: 700;
+                    text-decoration: none; transition: all .2s;
+                    cursor: pointer;
+                    box-shadow: 0 2px 8px rgba(79,70,229,.25);
+                }
+                .btn-exam-enter:hover {
+                    background: var(--ex-accent-h); color: #fff;
+                    text-decoration: none; transform: translateY(-1px);
+                    box-shadow: 0 5px 16px rgba(79,70,229,.35);
+                }
+                .btn-exam-enter.in-progress {
+                    background: #FFFBEB; color: #D97706;
+                    border: 1.5px solid #FDE68A;
+                    box-shadow: none;
+                }
+                .btn-exam-enter.in-progress:hover {
+                    background: #FEF3C7; color: #B45309;
+                    box-shadow: none;
+                }
+
+                /* Status chips */
+                .exam-status-chip {
+                    display: inline-flex; align-items: center; gap: 5px;
+                    padding: 4px 10px; border-radius: 7px;
+                    font-size: 11px; font-weight: 600;
+                }
+                .exam-status-chip.waiting {
+                    background: #FFFBEB; color: #D97706;
+                    border: 1px solid #FDE68A;
+                }
+                .exam-status-chip.authorized {
+                    background: #ECFDF5; color: #059669;
+                    border: 1px solid #A7F3D0;
+                }
+                .exam-status-chip.in_exam {
+                    background: #EAF2F9; color: #2C5F8D;
+                    border: 1px solid #C9D8E8;
+                }
+                .exam-status-chip.completed {
+                    background: #F1F5F9; color: #64748B;
+                    border: 1px solid #CBD5E1;
+                }
+
+                /* Bouton désactivé */
+                .btn-exam-done {
+                    display: inline-flex; align-items: center; gap: 7px;
+                    padding: 9px 20px;
+                    background: #F1F5F9; color: #94A3B8;
+                    border: none; border-radius: 10px;
+                    font-size: 12px; font-weight: 600;
+                    text-decoration: none;
+                    cursor: not-allowed; pointer-events: none;
+                }
+
+                /* Alert already done */
+                .exam-already-done-alert {
+                    background: #FFFBEB; border: 1px solid #FDE68A;
+                    color: #92400E; padding: 13px 18px;
+                    border-radius: 12px; margin-bottom: 22px;
+                    display: flex; align-items: center; gap: 12px;
+                    font-size: 13px;
+                }
+                .exam-already-done-alert i { font-size: 18px; }
+
+                /* Empty state */
+                .exam-empty {
+                    text-align: center; padding: 70px 20px;
+                    background: #fff; border: 1px solid var(--ex-border);
+                    border-radius: var(--ex-radius); color: var(--ex-muted);
+                }
+                .exam-empty i { font-size: 48px; opacity: .2; display: block; margin-bottom: 14px; }
+
+                /* ── PAGINATION ── */
+                .ex-pagination {
+                    display: flex; justify-content: center;
+                    margin-top: 12px; margin-bottom: 16px;
+                }
+                .ex-pagination .o_portal_pager {
+                    display: flex; align-items: center; gap: 6px;
+                }
+                /* Overrides Bootstrap pager */
+                .ex-pagination .page-link {
+                    border-radius: 9px !important;
+                    border: 1.5px solid var(--ex-border) !important;
+                    color: var(--ex-accent) !important;
+                    font-weight: 600 !important;
+                    font-size: 13px !important;
+                    padding: 7px 13px !important;
+                    transition: all .18s !important;
+                }
+                .ex-pagination .page-link:hover {
+                    background: var(--ex-accent-light) !important;
+                    border-color: #C9D8E8 !important;
+                }
+                .ex-pagination .page-item.active .page-link {
+                    background: var(--ex-accent) !important;
+                    border-color: var(--ex-accent) !important;
+                    color: #fff !important;
+                    box-shadow: 0 2px 8px rgba(79,70,229,.30) !important;
+                }
+                .ex-pagination .page-item.disabled .page-link {
+                    color: var(--ex-muted) !important; opacity: .5 !important;
+                }
+            </style>
+
+            <!-- ── PAGE HEADER ── -->
+            <div class="ex-header">
+                <div class="ex-header-left">
+                    <div class="ex-eyebrow">Portail candidat</div>
+                    <h2 class="ex-title">Mes examens</h2>
+                    <p class="ex-sub">Consultez vos examens disponibles et démarrez vos sessions</p>
+                </div>
+                <div class="ex-header-icon">🎓</div>
+            </div>
+
+            <!-- Alerte déjà passé -->
+            <t t-if="already_done_msg">
+                <div class="exam-already-done-alert">
+                    <i class="fa fa-info-circle"/>
+                    <div>
+                        <strong>Examen deja passe.</strong>
+                        Vous avez deja termine cet examen. Une seule tentative est autorisee.
+                    </div>
+                </div>
+            </t>
+
+            <!-- ── STATS BAR ── -->
+            <t t-if="exams or exam_count">
+                <div class="ex-stats">
+                    <div class="ex-stat">
+                        <div class="ex-stat-num"><t t-out="exam_count or 0"/></div>
+                        <div class="ex-stat-label">Examens au total</div>
+                    </div>
+                    <div class="ex-stat">
+                        <div class="ex-stat-num"><t t-out="len(completed_exam_ids)"/></div>
+                        <div class="ex-stat-label">Complétés</div>
+                    </div>
+                    <div class="ex-stat">
+                        <div class="ex-stat-num"><t t-out="len(active_sessions)"/></div>
+                        <div class="ex-stat-label">Sessions actives</div>
+                    </div>
+                </div>
+            </t>
+
+            <!-- ── EMPTY STATE ── -->
+            <t t-if="not exams">
+                <div class="exam-empty">
+                    <i class="fa fa-graduation-cap"/>
+                    <h4>Aucun examen disponible</h4>
+                    <p>Il n'y a pas d'examen ouvert pour le moment.</p>
+                </div>
+            </t>
+
+            <!-- ── GRILLE DES EXAMENS ── -->
+            <t t-if="exams">
+                <div class="ex-grid">
+                    <t t-foreach="exams" t-as="exam">
+                        <t t-set="active_session" t-value="active_sessions.get(exam.id)"/>
+                        <t t-set="is_completed"   t-value="exam.id in completed_exam_ids"/>
+                        <t t-set="is_rejected"    t-value="rejected_exam_ids and exam.id in rejected_exam_ids"/>
+
+                        <div t-attf-class="exam-card #{'rejected-card' if is_rejected else ('completed-card' if is_completed else ('proctored-card' if exam.is_proctored else 'standard-card'))}">
+                            <div class="exam-card-top">
+                                <!-- Badge type -->
+                                <t t-if="is_rejected">
+                                    <div class="exam-card-badge rejected">
+                                        <i class="fa fa-ban"/>
+                                        Rejeté
+                                    </div>
+                                </t>
+                                <t t-elif="exam.is_proctored">
+                                    <div class="exam-card-badge proctored">
+                                        <span class="dot"/>
+                                        <i class="fa fa-video-camera"/>
+                                        Surveillance en direct
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="exam-card-badge standard">
+                                        <i class="fa fa-check-circle"/>
+                                        Examen standard
+                                    </div>
+                                </t>
+
+                                <h4 class="exam-card-title">
+                                    <t t-out="exam.title"/>
+                                </h4>
+                                <p class="exam-card-desc" t-if="exam.description">
+                                    <t t-out="exam.description[:140]"/>
+                                    <t t-if="len(exam.description or '') > 140">…</t>
+                                </p>
+
+                                <!-- Méta-données -->
+                                <div class="exam-meta-row">
+                                    <div class="exam-meta-item">
+                                        <i class="fa fa-list-ol"/>
+                                        <span><t t-out="len(exam.question_ids)"/> questions</span>
+                                    </div>
+                                    <t t-if="exam.is_certification">
+                                        <div class="exam-meta-item">
+                                            <i class="fa fa-certificate"/>
+                                            <span>Certification</span>
+                                        </div>
+                                    </t>
+                                    <t t-if="exam.is_time_limited">
+                                        <div class="exam-meta-item">
+                                            <i class="fa fa-clock-o"/>
+                                            <span><t t-out="exam.time_limit"/> min</span>
+                                        </div>
+                                    </t>
+                                </div>
+
+                                <!-- Score précédent -->
+                                <t t-if="exam.id in past_attempts">
+                                    <div class="exam-past-score">
+                                        <i class="fa fa-history"/>
+                                        Dernier score :
+                                        <strong>
+                                            <t t-out="'%.1f' % past_attempts[exam.id][0].scoring_percentage"/>%
+                                        </strong>
+                                    </div>
+                                </t>
+
+                                <!-- Motif de rejet -->
+                                <t t-if="is_rejected">
+                                    <div class="exam-reject-reason">
+                                        <i class="fa fa-exclamation-circle"/>
+                                        <span>
+                                            <strong>Examen rejeté.</strong>
+                                            <t t-out="(rejected_reasons or {}).get(exam.id) or ''"/>
+                                        </span>
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- ── ACTIONS (logique 100% originale) ── -->
+                            <div class="exam-card-actions">
+                                <!-- CAS 0 : examen rejeté -->
+                                <t t-if="is_rejected">
+                                    <span class="exam-status-chip rejected">
+                                        <i class="fa fa-ban"/> Rejeté
+                                    </span>
+                                    <span class="btn-exam-done ms-auto">
+                                        <i class="fa fa-lock"/> Accès refusé
+                                    </span>
+                                </t>
+
+                                <!-- CAS 1 : examen terminé -->
+                                <t t-elif="is_completed">
+                                    <span class="exam-status-chip completed">
+                                        <i class="fa fa-check-circle"/> Terminé
+                                    </span>
+                                    <span class="btn-exam-done ms-auto">
+                                        <i class="fa fa-lock"/> Déjà passé
+                                    </span>
+                                </t>
+
+                                <!-- CAS 2 : session en attente -->
+                                <t t-elif="active_session and active_session.state == 'waiting'">
+                                    <span class="exam-status-chip waiting">
+                                        <i class="fa fa-hourglass-half"/>
+                                        En attente d'autorisation
+                                    </span>
+                                    <a t-attf-href="/my/exam/#{exam.id}/waiting-room"
+                                       class="btn-exam-enter in-progress ms-auto">
+                                        <i class="fa fa-video-camera"/> Reprendre
+                                    </a>
+                                </t>
+
+                                <!-- CAS 3 : session autorisée -->
+                                <t t-elif="active_session and active_session.state == 'authorized'">
+                                    <span class="exam-status-chip authorized">
+                                        <i class="fa fa-check-circle"/> Autorisé
+                                    </span>
+                                    <a t-attf-href="/my/exam/#{exam.id}/waiting-room"
+                                       class="btn-exam-enter ms-auto">
+                                        <i class="fa fa-play"/> Commencer
+                                    </a>
+                                </t>
+
+                                <!-- CAS 4 : en examen -->
+                                <t t-elif="active_session and active_session.state == 'in_exam'">
+                                    <span class="exam-status-chip in_exam">
+                                        <i class="fa fa-pencil"/> En cours
+                                    </span>
+                                </t>
+
+                                <!-- CAS 5 : pas encore commencé -->
+                                <t t-else="">
+                                    <span style="font-size:11px;color:#94A3B8;">Non commencé</span>
+                                    <t t-if="exam.is_proctored">
+                                        <a t-attf-href="/my/exam/#{exam.id}/waiting-room"
+                                           class="btn-exam-enter ms-auto">
+                                            <i class="fa fa-sign-in"/> Entrer
+                                        </a>
+                                    </t>
+                                    <t t-elif="exam.record_video">
+                                        <!-- Mode enregistrement seul : demarre via JS
+                                             (active la camera puis entre dans l'examen) -->
+                                        <a href="#"
+                                           t-att-data-exam-id="exam.id"
+                                           class="btn-exam-enter ms-auto o_exam_record_start">
+                                            <i class="fa fa-video-camera"/> Démarrer
+                                        </a>
+                                    </t>
+                                    <t t-else="">
+                                        <a href="#"
+                                           t-att-data-exam-id="exam.id"
+                                           class="btn-exam-enter ms-auto o_exam_standard_start">
+                                            <i class="fa fa-play"/> Démarrer
+                                        </a>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- ── PAGINATION ── -->
+                <t t-if="pager">
+                    <div class="ex-pagination">
+                        <t t-call="portal.pager"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</data>
+</odoo>

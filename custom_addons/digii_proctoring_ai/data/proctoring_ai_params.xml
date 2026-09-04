@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Clé Groq pour l'interprétation LLM (optionnelle). Vide par défaut. -->
+        <record id="param_proctoring_groq_key" model="ir.config_parameter">
+            <field name="key">digii_proctoring_ai.groq_api_key</field>
+            <field name="value"></field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LIST VIEW blog.post -->
+    <record id="view_blog_post_list_lms" model="ir.ui.view">
+        <field name="name">blog.post.list.lms</field>
+        <field name="model">blog.post</field>
+        <field name="arch" type="xml">
+            <list string="Articles de blog"
+                  decoration-muted="active == False">
+                <field name="name" string="Titre"/>
+                <field name="blog_id" string="Blog"/>
+                <field name="author_id" string="Auteur"/>
+                <field name="create_date" string="Créé le"/>
+                <field name="write_date" string="Modifié le"/>
+                <field name="website_published"
+                       widget="boolean_toggle"
+                       string="Publié"/>
+                <field name="active" widget="boolean_toggle"
+                       groups="digii_lms.group_lms_admin"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_lms_blog_posts" model="ir.actions.act_window">
+        <field name="name">Articles de blog</field>
+        <field name="res_model">blog.post</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_blog_post_list_lms')}),
+        ]"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun article trouvé
+            </p>
+            <p>Créez votre premier article de blog.</p>
+        </field>
+    </record>
+
+</odoo>

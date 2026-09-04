@@ -1,0 +1,21 @@
+api_key:    devkey
+api_secret: secret
+ws_url:     ws://livekit:7880
+
+redis:
+  address: redis:6379
+
+s3:
+  access_key:       minioadmin
+  secret:           minioadmin
+  region:           us-east-1
+  endpoint:         http://minio:9000
+  bucket:           exam-recordings
+  force_path_style: true
+
+health_port:   9090
+# Resolution 16:9 standard - pas de zoom
+width:         1280
+height:        720
+framerate:     24
+audio_bitrate: 128

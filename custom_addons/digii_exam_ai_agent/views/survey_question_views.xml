@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- =========================================================
+             Vue LISTE de revue des questions proposees par l'IA
+             ========================================================= -->
+        <record id="view_ai_question_review_list" model="ir.ui.view">
+            <field name="name">survey.question.ai.review.list</field>
+            <field name="model">survey.question</field>
+            <field name="arch" type="xml">
+                <list string="Questions proposees par l'IA"
+                      decoration-muted="ai_validation_state == 'rejected'"
+                      decoration-success="ai_validation_state == 'approved'">
+                    <field name="title"/>
+                    <field name="question_type"/>
+                    <field name="exam_category_id"/>
+                    <field name="exam_subcategory_id"/>
+                    <field name="exam_difficulty"/>
+                    <field name="ai_confidence"/>
+                    <field name="ai_validation_state"/>
+                    <field name="ai_generation_session_id"/>
+                    <button name="action_ai_approve" type="object"
+                            string="Approuver" icon="fa-check"
+                            class="text-success"
+                            invisible="ai_validation_state not in ('proposed','edited')"/>
+                    <button name="action_ai_reject" type="object"
+                            string="Rejeter" icon="fa-times"
+                            class="text-danger"
+                            invisible="ai_validation_state not in ('proposed','edited')"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- =========================================================
+             Vue FORM de revue (edition manuelle avant approbation)
+             ========================================================= -->
+        <record id="view_ai_question_review_form" model="ir.ui.view">
+            <field name="name">survey.question.ai.review.form</field>
+            <field name="model">survey.question</field>
+            <field name="arch" type="xml">
+                <form string="Question proposee par l'IA">
+                    <header>
+                        <button name="action_ai_approve" type="object"
+                                string="Approuver" class="btn-success"
+                                invisible="ai_validation_state not in ('proposed','edited')"/>
+                        <button name="action_ai_reject" type="object"
+                                string="Rejeter" class="btn-danger"
+                                invisible="ai_validation_state not in ('proposed','edited')"/>
+                        <field name="ai_validation_state" widget="statusbar"
+                               statusbar_visible="proposed,edited,approved"/>
+                    </header>
+                    <sheet>
+                        <div class="alert alert-info" role="alert"
+                             invisible="not ai_generated">
+                            Question generee par l'IA. Verifiez et corrigez si
+                            necessaire avant d'approuver. L'approbation l'ajoute
+                            a la banque officielle.
+                        </div>
+                        <group>
+                            <field name="ai_generated" invisible="1"/>
+                            <field name="title"/>
+                            <field name="question_type"/>
+                        </group>
+                        <group>
+                            <group string="Classification">
+                                <field name="exam_category_id"/>
+                                <field name="exam_subcategory_id"/>
+                                <field name="exam_difficulty"/>
+                            </group>
+                            <group string="Metadonnees IA">
+                                <field name="ai_confidence"/>
+                                <field name="ai_generation_session_id"/>
+                                <field name="is_bank_question"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Reponses">
+                                <field name="suggested_answer_ids">
+                                    <list editable="bottom">
+                                        <field name="value"/>
+                                        <field name="is_correct" widget="boolean_toggle"/>
+                                        <field name="answer_score"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Explication IA">
+                                <field name="ai_explanation"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Recherche / filtres -->
+        <record id="view_ai_question_review_search" model="ir.ui.view">
+            <field name="name">survey.question.ai.review.search</field>
+            <field name="model">survey.question</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="title"/>
+                    <field name="exam_category_id"/>
+                    <field name="ai_generation_session_id"/>
+                    <filter name="proposed" string="A valider"
+                            domain="[('ai_validation_state','=','proposed')]"/>
+                    <filter name="edited" string="Editees"
+                            domain="[('ai_validation_state','=','edited')]"/>
+                    <filter name="approved" string="Approuvees"
+                            domain="[('ai_validation_state','=','approved')]"/>
+                    <filter name="rejected" string="Rejetees"
+                            domain="[('ai_validation_state','=','rejected')]"/>
+                    <separator/>
+                    <group>
+                        <filter name="group_state" string="Statut validation"
+                                context="{'group_by':'ai_validation_state'}"/>
+                        <filter name="group_category" string="Categorie"
+                                context="{'group_by':'exam_category_id'}"/>
+                        <filter name="group_session" string="Session"
+                                context="{'group_by':'ai_generation_session_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Action : vue de validation en masse (filtree sur proposed) -->
+        <record id="action_ai_question_review" model="ir.actions.act_window">
+            <field name="name">Validation IA des questions</field>
+            <field name="res_model">survey.question</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain">[('ai_generated','=',True)]</field>
+            <field name="context">{'search_default_proposed': 1}</field>
+            <field name="search_view_id" ref="view_ai_question_review_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Aucune question proposee par l'IA pour le moment.
+                </p>
+                <p>
+                    Ouvrez l'assistant IA depuis la fiche d'un examen ou la
+                    banque de questions pour generer des propositions.
+                </p>
+            </field>
+        </record>
+
+        <!-- Forcer nos vues pour cette action -->
+        <record id="action_ai_question_review_list_view" model="ir.actions.act_window.view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">list</field>
+            <field name="view_id" ref="view_ai_question_review_list"/>
+            <field name="act_window_id" ref="action_ai_question_review"/>
+        </record>
+        <record id="action_ai_question_review_form_view" model="ir.actions.act_window.view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_ai_question_review_form"/>
+            <field name="act_window_id" ref="action_ai_question_review"/>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--
+          Cron : recuperation automatique des resultats d'analyse IA.
+          Toutes les 30 secondes, verifie les sessions en cours d'analyse
+          et rapatrie leur resultat des qu'il est pret.
+          Le procteur n'a donc pas besoin de cliquer "Rafraichir".
+        -->
+        <record id="cron_fetch_ai_results" model="ir.cron">
+            <field name="name">Proctoring IA : recuperer les resultats d'analyse</field>
+            <field name="model_id" ref="model_exam_proctoring_session"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_fetch_ai_results()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

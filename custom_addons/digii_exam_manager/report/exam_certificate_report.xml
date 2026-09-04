@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!-- Paperformat PAYSAGE sans header/footer Odoo, haute resolution -->
+    <record id="paperformat_certificate" model="report.paperformat">
+        <field name="name">Certificat A4 Paysage</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="disable_shrinking" eval="True"/>
+        <field name="dpi">96</field>
+    </record>
+
+    <template id="report_exam_certificate_document">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="cert">
+                <t t-set="tmpl" t-value="cert.certificate_template_id"/>
+
+                <!-- Couleurs (avec valeurs par defaut accordees au fond bleu/violet) -->
+                <t t-set="hcolor"  t-value="tmpl.header_color if tmpl and tmpl.header_color else '#1B3F6B'"/>
+                <t t-set="accent"  t-value="tmpl.accent_color if tmpl and tmpl.accent_color else '#5B2EC4'"/>
+                <t t-set="txtcol"  t-value="tmpl.body_text_color if tmpl and tmpl.body_text_color else '#1a1a1a'"/>
+
+                <!-- Source du fond : image uploadee sur le template, sinon fond livre -->
+                <t t-set="use_bg" t-value="(not tmpl) or tmpl.use_background"/>
+                <t t-if="tmpl and tmpl.use_background and tmpl.background_image"
+                   t-set="bg_src" t-value="image_data_uri(tmpl.background_image)"/>
+                <t t-elif="use_bg"
+                   t-set="bg_src" t-value="'/digii_exam_manager/static/src/img/certificate_bg.png'"/>
+                <t t-else="" t-set="bg_src" t-value="False"/>
+
+                <!-- Mention selon le score + couleur associee -->
+                <t t-set="sc" t-value="cert.score_obtained or 0"/>
+                <t t-if="sc &gt;= 90">
+                    <t t-set="mention">Mention Excellent</t>
+                    <t t-set="mention_color">#1D9E75</t>
+                </t>
+                <t t-elif="sc &gt;= 80">
+                    <t t-set="mention">Mention Très Bien</t>
+                    <t t-set="mention_color">#0F9E8A</t>
+                </t>
+                <t t-elif="sc &gt;= 70">
+                    <t t-set="mention">Mention Bien</t>
+                    <t t-set="mention_color">#E67E22</t>
+                </t>
+                <t t-else="">
+                    <t t-set="mention">Validé</t>
+                    <t t-set="mention_color">#6C757D</t>
+                </t>
+
+                <!-- Date a afficher -->
+                <t t-set="cdate" t-value="cert.date_approved or cert.date_completion"/>
+
+                <style>
+                    /* Impression navigateur (Ctrl+P) quand wkhtmltopdf est absent :
+                       force le paysage, marges nulles et l'impression des fonds. */
+                    @media print {
+                        @page { size: A4 landscape; margin: 0; }
+                        body { margin: 0; padding: 0; }
+                    }
+                    html, body, .cert-wrap, .cert-bg, .cert-score, .cert-mention {
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .cert-wrap {
+                        position: relative;
+                        width: 297mm;
+                        height: 209mm;
+                        margin: 0;
+                        padding: 0;
+                        overflow: hidden;
+                        font-family: Georgia, 'Times New Roman', serif;
+                        color: <t t-out="txtcol"/>;
+                        background-color: #ffffff;
+                    }
+                    .cert-bg {
+                        position: absolute;
+                        top: 0; left: 0;
+                        width: 297mm;
+                        height: 209mm;
+                        background-repeat: no-repeat;
+                        background-position: center center;
+                        background-size: 297mm 209mm;
+                    }
+                    /* Zone de contenu centree dans la partie claire du fond */
+                    .cert-content {
+                        position: absolute;
+                        top: 0; left: 0;
+                        width: 297mm;
+                        height: 209mm;
+                        padding: 30mm 52mm 26mm 52mm;
+                        text-align: center;
+                    }
+                    .cert-logo { max-height: 60px; max-width: 150px; margin-bottom: 6px; }
+                    .cert-brand {
+                        font-family: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+                        font-size: 22px; font-weight: 700; letter-spacing: 1px;
+                        color: <t t-out="hcolor"/>; margin-bottom: 2px;
+                    }
+                    .cert-eyebrow {
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 12px; letter-spacing: 5px;
+                        color: #5a5a5a; text-transform: uppercase; margin-bottom: 6px;
+                    }
+                    .cert-title {
+                        font-size: 34px; font-weight: 700; line-height: 1.1;
+                        color: <t t-out="hcolor"/>; margin: 0 0 4px;
+                    }
+                    .cert-title-sub {
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px; color: #666666; margin-bottom: 20px;
+                    }
+                    .cert-presented {
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px; color: #666666; margin-bottom: 4px;
+                    }
+                    .cert-name {
+                        font-size: 38px; font-weight: 700; color: <t t-out="txtcol"/>;
+                        border-bottom: 3px solid <t t-out="accent"/>;
+                        display: inline-block; padding: 0 18px 6px;
+                        margin-bottom: 18px;
+                    }
+                    .cert-body-text {
+                        font-size: 14px; line-height: 1.6; color: #444;
+                        max-width: 170mm; margin: 0 auto 16px;
+                    }
+                    .cert-domain {
+                        font-size: 19px; font-weight: 700; color: <t t-out="hcolor"/>;
+                        margin-bottom: 14px; text-transform: capitalize;
+                    }
+                    .cert-badges { margin: 0 auto 18px; }
+                    .cert-verify { margin: 14px auto 0; }
+                    .cert-qr { width: 24mm; height: 24mm; display: block; margin: 0 auto 5px; }
+                    .cert-verify-text {
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 10px; color: #555555; line-height: 1.4;
+                    }
+                    .cert-score {
+                        display: inline-block;
+                        background: <t t-out="hcolor"/>; color: #fff;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px; font-weight: 700;
+                        padding: 7px 20px; border-radius: 20px; margin: 0 5px;
+                    }
+                    .cert-mention {
+                        display: inline-block;
+                        background: <t t-out="accent"/>; color: #fff;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px; font-weight: 700;
+                        padding: 7px 20px; border-radius: 20px; margin: 0 5px;
+                    }
+                    /* Bas : signatures + meta */
+                    .cert-foot {
+                        position: absolute;
+                        left: 20mm; right: 20mm; bottom: 30mm;
+                        text-align: center;
+                    }
+                    .cert-foot-cell {
+                        display: inline-block; vertical-align: bottom;
+                        width: 48mm; margin: 0 6mm; text-align: center;
+                        font-family: Arial, Helvetica, sans-serif;
+                    }
+                    .sig-img { max-height: 38px; max-width: 110px; margin-bottom: 2px; }
+                    .sig-line { border-bottom: 1.5px solid #555; width: 130px; margin: 0 auto 4px; height: 18px; }
+                    .sig-name { font-size: 12px; font-weight: 700; color: #1f1f1f; }
+                    .sig-role { font-size: 11px; color: #555555; }
+                    .meta-lbl { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #666666; }
+                    .meta-val { font-size: 12px; font-weight: 700; color: #1f1f1f; }
+                    .cert-num {
+                        position: absolute; bottom: 12mm; left: 0; right: 0;
+                        text-align: center;
+                        font-family: 'Courier New', monospace;
+                        font-size: 11px; letter-spacing: 1px; color: #444444;
+                    }
+                    .cert-num span {
+                        background: rgba(255,255,255,0.75);
+                        padding: 3px 12px; border-radius: 10px;
+                    }
+                    /* Affichage ECRAN (aperçu portail/admin) : fond neutre + centrage.
+                       Le certificat garde sa taille A4 réelle ; un script le met à
+                       l'échelle pour tenir dans la largeur du conteneur. */
+                    @media screen {
+                        body { margin: 0; background: #eef0f4; }
+                        .cert-screen-fit { display: block; margin: 0 auto; }
+                    }
+                    /* Securite PDF : ne jamais mettre le certificat a l'echelle
+                       lors de l'impression / generation PDF. Le certificat doit
+                       remplir toute la page A4 paysage. */
+                    @media print {
+                        html, body, .cert-wrap {
+                            transform: none !important;
+                            transform-origin: top left !important;
+                        }
+                    }
+                </style>
+
+                <!-- Le script de mise a l'echelle ne sert QUE pour l'apercu ecran
+                     (aperçu admin / repli HTML). Il ne doit JAMAIS s'executer lors
+                     de la generation PDF (wkhtmltopdf execute le JS et reduirait le
+                     certificat). Il n'est donc rendu que si screen_preview=True,
+                     drapeau passe par les controleurs qui rendent du HTML. -->
+                <t t-if="data and data.get('screen_preview')">
+                    <script>
+                        (function () {
+                            function fitCert() {
+                                var w = document.querySelector('.cert-wrap');
+                                if (!w) return;
+                                var natural = w.offsetWidth;          // ~ largeur A4 paysage
+                                if (!natural) return;
+                                var avail = (document.documentElement.clientWidth || window.innerWidth);
+                                var scale = avail / natural;
+                                if (scale &gt; 1) scale = 1;            // jamais agrandir
+                                w.style.transformOrigin = 'top left';
+                                w.style.transform = 'scale(' + scale + ')';
+                                // Réserver la hauteur réelle après mise à l'échelle
+                                document.body.style.height = (w.offsetHeight * scale) + 'px';
+                            }
+                            window.addEventListener('load', fitCert);
+                            window.addEventListener('resize', fitCert);
+                        })();
+                    </script>
+                </t>
+
+                <div class="page" style="margin:0;padding:0;">
+                    <div class="cert-wrap">
+
+                        <!-- FOND -->
+                        <t t-if="bg_src">
+                            <div class="cert-bg" t-attf-style="background-image: url('#{bg_src}');"></div>
+                        </t>
+
+                        <!-- CONTENU CENTRAL -->
+                        <div class="cert-content">
+                            <t t-if="tmpl and tmpl.logo">
+                                <img class="cert-logo" t-att-src="image_data_uri(tmpl.logo)" alt="Logo"/>
+                            </t>
+
+                            <div class="cert-brand">CertMind</div>
+                            <div class="cert-eyebrow">Certificat Officiel</div>
+                            <div class="cert-title">
+                                <t t-if="tmpl and tmpl.title_text" t-out="tmpl.title_text"/>
+                                <t t-else="">Certificat de Réussite</t>
+                            </div>
+                            <div class="cert-title-sub">Délivré après évaluation et validation</div>
+
+                            <div class="cert-presented">Ce certificat est décerné à</div>
+                            <div class="cert-name"><t t-out="cert.partner_id.name"/></div>
+
+                            <div class="cert-body-text">
+                                pour avoir réussi avec succès l'examen
+                            </div>
+                            <div class="cert-domain"><t t-out="cert.survey_id.title"/></div>
+
+                            <div class="cert-badges">
+                                <span class="cert-score">Score : <t t-out="'%.1f' % sc"/>%</span>
+                                <span class="cert-mention" t-attf-style="background: #{mention_color};"><t t-out="mention"/></span>
+                            </div>
+
+                            <t t-if="cert.qr_code">
+                                <div class="cert-verify">
+                                    <img class="cert-qr" t-att-src="image_data_uri(cert.qr_code)" alt="QR de vérification"/>
+                                    <div class="cert-verify-text">Scannez ce QR code pour vérifier<br/>l'authenticité de ce certificat</div>
+                                </div>
+                            </t>
+                        </div>
+
+                        <!-- BAS : signatures + dates (blocs centres adaptatifs) -->
+                        <t t-set="has_signatory" t-value="tmpl and (tmpl.signatory_name or tmpl.signature_image)"/>
+                        <div class="cert-foot">
+                            <t t-if="has_signatory">
+                                <div class="cert-foot-cell">
+                                    <t t-if="tmpl.signature_image">
+                                        <img class="sig-img" t-att-src="image_data_uri(tmpl.signature_image)" alt="Signature"/><br/>
+                                    </t>
+                                    <div class="sig-line"></div>
+                                    <div class="sig-name">
+                                        <t t-if="tmpl.signatory_name" t-out="tmpl.signatory_name"/>
+                                    </div>
+                                    <div class="sig-role">
+                                        <t t-if="tmpl.signatory_title" t-out="tmpl.signatory_title"/>
+                                    </div>
+                                </div>
+                            </t>
+                            <div class="cert-foot-cell">
+                                <div class="meta-lbl">Date d'émission</div>
+                                <div class="meta-val">
+                                    <t t-if="cdate" t-out="cdate.strftime('%d/%m/%Y')"/>
+                                </div>
+                            </div>
+                            <div class="cert-foot-cell">
+                                <div class="sig-line"></div>
+                                <div class="sig-name">
+                                    <t t-if="cert.approved_by" t-out="cert.approved_by.name"/>
+                                </div>
+                                <div class="sig-role">
+                                    <t t-if="tmpl and tmpl.footer_text" t-out="tmpl.footer_text"/>
+                                    <t t-else="">Direction des examens</t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NUMERO DE CERTIFICAT -->
+                        <div class="cert-num">
+                            <span>N° <t t-out="cert.name"/> · Document officiel</span>
+                        </div>
+
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+</data>
+</odoo>

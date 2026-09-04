@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Colonne "Rejeté" dans la liste des résultats -->
+    <record id="view_survey_user_input_list_rejected" model="ir.ui.view">
+        <field name="name">survey.user_input.list.rejected</field>
+        <field name="model">survey.user_input</field>
+        <field name="inherit_id" ref="survey.survey_user_input_view_tree"/>
+        <field name="arch" type="xml">
+            <field name="state" position="before">
+                <field name="is_proctoring_rejected" optional="show"
+                       widget="badge" decoration-danger="is_proctoring_rejected"
+                       string="Rejeté"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Motif de rejet dans le formulaire de résultat -->
+    <record id="view_survey_user_input_form_rejected" model="ir.ui.view">
+        <field name="name">survey.user_input.form.rejected</field>
+        <field name="model">survey.user_input</field>
+        <field name="inherit_id" ref="survey.survey_user_input_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <widget name="web_ribbon" title="Rejeté" bg_color="text-bg-danger"
+                        invisible="not is_proctoring_rejected"/>
+            </xpath>
+            <field name="survey_id" position="after">
+                <field name="is_proctoring_rejected" invisible="1"/>
+                <field name="proctoring_rejection_reason"
+                       invisible="not is_proctoring_rejected"
+                       readonly="1"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Filtre "Rejetés" dans la recherche -->
+    <record id="view_survey_user_input_search_rejected" model="ir.ui.view">
+        <field name="name">survey.user_input.search.rejected</field>
+        <field name="model">survey.user_input</field>
+        <field name="inherit_id" ref="survey.survey_user_input_view_search"/>
+        <field name="arch" type="xml">
+            <field name="survey_id" position="after">
+                <filter name="filter_rejected" string="Rejetés"
+                        domain="[('is_proctoring_rejected','=',True)]"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

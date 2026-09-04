@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ai_generation_session_user,ai.generation.session user,model_digii_ai_generation_session,digii_exam_ai_agent.group_exam_ai_user,1,1,1,1
+access_ai_generation_session_manager,ai.generation.session manager,model_digii_ai_generation_session,survey.group_survey_manager,1,1,1,1
+access_ai_rule_proposal_user,ai.rule.proposal user,model_digii_ai_rule_proposal,digii_exam_ai_agent.group_exam_ai_user,1,1,1,1
+access_ai_rule_proposal_manager,ai.rule.proposal manager,model_digii_ai_rule_proposal,survey.group_survey_manager,1,1,1,1
+access_ai_chat_session_user,ai.chat.session user,model_digii_ai_chat_session,digii_exam_ai_agent.group_exam_ai_user,1,1,1,1
+access_ai_chat_session_manager,ai.chat.session manager,model_digii_ai_chat_session,survey.group_survey_manager,1,1,1,1
+access_ai_chat_message_user,ai.chat.message user,model_digii_ai_chat_message,digii_exam_ai_agent.group_exam_ai_user,1,1,1,1
+access_ai_chat_message_manager,ai.chat.message manager,model_digii_ai_chat_message,survey.group_survey_manager,1,1,1,1

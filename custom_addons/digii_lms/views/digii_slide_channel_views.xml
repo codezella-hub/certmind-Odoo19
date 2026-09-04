@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════
+         HÉRITAGE vue FORMULAIRE slide.channel
+    ═══════════════════════════════════════════════════ -->
+    <record id="slide_channel_form_inherit_digii" model="ir.ui.view">
+        <field name="name">slide.channel.form.digii</field>
+        <field name="model">slide.channel</field>
+        <field name="inherit_id" ref="website_slides.view_slide_channel_form"/>
+        <field name="arch" type="xml">
+              <!-- Boutons Publier / Dépublier dans le header -->
+            <xpath expr="//header" position="inside">
+    <field name="is_published" invisible="1"/>
+
+    <!-- Publier le cours -->
+    <button name="action_publish"
+            string="Publier le Cours"
+            type="object"
+            class="btn-success"
+            invisible="is_published"/>
+
+    <!-- Dépublier le cours -->
+    <button name="action_unpublish"
+            string="Dépublier"
+            type="object"
+            class="btn-warning"
+            invisible="not is_published"/>
+
+    <!-- Publier cours + toutes les leçons -->
+    <button name="action_publish_all_slides"
+            string="Publier Cours + Leçons"
+            type="object"
+            class="btn-primary"
+            invisible="is_published"
+            confirm="Publier ce cours et toutes ses leçons ?"/>
+</xpath>
+
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="course_category_id"
+                       placeholder="Sélectionner une catégorie..."/>
+                <field name="custom_difficulty"/>
+                <field name="custom_language"/>
+            </xpath>
+
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Infos Pédagogiques" name="digii_info">
+                    <group>
+                        <group string="Paramètres">
+                            <field name="course_category_id"/>
+                            <field name="custom_difficulty"/>
+                            <field name="custom_language"/>
+                        </group>
+                    </group>
+                    <group string="Prérequis">
+                        <field name="custom_prerequisites"
+                               nolabel="1"
+                               placeholder="Décrivez les prérequis..."/>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         HÉRITAGE vue LISTE slide.channel
+    ═══════════════════════════════════════════════════ -->
+ <!-- HÉRITAGE vue LISTE slide.channel -->
+<record id="slide_channel_list_inherit_digii" model="ir.ui.view">
+    <field name="name">slide.channel.list.digii</field>
+    <field name="model">slide.channel</field>
+    <field name="inherit_id" ref="website_slides.slide_channel_view_tree"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='is_published']" position="before">
+            <field name="course_category_id" string="Catégorie"/>
+            <field name="custom_difficulty" string="Niveau"/>
+            <field name="custom_language" string="Langue"/>
+        </xpath>
+    </field>
+</record>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         HÉRITAGE vue KANBAN slide.channel
+    ═══════════════════════════════════════════════════ -->
+  <!-- HÉRITAGE vue KANBAN slide.channel -->
+<record id="slide_channel_kanban_inherit_digii" model="ir.ui.view">
+    <field name="name">slide.channel.kanban.digii</field>
+    <field name="model">slide.channel</field>
+    <field name="inherit_id" ref="website_slides.slide_channel_view_kanban"/>
+    <field name="arch" type="xml">
+
+        <!-- Déclarer les champs après website_published existant -->
+        <xpath expr="//field[@name='website_published']" position="after">
+            <field name="course_category_id"/>
+            <field name="custom_difficulty"/>
+            <field name="custom_language"/>
+        </xpath>
+
+        <!-- Ajouter badges après tag_ids dans le template -->
+        <xpath expr="//field[@name='tag_ids']" position="after">
+            <div class="d-flex gap-1 flex-wrap ms-1 mb-2">
+                <span t-if="record.course_category_id.value"
+                      class="badge text-bg-info">
+                    <i class="fa fa-folder me-1"/>
+                    <t t-esc="record.course_category_id.value"/>
+                </span>
+                <span t-if="record.custom_difficulty.value"
+                      class="badge text-bg-secondary">
+                    <t t-esc="record.custom_difficulty.value"/>
+                </span>
+                <span t-if="record.custom_language.value"
+                      class="badge text-bg-light">
+                    <i class="fa fa-language me-1"/>
+                    <t t-esc="record.custom_language.value"/>
+                </span>
+            </div>
+        </xpath>
+
+    </field>
+</record>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         HÉRITAGE vue RECHERCHE slide.channel
+    ═══════════════════════════════════════════════════ -->
+    <record id="slide_channel_search_inherit_digii" model="ir.ui.view">
+        <field name="name">slide.channel.search.digii</field>
+        <field name="model">slide.channel</field>
+        <field name="inherit_id" ref="website_slides.slide_channel_view_search"/>
+        <field name="arch" type="xml">
+
+            <!-- Champs de recherche -->
+            <xpath expr="//search" position="inside">
+                <field name="course_category_id" string="Catégorie"/>
+                <field name="custom_difficulty" string="Niveau"/>
+
+                <separator/>
+
+                <!-- Filtres difficulté -->
+                <filter string="Débutant"
+                        name="filter_beginner"
+                        domain="[('custom_difficulty', '=', 'beginner')]"/>
+                <filter string="Intermédiaire"
+                        name="filter_intermediate"
+                        domain="[('custom_difficulty', '=', 'intermediate')]"/>
+                <filter string="Avancé"
+                        name="filter_advanced"
+                        domain="[('custom_difficulty', '=', 'advanced')]"/>
+                <filter string="Expert"
+                        name="filter_expert"
+                        domain="[('custom_difficulty', '=', 'expert')]"/>
+
+                <separator/>
+
+                <!-- Filtres langue -->
+                <filter string="Français"
+                        name="filter_fr"
+                        domain="[('custom_language', '=', 'fr')]"/>
+                <filter string="Anglais"
+                        name="filter_en"
+                        domain="[('custom_language', '=', 'en')]"/>
+                <filter string="Arabe"
+                        name="filter_ar"
+                        domain="[('custom_language', '=', 'ar')]"/>
+
+                <!-- Grouper par -->
+
+                    <filter string="Catégorie"
+                            name="group_category"
+                            context="{'group_by': 'course_category_id'}"/>
+                    <filter string="Niveau"
+                            name="group_difficulty"
+                            context="{'group_by': 'custom_difficulty'}"/>
+                    <filter string="Langue"
+                            name="group_language"
+                            context="{'group_by': 'custom_language'}"/>
+
+
+            </xpath>
+        </field>
+    </record>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         ACTION — slide.channel depuis menu Digii
+    ═══════════════════════════════════════════════════ -->
+    <record id="action_digii_slide_channel" model="ir.actions.act_window">
+        <field name="name">Cours</field>
+        <field name="res_model">slide.channel</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez votre premier cours !
+            </p>
+        </field>
+    </record>
+
+</odoo>

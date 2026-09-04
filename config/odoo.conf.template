@@ -1,0 +1,42 @@
+[options]
+; ─────────────────────────────────────────────────────────────────
+; Odoo 19 — configuration générée au démarrage par entrypoint.sh
+; Les ${VARIABLES} sont remplacées par envsubst à partir des
+; variables d'environnement (docker-compose en dev, Azure en prod).
+; Aucune valeur sensible ne doit être écrite en dur ici.
+; ─────────────────────────────────────────────────────────────────
+
+addons_path = /usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons
+
+; ── Base de données ───────────────────────────────────────────────
+db_host     = ${DB_HOST}
+db_port     = ${DB_PORT}
+db_user     = ${DB_USER}
+db_password = ${DB_PASSWORD}
+db_sslmode  = ${DB_SSLMODE}
+
+; ── Sécurité ──────────────────────────────────────────────────────
+admin_passwd = ${ODOO_ADMIN_PASSWD}
+
+; ── Réseau ────────────────────────────────────────────────────────
+; http_port remplace xmlrpc_port depuis Odoo 17
+http_port      = 8069
+http_interface = 0.0.0.0
+; proxy_mode obligatoire derrière le load balancer Azure
+proxy_mode     = True
+
+; ── Performance ───────────────────────────────────────────────────
+; workers = 0 → mode thread (dev) ; 2+ → multi-process (prod Linux)
+workers           = ${ODOO_WORKERS}
+max_cron_threads  = 1
+limit_memory_hard = 2684354560
+limit_memory_soft = 2147483648
+limit_request     = 8192
+limit_time_cpu    = 600
+limit_time_real   = 1200
+
+; ── Données ───────────────────────────────────────────────────────
+data_dir = /var/lib/odoo
+
+; ── Logs (minuscules obligatoires : info, warn, error, debug...) ──
+log_level = ${ODOO_LOG_LEVEL}

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!--
+        Le menu racine "Examens" est conservé mais caché (active=False).
+        Toute la navigation passe par Smart LMS (digii_lms).
+        Les actions restent déclarées ici et sont référencées
+        depuis digii_lms/views/digii_menu_views.xml via
+        digii_exam_manager.action_xxx
+    -->
+    <menuitem
+        id="menu_exam_root"
+        name="Examens"
+        sequence="90"
+        active="False"/>
+
+    <!-- Les sous-menus ci-dessous sont gardés inactifs.
+         Ils ne sont plus utilisés directement :
+         digii_lms les réexpose sous le menu Smart LMS. -->
+
+    <menuitem
+        id="menu_exam_surveys"
+        name="Examens"
+        parent="menu_exam_root"
+        action="survey.action_survey_form"
+        sequence="1"
+        active="False"/>
+
+    <menuitem
+        id="menu_exam_bank_questions"
+        name="Banque de questions"
+        parent="menu_exam_root"
+        action="action_bank_questions"
+        sequence="2"
+        active="False"/>
+
+    <menuitem
+        id="menu_exam_categories"
+        name="Catégories"
+        parent="menu_exam_root"
+        action="action_exam_category"
+        sequence="3"
+        active="False"/>
+
+    <menuitem
+        id="menu_exam_question_import"
+        name="Importer des questions"
+        parent="menu_exam_root"
+        action="action_exam_question_import"
+        sequence="4"/>
+
+    <menuitem
+        id="menu_exam_participants"
+        name="Résultats"
+        parent="menu_exam_root"
+        action="survey.action_survey_user_input"
+        sequence="4"
+        active="False"/>
+
+    <menuitem
+        id="menu_exam_certificates"
+        name="Certificats"
+        parent="menu_exam_root"
+        action="action_exam_certificate"
+        sequence="5"
+        active="False"/>
+
+    <menuitem
+        id="menu_exam_proctoring"
+        name="Proctoring"
+        parent="menu_exam_root"
+        action="action_exam_proctoring_session"
+        sequence="6"
+        active="False"/>
+
+    <menuitem
+        id="menu_exam_config"
+        name="Configuration"
+        parent="menu_exam_root"
+        sequence="90"
+        active="False"/>
+
+    <menuitem
+        id="menu_exam_cert_templates"
+        name="Templates de certificat"
+        parent="menu_exam_config"
+        action="action_exam_certificate_template"
+        sequence="1"
+        active="False"/>
+
+</data>
+</odoo>

@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+    <!-- ============================================================ -->
+    <!-- Systray button                                               -->
+    <!-- ============================================================ -->
+    <t t-name="digii_exam_ai_agent.AiAgentSystray">
+        <div class="o_ai_systray" t-on-click="onClick" title="Assistant Examens IA">
+            <i class="fa fa-magic"/>
+            <span class="o_ai_systray_label">Assistant IA</span>
+        </div>
+    </t>
+
+    <!-- ============================================================ -->
+    <!-- Survey form button                                           -->
+    <!-- ============================================================ -->
+    <t t-name="digii_exam_ai_agent.AiSurveyButton">
+        <button t-if="isExam" type="button"
+                class="btn btn-secondary o_ai_survey_btn"
+                t-on-click="onClick">
+            <i class="fa fa-magic me-1"/> Assistant IA
+        </button>
+    </t>
+
+    <!-- ============================================================ -->
+    <!-- Typing indicator                                             -->
+    <!-- ============================================================ -->
+    <t t-name="digii_exam_ai_agent.AiTypingIndicator">
+        <div class="o_ai_typing">
+            <span class="o_ai_dot"/>
+            <span class="o_ai_dot"/>
+            <span class="o_ai_dot"/>
+        </div>
+    </t>
+
+    <!-- ============================================================ -->
+    <!-- Message bubble                                               -->
+    <!-- ============================================================ -->
+    <t t-name="digii_exam_ai_agent.AiMessage">
+        <div t-att-class="props.role === 'user' ? 'o_ai_msg o_ai_msg_user' : 'o_ai_msg o_ai_msg_assistant'">
+            <div class="o_ai_msg_body" t-out="rendered"/>
+        </div>
+    </t>
+
+    <!-- ============================================================ -->
+    <!-- Question card                                                -->
+    <!-- ============================================================ -->
+    <t t-name="digii_exam_ai_agent.AiQuestionCard">
+        <div class="o_ai_card o_ai_question_card"
+             t-att-class="{ 'o_ai_card_approved': q.validation_state === 'approved' }">
+
+            <div class="o_ai_card_badges">
+                <span t-if="q.category" class="o_ai_badge o_ai_badge_cat" t-esc="q.category"/>
+                <span t-if="q.subcategory" class="o_ai_badge o_ai_badge_sub" t-esc="q.subcategory"/>
+                <span t-if="q.difficulty_label" t-att-class="'o_ai_badge ' + difficultyClass" t-esc="q.difficulty_label"/>
+                <span class="o_ai_badge o_ai_badge_type" t-esc="q.type_label"/>
+                <span t-if="q.confidence" class="o_ai_badge o_ai_badge_conf">
+                    Confiance: <t t-esc="q.confidence"/>
+                </span>
+            </div>
+
+            <div class="o_ai_q_title" t-if="!state.editing">
+                <t t-esc="q.title"/>
+            </div>
+            <div class="o_ai_q_edit" t-if="state.editing">
+                <textarea class="o_ai_edit_area"
+                          t-att-value="state.editTitle"
+                          t-on-input="(ev) => state.editTitle = ev.target.value"/>
+                <div class="o_ai_edit_actions">
+                    <button class="btn btn-sm btn-primary" t-on-click="saveEdit">Enregistrer</button>
+                    <button class="btn btn-sm btn-light" t-on-click="toggleEdit">Annuler</button>
+                </div>
+            </div>
+
+            <ul class="o_ai_answers">
+                <li t-foreach="q.answers" t-as="ans" t-key="ans_index"
+                    t-att-class="ans.correct ? 'o_ai_answer o_ai_answer_correct' : 'o_ai_answer'">
+                    <i t-if="ans.correct" class="fa fa-check o_ai_answer_icon"/>
+                    <i t-if="!ans.correct" class="fa fa-circle-o o_ai_answer_icon"/>
+                    <span t-esc="ans.text"/>
+                </li>
+            </ul>
+
+            <div t-if="q.explanation" class="o_ai_q_explain">
+                <i class="fa fa-lightbulb-o me-1"/><t t-esc="q.explanation"/>
+            </div>
+
+            <!-- Bloc regeneration -->
+            <div t-if="state.showRegen" class="o_ai_regen_box">
+                <input type="text" class="o_ai_regen_input"
+                       placeholder="Ex: rends-la plus difficile, reformule plus clairement..."
+                       t-att-value="state.regenText"
+                       t-on-input="(ev) => state.regenText = ev.target.value"/>
+                <button class="btn btn-sm btn-primary" t-on-click="submitRegen">Envoyer</button>
+            </div>
+
+            <div class="o_ai_card_actions" t-if="q.validation_state !== 'approved'">
+                <button class="o_ai_act o_ai_act_approve" t-on-click="approve"
+                        t-att-disabled="state.busy">
+                    <i class="fa fa-check me-1"/>Approuver
+                </button>
+                <button class="o_ai_act o_ai_act_edit" t-on-click="toggleEdit"
+                        t-att-disabled="state.busy">
+                    <i class="fa fa-pencil me-1"/>Editer
+                </button>
+                <button class="o_ai_act o_ai_act_regen" t-on-click="toggleRegen"
+                        t-att-disabled="state.busy">
+                    <i class="fa fa-refresh me-1"/>Regenerer
+                </button>
+                <button class="o_ai_act o_ai_act_reject" t-on-click="reject"
+                        t-att-disabled="state.busy">
+                    <i class="fa fa-times me-1"/>Rejeter
+                </button>
+            </div>
+            <div class="o_ai_card_approved_tag" t-if="q.validation_state === 'approved'">
+                <i class="fa fa-check-circle me-1"/>Ajoutee a la banque
+            </div>
+        </div>
+    </t>
+
+    <!-- ============================================================ -->
+    <!-- Rule card                                                    -->
+    <!-- ============================================================ -->
+    <t t-name="digii_exam_ai_agent.AiRuleCard">
+        <div class="o_ai_card o_ai_rule_card"
+             t-att-class="{ 'o_ai_card_accepted': r.state === 'accepted' }">
+            <div class="o_ai_rule_head">
+                <span class="o_ai_rule_name" t-esc="r.name"/>
+                <span t-if="r.is_feasible" class="o_ai_badge o_ai_badge_ok">
+                    <i class="fa fa-check me-1"/>Faisable
+                </span>
+                <span t-if="!r.is_feasible" class="o_ai_badge o_ai_badge_warn">
+                    <i class="fa fa-exclamation-triangle me-1"/>Pool insuffisant
+                </span>
+            </div>
+            <div class="o_ai_rule_meta">
+                <span t-if="r.category" class="o_ai_badge o_ai_badge_cat" t-esc="r.category"/>
+                <span t-if="r.subcategory" class="o_ai_badge o_ai_badge_sub" t-esc="r.subcategory"/>
+                <span t-if="r.difficulty_label" class="o_ai_badge o_ai_badge_neutral" t-esc="r.difficulty_label"/>
+                <span t-if="r.cognitive_label" class="o_ai_badge o_ai_badge_type" t-esc="r.cognitive_label"/>
+            </div>
+            <div t-if="r.reason" class="o_ai_rule_reason">
+                <i class="fa fa-info-circle me-1"/><t t-esc="r.reason"/>
+            </div>
+            <div class="o_ai_rule_count">
+                Demande: <strong t-esc="r.count"/> &#8226;
+                Disponible:
+                <strong t-att-class="r.is_feasible ? 'text-success' : 'text-danger'"
+                        t-esc="r.available_count"/>
+            </div>
+            <div class="o_ai_card_actions" t-if="r.state === 'proposed'">
+                <button class="o_ai_act o_ai_act_approve" t-on-click="accept"
+                        t-att-disabled="state.busy">
+                    <i class="fa fa-check me-1"/>Ajouter a l'examen
+                </button>
+                <button class="o_ai_act o_ai_act_reject" t-on-click="reject"
+                        t-att-disabled="state.busy">
+                    <i class="fa fa-times me-1"/>Ignorer
+                </button>
+            </div>
+            <div class="o_ai_card_approved_tag" t-if="r.state === 'accepted'">
+                <i class="fa fa-check-circle me-1"/>Regle ajoutee
+            </div>
+        </div>
+    </t>
+
+    <!-- ============================================================ -->
+    <!-- Main panel                                                   -->
+    <!-- ============================================================ -->
+    <t t-name="digii_exam_ai_agent.AiAgentPanel">
+        <div class="o_ai_overlay" t-att-class="{ 'o_ai_overlay_visible': state.visible }">
+            <div class="o_ai_backdrop" t-on-click="close"/>
+            <div class="o_ai_panel" t-att-class="{ 'o_ai_panel_open': state.visible }">
+
+                <!-- Header -->
+                <div class="o_ai_header">
+                    <div class="o_ai_header_title">
+                        <i class="fa fa-magic me-2"/>
+                        <span>Assistant Examens IA</span>
+                    </div>
+                    <button class="o_ai_close" t-on-click="close" title="Fermer">
+                        <i class="fa fa-times"/>
+                    </button>
+                </div>
+
+                <!-- Tabs -->
+                <div class="o_ai_tabs">
+                    <button class="o_ai_tab"
+                            t-att-class="{ 'o_ai_tab_active': state.mode === 'questions' }"
+                            t-on-click="() => this.setMode('questions')">
+                        Generation de questions
+                    </button>
+                    <button class="o_ai_tab"
+                            t-att-class="{ 'o_ai_tab_active': state.mode === 'rules' }"
+                            t-on-click="() => this.setMode('rules')">
+                        Regles d'examen
+                    </button>
+                    <button class="o_ai_tab"
+                            t-att-class="{ 'o_ai_tab_active': state.mode === 'assistant' }"
+                            t-on-click="() => this.setMode('assistant')">
+                        Assistant
+                    </button>
+                </div>
+
+                <!-- Barre sessions (mode assistant) -->
+                <div class="o_ai_settings o_ai_chatbar" t-if="state.mode === 'assistant'">
+                    <button class="o_ai_chatbar_btn" t-on-click="newChatSession"
+                            title="Nouvelle conversation">
+                        <i class="fa fa-plus me-1"/>Nouvelle
+                    </button>
+                    <button class="o_ai_chatbar_btn" t-on-click="toggleSessions"
+                            title="Historique des conversations">
+                        <i class="fa fa-history me-1"/>Historique
+                    </button>
+                </div>
+
+                <!-- Liste des conversations passees -->
+                <div class="o_ai_sessions" t-if="state.mode === 'assistant' and state.showSessions">
+                    <t t-if="state.chatSessions.length">
+                        <div class="o_ai_sessions_header">
+                            <span class="o_ai_sessions_title">Conversations</span>
+                            <button class="o_ai_session_delete_all"
+                                    t-att-class="{ 'o_ai_confirming': state.confirmDeleteId === 'all' }"
+                                    t-on-click="deleteAllChatSessions">
+                                <t t-if="state.confirmDeleteId === 'all'">
+                                    <i class="fa fa-exclamation-triangle me-1"/>
+                                    <t t-if="state.userLang === 'en'">Confirm?</t>
+                                    <t t-else="">Confirmer ?</t>
+                                </t>
+                                <t t-else="">
+                                    <i class="fa fa-trash me-1"/>
+                                    <t t-if="state.userLang === 'en'">Delete all</t>
+                                    <t t-else="">Tout supprimer</t>
+                                </t>
+                            </button>
+                        </div>
+                        <div class="o_ai_session_item"
+                             t-foreach="state.chatSessions" t-as="s" t-key="s.id"
+                             t-on-click="() => this.openChatSession(s.id)">
+                            <i class="fa fa-comments-o me-2"/>
+                            <span class="o_ai_session_name" t-esc="s.name"/>
+                            <span class="o_ai_session_count" t-esc="s.count + ' msg'"/>
+                            <button class="o_ai_session_delete"
+                                    t-att-class="{ 'o_ai_confirming': state.confirmDeleteId === s.id }"
+                                    t-on-click="(ev) => this.deleteChatSession(s.id, ev)">
+                                <t t-if="state.confirmDeleteId === s.id">
+                                    <t t-if="state.userLang === 'en'">Confirm?</t>
+                                    <t t-else="">Confirmer ?</t>
+                                </t>
+                                <i t-else="" class="fa fa-trash-o"/>
+                            </button>
+                        </div>
+                    </t>
+                    <div t-else="" class="o_ai_sessions_empty">
+                        <t t-if="state.userLang === 'en'">No past conversations.</t>
+                        <t t-else="">Aucune conversation passee.</t>
+                    </div>
+                </div>
+
+                <!-- Settings strip : questions -->
+                <div class="o_ai_settings" t-if="state.mode === 'questions'">
+                    <div class="o_ai_setting">
+                        <label>Source</label>
+                        <select t-model="state.sourceType">
+                            <option value="topic">Sujet libre</option>
+                            <option value="course">Cours</option>
+                            <option value="text">Texte colle</option>
+                        </select>
+                    </div>
+                    <div class="o_ai_setting" t-if="state.sourceType === 'course'">
+                        <label>Cours</label>
+                        <select t-model="state.courseId">
+                            <option value="">— choisir —</option>
+                            <option t-foreach="state.courses" t-as="c" t-key="c.id"
+                                    t-att-value="c.id" t-esc="c.name"/>
+                        </select>
+                    </div>
+                    <div class="o_ai_setting">
+                        <label>Nombre</label>
+                        <input type="number" min="1" max="30" t-model.number="state.count"/>
+                    </div>
+                    <div class="o_ai_setting">
+                        <label>Type</label>
+                        <select t-model="state.questionType">
+                            <option value="simple_choice">Reponse unique</option>
+                            <option value="multiple_choice">Choix multiple</option>
+                        </select>
+                    </div>
+                    <div class="o_ai_setting">
+                        <label>Catégorie</label>
+                        <select t-model.number="state.categoryId">
+                            <option value="">— Auto —</option>
+                            <option t-foreach="state.categories" t-as="cat" t-key="cat.id"
+                                    t-att-value="cat.id" t-esc="cat.name"/>
+                        </select>
+                    </div>
+                    <div class="o_ai_setting">
+                        <label>Type cognitif</label>
+                        <select t-model="state.cognitiveType">
+                            <option value="">— Auto —</option>
+                            <option value="memory">Mémoire</option>
+                            <option value="comprehension">Compréhension</option>
+                            <option value="application">Application</option>
+                            <option value="analysis">Analyse</option>
+                            <option value="experience">Expérience</option>
+                        </select>
+                    </div>
+                    <div class="o_ai_setting">
+                        <label>Difficulte</label>
+                        <select t-model="state.difficultyMode">
+                            <option value="balanced">Equilibree</option>
+                            <option value="custom">Personnalisee</option>
+                        </select>
+                    </div>
+                    <div class="o_ai_setting o_ai_setting_dist" t-if="state.difficultyMode === 'custom'">
+                        <span class="o_ai_dist_item">F <input type="number" min="0" t-model.number="state.diffEasy"/></span>
+                        <span class="o_ai_dist_item">M <input type="number" min="0" t-model.number="state.diffMedium"/></span>
+                        <span class="o_ai_dist_item">D <input type="number" min="0" t-model.number="state.diffHard"/></span>
+                    </div>
+                </div>
+
+                <!-- Settings strip : rules -->
+                <div class="o_ai_settings" t-if="state.mode === 'rules'">
+                    <div class="o_ai_setting o_ai_setting_grow">
+                        <label>Examen cible</label>
+                        <select t-model.number="state.surveyId" t-att-disabled="props.surveyId">
+                            <option value="">— choisir —</option>
+                            <option t-foreach="state.exams" t-as="e" t-key="e.id"
+                                    t-att-value="e.id" t-esc="e.name"/>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Conversation -->
+                <div class="o_ai_scroll" t-ref="scroll">
+                    <t t-foreach="state.messages" t-as="msg" t-key="msg.id">
+                        <AiMessage t-if="msg.type === 'text'"
+                                   role="msg.role" content="msg.content"/>
+
+                        <div t-if="msg.type === 'questions'" class="o_ai_cards_group">
+                            <AiQuestionCard t-foreach="msg.cards" t-as="card" t-key="card.id"
+                                            question="card"
+                                            onApprove.bind="onApproveQuestion"
+                                            onReject.bind="onRejectQuestion"
+                                            onEdit.bind="onEditQuestion"
+                                            onRegenerate.bind="onRegenerateQuestion"/>
+                        </div>
+
+                        <div t-if="msg.type === 'rules'" class="o_ai_cards_group">
+                            <AiRuleCard t-foreach="msg.cards" t-as="card" t-key="card.id"
+                                        rule="card"
+                                        onAccept.bind="onAcceptRule"
+                                        onReject.bind="onRejectRule"/>
+                        </div>
+
+                        <!-- Message analytique (assistant Q&A) : charts + tableaux -->
+                        <div t-if="msg.type === 'analytics'" class="o_ai_analytics">
+                            <AiMessage role="'assistant'" content="msg.content"/>
+
+                            <div t-if="msg.charts and msg.charts.length" class="o_ai_charts">
+                                <div t-foreach="msg.charts" t-as="chart"
+                                     t-key="chart_index" class="o_ai_chart">
+                                    <div class="o_ai_chart_title" t-esc="chart.title"/>
+
+                                    <!-- BAR -->
+                                    <div t-if="chart.type === 'bar'" class="o_ai_chart_bars">
+                                        <div t-foreach="chart.rows" t-as="row"
+                                             t-key="row_index" class="o_ai_chart_row">
+                                            <span class="o_ai_chart_label" t-esc="row.label"/>
+                                            <div class="o_ai_chart_track">
+                                                <div class="o_ai_chart_fill"
+                                                     t-attf-style="width: {{ row.pct }}%"/>
+                                            </div>
+                                            <span class="o_ai_chart_value" t-esc="row.value"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- PIE -->
+                                    <div t-if="chart.type === 'pie'" class="o_ai_pie_wrap">
+                                        <div class="o_ai_pie"
+                                             t-attf-style="background: {{ chart.gradient }}"/>
+                                        <div class="o_ai_pie_legend">
+                                            <div t-foreach="chart.segments" t-as="seg"
+                                                 t-key="seg_index" class="o_ai_pie_item">
+                                                <span class="o_ai_pie_dot"
+                                                      t-attf-style="background: {{ seg.color }}"/>
+                                                <span class="o_ai_pie_label" t-esc="seg.label"/>
+                                                <span class="o_ai_pie_val"
+                                                      t-esc="seg.value + ' (' + seg.pct + '%)'"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- LINE -->
+                                    <div t-if="chart.type === 'line'" class="o_ai_line_wrap">
+                                        <svg viewBox="0 0 100 40" class="o_ai_line_svg"
+                                             preserveAspectRatio="none">
+                                            <polyline t-att-points="chart.points"
+                                                      fill="none" stroke="#6366f1"
+                                                      stroke-width="1.5"
+                                                      stroke-linejoin="round"
+                                                      stroke-linecap="round"/>
+                                            <circle t-foreach="chart.dots" t-as="dot"
+                                                    t-key="dot_index"
+                                                    t-att-cx="dot.x" t-att-cy="dot.y"
+                                                    r="1.6" fill="#8b5cf6"/>
+                                        </svg>
+                                        <div class="o_ai_line_labels">
+                                            <span t-esc="chart.firstLabel"/>
+                                            <span t-esc="chart.lastLabel"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TABLEAUX -->
+                            <div t-if="msg.tables and msg.tables.length" class="o_ai_tables">
+                                <div t-foreach="msg.tables" t-as="tbl"
+                                     t-key="tbl_index" class="o_ai_table_card">
+                                    <div class="o_ai_chart_title" t-esc="tbl.title"/>
+                                    <div class="o_ai_table_scroll">
+                                        <table class="o_ai_table">
+                                            <thead>
+                                                <tr>
+                                                    <th t-foreach="tbl.headers" t-as="h"
+                                                        t-key="h_index" t-esc="h"/>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="tbl.rows" t-as="row"
+                                                    t-key="row_index">
+                                                    <td t-foreach="row" t-as="cell"
+                                                        t-key="cell_index" t-esc="cell"/>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                    <div t-if="state.loading" class="o_ai_loading_row">
+                        <AiTypingIndicator/>
+                    </div>
+                </div>
+
+                <!-- Barre d'actions groupees (si des questions sont generees) -->
+                <div class="o_ai_batch_bar" t-if="lastBatchStats and !state.loading">
+                    <span class="o_ai_batch_count">
+                        <i class="fa fa-check-circle me-1"/>
+                        <t t-esc="lastBatchStats.approved"/> / <t t-esc="lastBatchStats.total"/> approuvée(s)
+                    </span>
+                    <button class="o_ai_batch_btn" t-on-click="approveAllQuestions"
+                            t-att-disabled="state.busy">
+                        <i class="fa fa-check-double me-1"/>Tout approuver
+                    </button>
+                </div>
+
+                <!-- Quick chips -->
+                <div class="o_ai_chips" t-if="!state.loading">
+                    <button class="o_ai_chip" t-foreach="chips" t-as="chip" t-key="chip_index"
+                            t-on-click="() => this.onChipClick(chip)" t-esc="chip"/>
+                </div>
+
+                <!-- Input bar -->
+                <div class="o_ai_inputbar">
+                    <textarea t-ref="input"
+                              class="o_ai_textarea"
+                              rows="1"
+                              placeholder="Decrivez ce que vous voulez generer..."
+                              t-att-value="state.input"
+                              t-on-input="onInput"
+                              t-on-keydown="onKeydown"/>
+                    <button class="o_ai_send" t-on-click="send" t-att-disabled="!canSend">
+                        <i class="fa fa-paper-plane"/>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </t>
+
+</templates>

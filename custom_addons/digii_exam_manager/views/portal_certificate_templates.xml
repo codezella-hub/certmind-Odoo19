@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!-- ============================================================ -->
+    <!-- Ajout du lien "Mes certificats" dans le menu portail -->
+    <!-- ============================================================ -->
+    <template id="portal_my_home_certificate"
+              inherit_id="portal.portal_my_home"
+              name="Certificats dans le portail"
+              priority="40">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/digii_exam_manager/static/description/icon.png'"/>
+                <t t-set="title">Mes certificats</t>
+                <t t-set="url" t-value="'/my/certificates'"/>
+                <t t-set="text">Consultez vos certificats d'examen</t>
+                <t t-set="placeholder_count" t-value="'certificate_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- ============================================================ -->
+    <!-- Liste des certificats du candidat -->
+    <!-- ============================================================ -->
+    <template id="portal_my_certificates" name="Mes certificats">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="o_digii_cert_page">
+
+                <!-- En-tête -->
+                <div class="dcert-hero">
+                    <div class="dcert-hero-icon"><i class="fa fa-certificate"/></div>
+                    <div>
+                        <h2 class="dcert-hero-title">Mes certificats</h2>
+                        <p class="dcert-hero-sub">
+                            Vos certifications obtenues, prêtes à télécharger.
+                        </p>
+                    </div>
+                    <div class="dcert-hero-count" t-if="certificate_count">
+                        <span t-out="certificate_count"/>
+                        <small>certificat(s)</small>
+                    </div>
+                </div>
+
+                <!-- Barre de recherche + filtre -->
+                <form action="/my/certificates" method="get" class="dcert-search">
+                    <div class="dcert-search-input">
+                        <i class="fa fa-search"/>
+                        <input type="text" name="search" t-att-value="search or ''"
+                               placeholder="Rechercher un certificat (examen, numéro)..."/>
+                    </div>
+                    <select name="exam_id" class="dcert-search-select">
+                        <option value="">Tous les examens</option>
+                        <t t-foreach="exam_options" t-as="ex">
+                            <option t-att-value="ex.id"
+                                    t-att-selected="'selected' if exam_id == ex.id else None"
+                                    t-out="ex.title"/>
+                        </t>
+                    </select>
+                    <button type="submit" class="dcert-btn dcert-btn-primary dcert-search-btn">
+                        <i class="fa fa-filter me-1"/> Filtrer
+                    </button>
+                    <a t-if="search or exam_id" href="/my/certificates"
+                       class="dcert-btn dcert-btn-light dcert-search-btn">
+                        <i class="fa fa-times"/>
+                    </a>
+                </form>
+
+                <!-- État vide -->
+                <t t-if="not certificates">
+                    <div class="dcert-empty">
+                        <i class="fa fa-folder-open-o"/>
+                        <t t-if="search or exam_id">
+                            <h4>Aucun certificat ne correspond</h4>
+                            <p>Essayez un autre mot-clé ou réinitialisez les filtres.</p>
+                            <a href="/my/certificates" class="dcert-btn dcert-btn-primary">
+                                <i class="fa fa-refresh me-1"/> Réinitialiser
+                            </a>
+                        </t>
+                        <t t-else="">
+                            <h4>Aucun certificat pour le moment</h4>
+                            <p>Réussissez un examen certifiant pour obtenir votre premier certificat.</p>
+                            <a href="/my/exams" class="dcert-btn dcert-btn-primary">
+                                <i class="fa fa-list-ul me-1"/> Voir mes examens
+                            </a>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- Grille de certificats -->
+                <t t-if="certificates">
+                    <div class="dcert-grid">
+                        <t t-foreach="certificates" t-as="cert">
+                            <div class="dcert-card">
+                                <div class="dcert-card-top">
+                                    <i class="fa fa-certificate dcert-card-badge"/>
+                                    <div class="dcert-score">
+                                        <span class="dcert-score-val"
+                                              t-out="'%.0f' % cert.score_obtained"/><span class="dcert-score-pct">%</span>
+                                    </div>
+                                </div>
+                                <div class="dcert-card-body">
+                                    <h5 class="dcert-card-title" t-out="cert.survey_id.title"/>
+                                    <div class="dcert-meta">
+                                        <span><i class="fa fa-hashtag"/> <t t-out="cert.name"/></span>
+                                        <span><i class="fa fa-calendar"/>
+                                            <t t-out="cert.date_approved" t-options="{'widget': 'date'}"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="dcert-card-actions">
+                                    <a t-attf-href="/my/certificate/#{cert.id}"
+                                       class="dcert-btn dcert-btn-light">
+                                        <i class="fa fa-eye me-1"/> Détails
+                                    </a>
+                                    <a t-attf-href="/my/certificate/#{cert.id}/download"
+                                       class="dcert-btn dcert-btn-primary">
+                                        <i class="fa fa-download me-1"/> PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <div t-if="pager" class="o_portal_pager text-center mt-4">
+                        <t t-call="portal.pager"/>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================================================ -->
+    <!-- Détail d'un certificat -->
+    <!-- ============================================================ -->
+    <template id="portal_certificate_detail" name="Détail du certificat">
+        <t t-call="portal.portal_layout">
+            <t t-set="o_portal_fullwidth_alert" groups="portal.group_portal"/>
+
+            <div class="container py-4">
+                <!-- Fil d'ariane -->
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="/my">Mon compte</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="/my/certificates">Mes certificats</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            <t t-out="certificate.name"/>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="card shadow dcert-detail-card">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center dcert-detail-header">
+                        <h3 class="mb-0">
+                            <i class="fa fa-certificate me-2"/>
+                            <t t-out="certificate.name"/>
+                        </h3>
+                        <span class="badge bg-light text-dark fs-6">
+                            <i class="fa fa-check-circle text-success me-1"/> Approuvé
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Aperçu visuel du certificat (paysage, ajusté à la largeur) -->
+                            <div class="col-lg-7 mb-4 mb-lg-0">
+                                <div class="dcert-preview-frame">
+                                    <iframe t-attf-src="/my/certificate/#{certificate.id}/preview"
+                                            title="Aperçu du certificat"/>
+                                </div>
+                                <p class="text-muted small text-center mt-2">
+                                    <i class="fa fa-info-circle me-1"/>
+                                    Aperçu — utilisez le bouton ci-dessous pour télécharger le PDF officiel.
+                                </p>
+                            </div>
+                            <!-- Informations -->
+                            <div class="col-lg-5">
+                                <h5 class="mb-3">Informations</h5>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td class="fw-bold text-muted">Examen</td>
+                                        <td><t t-out="certificate.survey_id.title"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-muted">Candidat</td>
+                                        <td><t t-out="certificate.partner_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-muted">Score</td>
+                                        <td>
+                                            <span class="badge bg-success fs-6">
+                                                <t t-out="'%.1f' % certificate.score_obtained"/>%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-muted">Date de certification</td>
+                                        <td>
+                                            <t t-out="certificate.date_approved"
+                                               t-options="{'widget': 'date'}"/>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="certificate.approved_by">
+                                        <td class="fw-bold text-muted">Approuvé par</td>
+                                        <td><t t-out="certificate.approved_by.name"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a t-attf-href="/my/certificate/#{certificate.id}/download"
+                           class="btn btn-primary">
+                            <i class="fa fa-download me-1"/>
+                            Télécharger le certificat (PDF)
+                        </a>
+                        <a href="/my/certificates" class="btn btn-secondary ms-2">
+                            <i class="fa fa-arrow-left me-1"/> Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!-- ============================================================ -->
+    <!-- Page publique de vérification (QR code) -->
+    <!-- ============================================================ -->
+    <template id="certificate_verify_page" name="Vérification de certificat">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div style="max-width:820px;margin:40px auto;padding:0 16px;font-family:system-ui,-apple-system,sans-serif;">
+
+                    <!-- Bandeau statut -->
+                    <t t-if="valid">
+                        <div style="background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;border-radius:24px;padding:30px 32px;text-align:center;box-shadow:0 14px 40px rgba(29,158,117,0.28);">
+                            <div style="font-size:2.6rem;line-height:1;margin-bottom:10px;">
+                                <i class="fa fa-check-circle"/>
+                            </div>
+                            <h2 style="margin:0;font-family:'Crimson Pro',serif;font-weight:700;font-size:1.9rem;">Certificat authentique</h2>
+                            <p style="margin:6px 0 0;opacity:.92;">Ce certificat a été délivré et vérifié par CertMind.</p>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div style="background:linear-gradient(135deg,#E24B4A,#A32D2D);color:#fff;border-radius:24px;padding:30px 32px;text-align:center;box-shadow:0 14px 40px rgba(226,75,74,0.28);">
+                            <div style="font-size:2.6rem;line-height:1;margin-bottom:10px;">
+                                <i class="fa fa-exclamation-triangle"/>
+                            </div>
+                            <h2 style="margin:0;font-family:'Crimson Pro',serif;font-weight:700;font-size:1.9rem;">Certificat non vérifiable</h2>
+                            <p style="margin:6px 0 0;opacity:.92;">
+                                <t t-if="exists and state == 'pending'">Ce certificat est en cours de validation et n'est pas encore officiel.</t>
+                                <t t-elif="exists and state == 'rejected'">Ce certificat a été rejeté et n'est pas valide.</t>
+                                <t t-else="">Aucun certificat ne correspond à ce lien. Il est peut-être invalide ou falsifié.</t>
+                            </p>
+                        </div>
+                    </t>
+
+                    <!-- Détails (uniquement si valide) -->
+                    <t t-if="valid">
+                        <div style="background:#fff;border:2px solid #E0E6ED;border-radius:24px;padding:28px 32px;margin-top:22px;box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+                            <h3 style="font-family:'Crimson Pro',serif;color:#1A3A5C;font-weight:700;margin:0 0 18px;">Détails du certificat</h3>
+                            <table style="width:100%;border-collapse:collapse;">
+                                <tr style="border-bottom:1px solid #EEF0F4;">
+                                    <td style="padding:12px 0;color:#6C757D;font-weight:600;">Titulaire</td>
+                                    <td style="padding:12px 0;text-align:right;color:#2C3E50;font-weight:600;" t-out="certificate.partner_id.name"/>
+                                </tr>
+                                <tr style="border-bottom:1px solid #EEF0F4;">
+                                    <td style="padding:12px 0;color:#6C757D;font-weight:600;">Examen</td>
+                                    <td style="padding:12px 0;text-align:right;color:#2C3E50;" t-out="certificate.survey_id.title"/>
+                                </tr>
+                                <tr style="border-bottom:1px solid #EEF0F4;">
+                                    <td style="padding:12px 0;color:#6C757D;font-weight:600;">Score</td>
+                                    <td style="padding:12px 0;text-align:right;">
+                                        <span style="background:#1D9E75;color:#fff;padding:4px 14px;border-radius:20px;font-weight:700;">
+                                            <t t-out="'%.1f' % certificate.score_obtained"/>%
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr style="border-bottom:1px solid #EEF0F4;">
+                                    <td style="padding:12px 0;color:#6C757D;font-weight:600;">Numéro</td>
+                                    <td style="padding:12px 0;text-align:right;color:#2C3E50;font-family:monospace;" t-out="certificate.name"/>
+                                </tr>
+                                <tr>
+                                    <td style="padding:12px 0;color:#6C757D;font-weight:600;">Date de délivrance</td>
+                                    <td style="padding:12px 0;text-align:right;color:#2C3E50;">
+                                        <t t-out="certificate.date_approved" t-options="{'widget': 'date'}"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </t>
+
+                    <p style="text-align:center;color:#6C757D;font-size:.85rem;margin-top:22px;">
+                        <i class="fa fa-shield"/> Page de vérification officielle — CertMind
+                    </p>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</data>
+</odoo>

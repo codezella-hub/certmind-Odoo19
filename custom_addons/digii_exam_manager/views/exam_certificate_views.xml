@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <record id="exam_certificate_view_form" model="ir.ui.view">
+        <field name="name">exam.certificate.view.form</field>
+        <field name="model">exam.certificate</field>
+        <field name="arch" type="xml">
+            <form string="Certificat">
+                <header>
+                    <button name="action_preview_certificate"
+                            string="Previsualiser"
+                            type="object"
+                            class="btn-secondary"
+                            icon="fa-eye"/>
+                    <button name="action_approve"
+                            string="Approuver le certificat"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'pending'"
+                            confirm="Approuver ce certificat et generer le numero unique ?"/>
+                    <button name="action_reject"
+                            string="Rejeter le certificat"
+                            type="object"
+                            class="btn-danger"
+                            invisible="state != 'pending'"/>
+                    <button name="action_reset_to_pending"
+                            string="Remettre en attente"
+                            type="object"
+                            invisible="state != 'rejected'"
+                            confirm="Remettre ce certificat en attente ?"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="pending,approved,rejected"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+
+                    <!-- Alerte rejet -->
+                    <div class="alert alert-danger" role="alert"
+                         invisible="state != 'rejected'">
+                        <strong>Certificat rejete</strong>
+                        <field name="rejection_reason" readonly="1" nolabel="1"
+                               class="d-block mt-1"/>
+                    </div>
+
+                    <!-- Alerte approuve -->
+                    <div class="alert alert-success" role="alert"
+                         invisible="state != 'approved'">
+                        <strong>Certificat approuve</strong>
+                    </div>
+
+                    <!-- BLOC VIDEO : le champ video_player_html contient le player HTML complet -->
+                    <!-- genere cote Python, donc pas besoin de t-if/t-att ici -->
+                    <div class="mb-4" invisible="not has_video">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-dark text-white d-flex align-items-center justify-content-between">
+                                <span>
+                                    <i class="fa fa-video-camera me-2"/>
+                                    <strong>Enregistrement video de l'examen</strong>
+                                </span>
+                                <button name="action_refresh_video_url"
+                                        string="Rafraichir le lien video"
+                                        type="object"
+                                        class="btn btn-sm btn-outline-light"/>
+                            </div>
+                            <div class="card-body p-0">
+                                <!-- Player HTML genere par _compute_video_player_html -->
+                                <field name="video_player_html"
+                                       widget="html"
+                                       readonly="1"
+                                       nolabel="1"/>
+                            </div>
+                            <div class="card-footer text-muted small">
+                                <i class="fa fa-info-circle me-1"/>
+                                Video enregistree par LiveKit Egress - Stockee dans Minio.
+                                Si le player ne charge pas, cliquez sur "Rafraichir le lien video".
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message si session proctoring liee mais video pas encore prete -->
+                    <div class="alert alert-info" role="alert"
+                         invisible="has_video or not proctoring_session_id">
+                        <i class="fa fa-clock-o me-2"/>
+                        La video est en cours de traitement par LiveKit.
+                        Rafraichissez la page dans quelques instants.
+                    </div>
+
+                    <!-- ============================================= -->
+                    <!-- BLOC ANALYSE IA (widget temps reel OWL)       -->
+                    <!-- ============================================= -->
+                    <div class="mb-4" invisible="not has_video">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <i class="fa fa-shield me-2"/>
+                                <strong>Analyse IA - Détection de triche</strong>
+                            </div>
+                            <div class="card-body">
+                                <!-- Champs invisibles requis par le widget OWL -->
+                                <field name="ai_risk_score" invisible="1"/>
+                                <field name="ai_risk_level" invisible="1"/>
+                                <field name="ai_alerts_count" invisible="1"/>
+                                <!-- Le widget OWL gere bouton + progression + resultat -->
+                                <field name="ai_analysis_state"
+                                       widget="ai_progress_widget"
+                                       nolabel="1"/>
+                            </div>
+
+                            <!-- Textes LLM (recharges automatiquement a la fin) -->
+                            <div class="card-body border-top"
+                                 invisible="not ai_conclusion">
+                                <div class="mb-2">
+                                    <strong class="text-primary">
+                                        <i class="fa fa-comment me-1"/>Conclusion
+                                    </strong>
+                                    <field name="ai_conclusion" nolabel="1" readonly="1"
+                                           class="d-block text-muted"/>
+                                </div>
+                                <div class="mb-2">
+                                    <strong class="text-primary">
+                                        <i class="fa fa-search me-1"/>Interprétation
+                                    </strong>
+                                    <field name="ai_interpretation" nolabel="1" readonly="1"
+                                           class="d-block text-muted"/>
+                                </div>
+                                <div class="mb-3">
+                                    <strong class="text-primary">
+                                        <i class="fa fa-lightbulb-o me-1"/>Recommandation
+                                    </strong>
+                                    <field name="ai_recommendation" nolabel="1" readonly="1"
+                                           class="d-block text-muted"/>
+                                </div>
+                                <div invisible="not ai_report">
+                                    <field name="ai_report_filename" invisible="1"/>
+                                    <field name="ai_report" filename="ai_report_filename"
+                                           string="Télécharger le rapport PDF"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations principales -->
+                    <group>
+                        <group string="Examen">
+                            <field name="survey_id"/>
+                            <field name="user_input_id"/>
+                            <field name="certificate_template_id"/>
+                        </group>
+                        <group string="Candidat">
+                            <field name="partner_id"/>
+                            <field name="score_obtained" string="Score (%)"/>
+                            <field name="date_completion"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Proctoring">
+                            <field name="proctoring_session_id"/>
+                            <field name="has_video" widget="boolean_toggle" readonly="1"/>
+                            <field name="video_stream_url" string="URL video" readonly="1"
+                                   invisible="not video_stream_url"/>
+                        </group>
+                        <group string="Validation" invisible="state == 'pending'">
+                            <field name="approved_by"   invisible="state != 'approved'"/>
+                            <field name="date_approved" invisible="state != 'approved'"/>
+                            <field name="rejected_by"   invisible="state != 'rejected'"/>
+                        </group>
+                    </group>
+
+                    <!-- champs computed invisibles necessaires aux conditions -->
+                    <field name="has_video"          invisible="1"/>
+                    <field name="video_stream_url"   invisible="1"/>
+                    <field name="video_player_html"  invisible="1"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="exam_certificate_view_list" model="ir.ui.view">
+        <field name="name">exam.certificate.view.list</field>
+        <field name="model">exam.certificate</field>
+        <field name="arch" type="xml">
+            <list string="Certificats"
+                  decoration-warning="state == 'pending'"
+                  decoration-success="state == 'approved'"
+                  decoration-danger="state == 'rejected'">
+                <field name="name" string="N Certificat"/>
+                <field name="partner_id" string="Candidat"/>
+                <field name="survey_id" string="Examen"/>
+                <field name="score_obtained" string="Score (%)"/>
+                <field name="date_completion" string="Date"/>
+                <field name="has_video" string="Video" widget="boolean_toggle" optional="show"/>
+                <field name="state" string="Statut" widget="badge"
+                       decoration-warning="state == 'pending'"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'"/>
+                <field name="approved_by" string="Approuve par" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="exam_certificate_view_search" model="ir.ui.view">
+        <field name="name">exam.certificate.view.search</field>
+        <field name="model">exam.certificate</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher un certificat">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="survey_id"/>
+                <separator/>
+                <filter name="filter_pending"  string="En attente"
+                        domain="[('state','=','pending')]"/>
+                <filter name="filter_approved" string="Approuves"
+                        domain="[('state','=','approved')]"/>
+                <filter name="filter_rejected" string="Rejetes"
+                        domain="[('state','=','rejected')]"/>
+                <group>
+                    <filter name="group_state"  string="Statut"
+                            context="{'group_by':'state'}"/>
+                    <filter name="group_survey" string="Examen"
+                            context="{'group_by':'survey_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_exam_certificate" model="ir.actions.act_window">
+        <field name="name">Certificats</field>
+        <field name="res_model">exam.certificate</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="exam_certificate_view_search"/>
+        <field name="context">{'search_default_filter_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun certificat en attente
+            </p>
+            <p>
+                Les certificats sont crees automatiquement quand un candidat
+                atteint le score de certification. La video d'enregistrement
+                LiveKit apparait ici pour validation avant approbation.
+            </p>
+        </field>
+    </record>
+
+</data>
+</odoo>

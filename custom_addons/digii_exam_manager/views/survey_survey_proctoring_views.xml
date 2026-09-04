@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!--
+        Extension du form survey.survey pour ajouter :
+        1. Toggle "Proctoring" dans l'onglet Options
+        2. Bouton "Ouvrir Dashboard Proctoring" dans le header
+        3. Stat button "Sessions proctoring"
+    -->
+    <record id="exam_survey_proctoring_view_form_inherit" model="ir.ui.view">
+        <field name="name">exam.survey.proctoring.view.form.inherit</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id" ref="survey.survey_survey_view_form"/>
+        <field name="priority">25</field>
+        <field name="arch" type="xml">
+
+            <!-- Bouton Dashboard Proctoring dans le header -->
+            <xpath expr="//header/button[@name='action_send_survey']" position="before">
+                <button name="action_open_proctoring_dashboard"
+                        string="Dashboard Proctoring"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="not is_proctored"
+                        icon="fa-shield"/>
+            </xpath>
+
+            <!-- Stat button Sessions proctoring -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button type="object"
+                        name="action_view_proctoring_sessions"
+                        class="oe_stat_button"
+                        icon="fa-video-camera"
+                        invisible="not is_proctored">
+                    <field name="proctoring_session_count" widget="statinfo"
+                           string="Proctoring"/>
+                </button>
+            </xpath>
+
+            <!-- Proctoring dans Options -->
+            <xpath expr="//page[@name='options']//group" position="inside">
+                <group string="Surveillance vidéo">
+                    <field name="record_video" widget="boolean_toggle"
+                           string="Enregistrer la vidéo du candidat"/>
+                    <field name="is_proctored" widget="boolean_toggle"
+                           string="Surveillance en direct (procteur)"
+                           invisible="not record_video"
+                           help="Le candidat passe par une salle d'attente et doit etre autorise par un procteur avant de commencer."/>
+                    <div class="text-muted" colspan="2"
+                         invisible="not record_video or is_proctored">
+                        <i class="fa fa-info-circle"/>
+                        Mode enregistrement seul : la caméra est enregistrée
+                        mais le candidat entre directement dans l'examen, sans
+                        salle d'attente. La vidéo reste analysable par l'IA
+                        après l'examen.
+                    </div>
+                </group>
+            </xpath>
+
+            <!-- Champ invisible pour les conditions -->
+            <xpath expr="//field[@name='is_exam'][@invisible='1']" position="after">
+                <field name="is_proctored" invisible="1"/>
+                <field name="record_video" invisible="1"/>
+                <field name="proctoring_session_count" invisible="1"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</data>
+</odoo>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Clé API Groq PROPRE au tuteur LMS (à remplir par l'admin) -->
+        <record id="param_lms_ai_api_key" model="ir.config_parameter">
+            <field name="key">digii_lms_ai_agent.api_key</field>
+            <field name="value"></field>
+        </record>
+
+        <!-- Modèle IA propre au LMS (modèle Groq actuel) -->
+        <record id="param_lms_ai_model" model="ir.config_parameter">
+            <field name="key">digii_lms_ai_agent.model</field>
+            <field name="value">openai/gpt-oss-120b</field>
+        </record>
+
+        <!-- URL de base de l'API (Groq compatible OpenAI) -->
+        <record id="param_lms_ai_base_url" model="ir.config_parameter">
+            <field name="key">digii_lms_ai_agent.base_url</field>
+            <field name="value">https://api.groq.com/openai/v1</field>
+        </record>
+    </data>
+</odoo>

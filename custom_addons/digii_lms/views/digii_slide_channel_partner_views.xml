@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════
+         HÉRITAGE vue LISTE slide.channel.partner
+    ═══════════════════════════════════════════════════ -->
+    <record id="slide_channel_partner_list_inherit_digii" model="ir.ui.view">
+        <field name="name">slide.channel.partner.list.digii</field>
+        <field name="model">slide.channel.partner</field>
+        <field name="inherit_id" ref="website_slides.slide_channel_partner_view_tree"/>
+        <field name="arch" type="xml">
+
+            <!-- Ajout après completion -->
+            <xpath expr="//field[@name='completion']" position="after">
+                <field name="custom_enrollment_source"
+                       string="Source"
+                       optional="hide"/>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         HÉRITAGE vue KANBAN slide.channel.partner
+    ═══════════════════════════════════════════════════ -->
+    <record id="slide_channel_partner_kanban_inherit_digii" model="ir.ui.view">
+        <field name="name">slide.channel.partner.kanban.digii</field>
+        <field name="model">slide.channel.partner</field>
+        <field name="inherit_id" ref="website_slides.slide_channel_partner_view_kanban"/>
+        <field name="arch" type="xml">
+
+            <!-- Déclarer le champ -->
+            <xpath expr="//field[@name='channel_id']" position="before">
+                <field name="custom_enrollment_source"/>
+            </xpath>
+
+            <!-- Afficher source dans la carte -->
+            <xpath expr="//footer" position="before">
+                <div t-if="record.custom_enrollment_source.value"
+                     class="mb-1">
+                    <span class="badge text-bg-info">
+                        <t t-esc="record.custom_enrollment_source.value"/>
+                    </span>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         HÉRITAGE vue RECHERCHE slide.channel.partner
+    ═══════════════════════════════════════════════════ -->
+    <record id="slide_channel_partner_search_inherit_digii" model="ir.ui.view">
+        <field name="name">slide.channel.partner.search.digii</field>
+        <field name="model">slide.channel.partner</field>
+        <field name="inherit_id" ref="website_slides.slide_channel_partner_view_search"/>
+        <field name="arch" type="xml">
+
+            <!-- Filtre par source -->
+            <xpath expr="//filter[@name='filter_completed']" position="after">
+                <separator/>
+                <filter string="Auto-inscription"
+                        name="filter_self"
+                        domain="[('custom_enrollment_source', '=', 'self')]"/>
+                <filter string="Par Administrateur"
+                        name="filter_admin"
+                        domain="[('custom_enrollment_source', '=', 'admin')]"/>
+                <filter string="Par Invitation"
+                        name="filter_invitation"
+                        domain="[('custom_enrollment_source', '=', 'invitation')]"/>
+
+                <!-- Grouper par source -->
+
+                    <filter string="Source"
+                            name="groupby_source"
+                            context="{'group_by': 'custom_enrollment_source'}"/>
+
+
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         ACTION
+    ═══════════════════════════════════════════════════ -->
+    <record id="action_digii_slide_channel_partner" model="ir.actions.act_window">
+        <field name="name">Apprenants</field>
+        <field name="res_model">slide.channel.partner</field>
+        <field name="view_mode">list,kanban</field>
+        <field name="search_view_id"
+               ref="website_slides.slide_channel_partner_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun apprenant inscrit pour le moment !
+            </p>
+        </field>
+    </record>
+
+</odoo>

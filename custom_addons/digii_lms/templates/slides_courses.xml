@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ════════════════════════════════════════════════════════════
+         PAGE /slides — Cours de la classe de l'utilisateur
+         Recherche · filtres dynamiques · cartes/liste · pagination
+    ════════════════════════════════════════════════════════════ -->
+    <template id="slides_class_page" name="CertMind - Mes Cours">
+        <t t-call="website.layout">
+            <div id="wrap">
+
+                <!-- ══════════════ HERO ══════════════ -->
+                <section class="lms-hero lms-hero--compact">
+                    <div class="lms-hero__bg-circle"/>
+                    <div class="lms-slides-hero__content">
+                        <h1>
+                            <t t-if="not is_public">Mes cours</t>
+                            <t t-else="">Espace cours</t>
+                        </h1>
+                        <p t-if="not is_public and classes">
+                            Cours de
+                            <t t-if="len(classes) == 1">votre classe</t>
+                            <t t-else="">vos classes</t> :
+                            <b><t t-esc="', '.join(classes.mapped('name'))"/></b>
+                        </p>
+                        <p t-elif="not is_public">Vous n'êtes rattaché à aucune classe.</p>
+                        <p t-else="">Connectez-vous pour accéder aux cours de votre classe.</p>
+                    </div>
+                </section>
+
+                <section class="lms-courses">
+                    <div class="lms-courses__container">
+
+                        <!-- ══════════════ PANNEAU RECHERCHE + FILTRES ══════════════ -->
+                        <t t-if="not is_public and (courses or has_filters)">
+                            <form class="lms-filters" action="/slides" method="get">
+                                <input type="hidden" name="view" t-att-value="view"/>
+                                <div class="lms-filters__search">
+                                    <i class="fa fa-search"/>
+                                    <input type="text" name="search"
+                                           placeholder="Rechercher un cours..."
+                                           t-att-value="search"/>
+                                </div>
+                                <div class="lms-filters__selects">
+                                    <select name="category" class="lms-select">
+                                        <option value="">Toutes les catégories</option>
+                                        <t t-foreach="categories" t-as="cat">
+                                            <option t-att-value="cat['id']"
+                                                    t-att-selected="'selected' if sel_category == str(cat['id']) else None">
+                                                <t t-esc="cat['name']"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                    <select name="level" class="lms-select">
+                                        <option value="">Tous les niveaux</option>
+                                        <t t-foreach="levels" t-as="lvl">
+                                            <option t-att-value="lvl['code']"
+                                                    t-att-selected="'selected' if sel_level == lvl['code'] else None">
+                                                <t t-esc="lvl['name']"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                    <select name="lang" class="lms-select">
+                                        <option value="">Toutes les langues</option>
+                                        <t t-foreach="langs" t-as="lg">
+                                            <option t-att-value="lg['code']"
+                                                    t-att-selected="'selected' if sel_lang == lg['code'] else None">
+                                                <t t-esc="lg['name']"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                    <select name="tag" class="lms-select">
+                                        <option value="">Tous les tags</option>
+                                        <t t-foreach="tags" t-as="tg">
+                                            <option t-att-value="tg['id']"
+                                                    t-att-selected="'selected' if sel_tag == str(tg['id']) else None">
+                                                <t t-esc="tg['name']"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                    <button type="submit" class="lms-btn lms-btn--primary lms-filters__btn">
+                                        Filtrer
+                                    </button>
+                                    <a t-if="has_filters" href="/slides" class="lms-filters__reset">Réinitialiser</a>
+                                </div>
+                            </form>
+
+                            <!-- ══════════════ BARRE OUTILS (compteur + vue) ══════════════ -->
+                            <div class="lms-toolbar">
+                                <span class="lms-toolbar__count">
+                                    <b><t t-esc="courses_count"/></b>
+                                    <t t-if="courses_count &gt; 1"> cours trouvés</t>
+                                    <t t-else=""> cours trouvé</t>
+                                </span>
+                                <div class="lms-viewtoggle">
+                                    <a t-attf-href="/slides?view=grid#{'&amp;' + qs_no_view if qs_no_view else ''}"
+                                       t-attf-class="lms-viewtoggle__btn #{'active' if view == 'grid' else ''}"
+                                       title="Vue cartes">
+                                        <i class="fa fa-th-large"/>
+                                    </a>
+                                    <a t-attf-href="/slides?view=list#{'&amp;' + qs_no_view if qs_no_view else ''}"
+                                       t-attf-class="lms-viewtoggle__btn #{'active' if view == 'list' else ''}"
+                                       title="Vue liste">
+                                        <i class="fa fa-list"/>
+                                    </a>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- ══════════════ RÉSULTATS ══════════════ -->
+                        <t t-if="courses">
+                            <!-- ─── VUE CARTES ─── -->
+                            <t t-if="view == 'grid'">
+                                <div class="lms-courses__grid">
+                                    <t t-foreach="courses" t-as="course">
+                                        <t t-call="digii_lms.slide_course_card"/>
+                                    </t>
+                                </div>
+                            </t>
+
+                            <!-- ─── VUE LISTE ─── -->
+                            <t t-else="">
+                                <div class="lms-list">
+                                    <t t-foreach="courses" t-as="course">
+                                        <t t-set="diff_labels"
+                                           t-value="{'beginner':'Débutant','intermediate':'Intermédiaire','advanced':'Avancé','expert':'Expert'}"/>
+                                        <a t-att-href="course.website_url" class="lms-list-item">
+                                            <div class="lms-list-item__thumb">
+                                                <t t-if="course.image_1920">
+                                                    <img t-attf-src="/web/image/slide.channel/#{course.id}/image_256"
+                                                         t-att-alt="course.name"/>
+                                                </t>
+                                                <t t-else=""><span>📚</span></t>
+                                            </div>
+                                            <div class="lms-list-item__main">
+                                                <div class="lms-list-item__tags">
+                                                    <span t-if="course.course_category_id" class="lms-chip lms-chip--cat">
+                                                        <t t-esc="course.course_category_id.name"/>
+                                                    </span>
+                                                    <span t-if="course.custom_difficulty" class="lms-chip">
+                                                        <t t-esc="diff_labels.get(course.custom_difficulty,'')"/>
+                                                    </span>
+                                                    <span t-if="course.custom_language" class="lms-chip">
+                                                        <t t-esc="dict(fr='Français',en='Anglais',ar='Arabe',es='Espagnol').get(course.custom_language,'')"/>
+                                                    </span>
+                                                </div>
+                                                <h3><t t-esc="course.name"/></h3>
+                                                <div class="lms-list-item__meta">
+                                                    <span>📖 <t t-esc="course.total_slides"/> leçons</span>
+                                                    <span>👥 <t t-esc="course.members_count"/> inscrits</span>
+                                                    <t t-set="prog" t-value="completion_map.get(course.id, 0)"/>
+                                                    <span t-if="prog">✅ <t t-esc="prog"/>%</span>
+                                                </div>
+                                            </div>
+                                            <div class="lms-list-item__action">
+                                                <span class="lms-btn lms-btn--primary lms-btn--sm">Ouvrir</span>
+                                            </div>
+                                        </a>
+                                    </t>
+                                </div>
+                            </t>
+
+                            <!-- ══════════════ PAGINATION ══════════════ -->
+                            <t t-if="num_pages &gt; 1">
+                                <nav class="lms-pager">
+                                    <a t-if="page &gt; 1"
+                                       t-attf-href="/slides?page=#{page - 1}#{'&amp;' + qs_no_page if qs_no_page else ''}"
+                                       class="lms-pager__btn">‹ Précédent</a>
+                                    <t t-foreach="page_range" t-as="p">
+                                        <a t-attf-href="/slides?page=#{p}#{'&amp;' + qs_no_page if qs_no_page else ''}"
+                                           t-attf-class="lms-pager__num #{'active' if p == page else ''}">
+                                            <t t-esc="p"/>
+                                        </a>
+                                    </t>
+                                    <a t-if="page &lt; num_pages"
+                                       t-attf-href="/slides?page=#{page + 1}#{'&amp;' + qs_no_page if qs_no_page else ''}"
+                                       class="lms-pager__btn">Suivant ›</a>
+                                </nav>
+                            </t>
+                        </t>
+
+                        <!-- ══════════════ ÉTATS VIDES ══════════════ -->
+                        <t t-elif="not is_public and has_filters">
+                            <div class="lms-empty">
+                                <div class="lms-empty__icon">🔍</div>
+                                <h2>Aucun cours ne correspond</h2>
+                                <p>Essayez d'élargir vos critères de recherche.</p>
+                                <a href="/slides" class="lms-btn lms-btn--primary">Réinitialiser les filtres</a>
+                            </div>
+                        </t>
+                        <t t-elif="not is_public">
+                            <div class="lms-empty">
+                                <div class="lms-empty__icon">🎓</div>
+                                <h2>Aucun cours pour le moment</h2>
+                                <p t-if="not classes">Vous n'êtes inscrit dans aucune classe. Contactez votre administrateur.</p>
+                                <p t-else="">Aucun cours n'a encore été affecté à votre classe.</p>
+                                <a href="/" class="lms-btn lms-btn--primary">Retour à l'accueil</a>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="lms-empty">
+                                <div class="lms-empty__icon">🔒</div>
+                                <h2>Connectez-vous pour voir vos cours</h2>
+                                <p>Les cours dépendent de la classe à laquelle vous êtes rattaché.</p>
+                                <a href="/web/login" class="lms-btn lms-btn--primary">Se connecter</a>
+                            </div>
+                        </t>
+
+                    </div>
+                </section>
+
+            </div>
+        </t>
+    </template>
+
+    <!-- ════════════════════════════════════════════════════════════
+         Carte cours réutilisable (vue grille)
+    ════════════════════════════════════════════════════════════ -->
+    <template id="slide_course_card" name="CertMind - Carte cours">
+        <t t-set="diff_labels"
+           t-value="{'beginner':'Débutant','intermediate':'Intermédiaire','advanced':'Avancé','expert':'Expert'}"/>
+        <a t-att-href="course.website_url" class="lms-course-card lms-course-card--link">
+            <div class="lms-course-card__image lms-course-card__image--blue">
+                <t t-if="course.image_1920">
+                    <img t-attf-src="/web/image/slide.channel/#{course.id}/image_512"
+                         class="lms-course-card__img" t-att-alt="course.name"/>
+                </t>
+                <t t-else="">📚</t>
+                <span t-if="course.custom_difficulty" class="lms-course-card__level">
+                    <t t-esc="diff_labels.get(course.custom_difficulty, '')"/>
+                </span>
+            </div>
+            <div class="lms-course-card__body">
+                <span t-if="course.course_category_id" class="lms-course-card__tag">
+                    <t t-esc="course.course_category_id.name"/>
+                </span>
+                <span t-else="" class="lms-course-card__tag">Cours</span>
+                <h3><t t-esc="course.name"/></h3>
+                <div class="lms-course-card__meta">
+                    <span>📖 <t t-esc="course.total_slides"/> leçons</span>
+                    <span>👥 <t t-esc="course.members_count"/> inscrits</span>
+                </div>
+                <t t-set="prog" t-value="completion_map.get(course.id, 0)"/>
+                <t t-if="prog">
+                    <div class="lms-progress">
+                        <div class="lms-progress__bar" t-attf-style="width: #{prog}%"/>
+                    </div>
+                    <div class="lms-progress__label"><t t-esc="prog"/>% complété</div>
+                </t>
+            </div>
+        </a>
+    </template>
+
+</odoo>

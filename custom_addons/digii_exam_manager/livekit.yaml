@@ -1,0 +1,36 @@
+# ─────────────────────────────────────────────────────────────────
+# livekit.yaml — configuration du serveur LiveKit
+#
+# ⚠ Le secret DOIT faire au moins 32 caractères.
+#   LiveKit 1.11+ démarre malgré un secret trop court, mais rejette
+#   silencieusement tous les tokens :
+#     ERROR  secret is too short, should be at least 32 characters
+#   Côté navigateur, cela se traduit par :
+#     WebSocket is closed before the connection is established
+#
+# Ce secret doit être IDENTIQUE à celui configuré dans Odoo :
+#   Paramètres > Technique > Paramètres système
+#     digii_exam_manager.livekit_api_key    = devkey
+#     digii_exam_manager.livekit_api_secret = (le secret ci-dessous)
+# ─────────────────────────────────────────────────────────────────
+
+port: 7880
+
+keys:
+  devkey: p919yuLsAbqLWtT5BjlxznGVD7lBPAzAznI5zFIoWYS3hzmX
+
+redis:
+  address: redis:6379
+
+rtc:
+  tcp_port: 7881
+  port_range_start: 50100
+  port_range_end: 50200
+  # IP de la machine hôte (Windows : ipconfig -> adresse IPv4).
+  # Permet à Egress et au navigateur de négocier la connexion WebRTC.
+  # À vérifier si le réseau change (nouveau Wi-Fi, redémarrage box...).
+  node_ip: 192.168.1.185
+
+logging:
+  level: info
+  pion_level: error

@@ -1,0 +1,190 @@
+/* ════════════════════════════════════════════════════════════
+   DIGII LMS — Cohérence visuelle des pages natives
+   Forum · Blog · Contact · Portail (/my, /my/exams, /my/account)
+   TOUT est scopé sous #wrap : le header (.lms-header) et le
+   footer (.lms-footer) sont en dehors de #wrap et ne sont JAMAIS
+   impactés. Variables (--primary, --accent...) : lms_home.css
+════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────
+   COUCHE GÉNÉRIQUE (boutons & liens de contenu)
+───────────────────────────────────────── */
+#wrap .btn-primary {
+    background: var(--accent, #E67E22);
+    border-color: var(--accent, #E67E22);
+    border-radius: 50px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.25);
+    transition: all 0.25s ease;
+}
+#wrap .btn-primary:hover,
+#wrap .btn-primary:focus {
+    background: var(--accent-light, #F39C12);
+    border-color: var(--accent-light, #F39C12);
+    transform: translateY(-2px);
+    color: #fff;
+}
+#wrap .btn-outline-primary {
+    color: var(--primary, #2C5F8D);
+    border-color: var(--primary, #2C5F8D);
+    border-radius: 50px;
+    font-weight: 600;
+}
+#wrap .btn-outline-primary:hover {
+    background: var(--primary, #2C5F8D);
+    border-color: var(--primary, #2C5F8D);
+}
+#wrap .btn-secondary { border-radius: 50px; }
+
+/* Badges & pills cohérents */
+#wrap .badge.text-bg-primary,
+#wrap .badge.bg-primary { background: var(--primary, #2C5F8D) !important; color: #fff !important; }
+
+/* ════════════════════════════════════════════════════════════
+   FORUM  (.o_wforum_wrapper)
+════════════════════════════════════════════════════════════ */
+#wrap .o_wforum_wrapper h1,
+#wrap .o_wforum_wrapper h2,
+#wrap .o_wforum_wrapper h3,
+#wrap .o_wforum_wrapper .h1,
+#wrap .o_wforum_wrapper .h2,
+#wrap .o_wforum_wrapper .h3 {
+    font-family: 'Crimson Pro', serif;
+    color: var(--primary-dark, #1A3A5C);
+}
+#wrap .o_wforum_wrapper a:not(.btn):not(.badge) {
+    color: var(--primary, #2C5F8D);
+}
+#wrap .o_wforum_wrapper a:not(.btn):not(.badge):hover {
+    color: var(--accent, #E67E22);
+}
+#wrap .o_wforum_wrapper .card,
+#wrap .o_wforum_sidebar_section,
+#wrap .o_wforum_content_wrapper > .border,
+#wrap .o_wforum_content_wrapper .o_wforum_question {
+    border-radius: 16px;
+    border-color: var(--border-color, #E0E6ED);
+}
+#wrap .o_wforum_ask_btn,
+#wrap .o_forum_ask_btn {
+    background: var(--accent, #E67E22) !important;
+    border-color: var(--accent, #E67E22) !important;
+    border-radius: 50px;
+    font-weight: 600;
+    color: #fff !important;
+}
+#wrap .o_wforum_ask_btn:hover { background: var(--accent-light, #F39C12) !important; }
+
+/* ════════════════════════════════════════════════════════════
+   BLOG  (.o_wblog_*)
+════════════════════════════════════════════════════════════ */
+#wrap .o_wblog_post_name,
+#wrap .o_wblog_post_main h1,
+#wrap .o_wblog_post_main h2,
+#wrap .o_wblog_post_main h3,
+#wrap .o_wblog_index_content h1,
+#wrap .o_wblog_index_content h2,
+#wrap .o_wblog_index_content h3 {
+    font-family: 'Crimson Pro', serif;
+    color: var(--primary-dark, #1A3A5C);
+}
+#wrap .o_wblog_blog_top {
+    background: linear-gradient(135deg, var(--primary, #2C5F8D) 0%, var(--primary-dark, #1A3A5C) 100%);
+    color: #fff;
+    border-radius: 0 0 24px 24px;
+}
+#wrap .o_wblog_blog_top h1,
+#wrap .o_wblog_blog_top h2,
+#wrap .o_wblog_blog_top p,
+#wrap .o_wblog_blog_top a { color: #fff !important; }
+
+#wrap .o_wblog_post_page_cover {
+    border-radius: 0 0 24px 24px;
+    overflow: hidden;
+}
+#wrap .o_wblog_normal_cover .card,
+#wrap .o_wblog_post_card,
+#wrap .o_wblog_index_content .card {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--border-color, #E0E6ED);
+    transition: all 0.35s ease;
+}
+#wrap .o_wblog_index_content .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 35px rgba(44, 95, 141, 0.15);
+}
+#wrap .o_wblog_post_content a:not(.btn),
+#wrap .o_wblog_index_content a:not(.btn):not(.o_wblog_post_name) {
+    color: var(--primary, #2C5F8D);
+}
+#wrap .o_wblog_post_content a:not(.btn):hover { color: var(--accent, #E67E22); }
+
+/* ════════════════════════════════════════════════════════════
+   CONTACT  (/contactus — formulaire website)
+════════════════════════════════════════════════════════════ */
+#wrap .s_website_form .form-control,
+#wrap .o_website_form .form-control {
+    border-radius: 12px;
+    border: 1px solid var(--border-color, #E0E6ED);
+    padding: 0.7rem 1rem;
+}
+#wrap .s_website_form .form-control:focus,
+#wrap .o_website_form .form-control:focus {
+    border-color: var(--primary, #2C5F8D);
+    box-shadow: 0 0 0 0.2rem rgba(44, 95, 141, 0.15);
+}
+
+/* ════════════════════════════════════════════════════════════
+   PORTAIL  (/my, /my/exams, /my/account, certificats...)
+════════════════════════════════════════════════════════════ */
+#wrap .o_portal h1,
+#wrap .o_portal h2,
+#wrap .o_portal h3,
+#wrap .o_portal_wrap h1,
+#wrap .o_portal_wrap h2,
+#wrap .o_portal_wrap h3,
+#wrap .o_portal_my_home h2 {
+    font-family: 'Crimson Pro', serif;
+    color: var(--primary-dark, #1A3A5C);
+}
+
+/* Cartes du portail */
+#wrap .o_portal_wrap .card,
+#wrap .o_portal_my_doc,
+#wrap .o_portal_docs .card {
+    border-radius: 16px;
+    border: 1px solid var(--border-color, #E0E6ED);
+    transition: all 0.3s ease;
+}
+#wrap .o_portal_wrap .card:hover {
+    box-shadow: 0 10px 30px rgba(44, 95, 141, 0.12);
+}
+
+/* En-têtes de cartes / tableaux */
+#wrap .o_portal_wrap .card-header {
+    background: var(--bg-cream, #FFF8F0);
+    border-bottom: 1px solid var(--border-color, #E0E6ED);
+    font-weight: 600;
+    color: var(--primary-dark, #1A3A5C);
+}
+#wrap .o_portal_wrap table.table thead th {
+    color: var(--primary-dark, #1A3A5C);
+    border-bottom: 2px solid var(--primary, #2C5F8D);
+}
+
+/* Breadcrumb du portail */
+#wrap .o_portal_navbar,
+#wrap .o_portal .breadcrumb {
+    border-radius: 12px;
+}
+#wrap .o_portal .breadcrumb a,
+#wrap .o_portal_navbar a { color: var(--primary, #2C5F8D); }
+
+/* Liens génériques portail */
+#wrap .o_portal_wrap a:not(.btn):not(.badge):not(.nav-link) {
+    color: var(--primary, #2C5F8D);
+}
+#wrap .o_portal_wrap a:not(.btn):not(.badge):not(.nav-link):hover {
+    color: var(--accent, #E67E22);
+}

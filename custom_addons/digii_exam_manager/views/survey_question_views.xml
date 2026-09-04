@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!--
+        Extension de la vue form native survey_question_form
+        pour afficher les champs banque (catégorie, difficulté)
+        quand is_bank_question = True.
+    -->
+    <record id="exam_survey_question_view_form_inherit" model="ir.ui.view">
+        <field name="name">exam.survey.question.view.form.inherit</field>
+        <field name="model">survey.question</field>
+        <field name="inherit_id" ref="survey.survey_question_form"/>
+        <field name="arch" type="xml">
+            <!-- Injecter les champs banque après le titre -->
+            <xpath expr="//field[@name='survey_id']" position="after">
+                <field name="is_bank_question" invisible="1"/>
+                <field name="bank_question_id" invisible="1"/>
+            </xpath>
+
+            <!-- Ajouter un groupe "Banque de questions" dans le sheet -->
+            <xpath expr="//group[@class='o_label_nowrap']" position="before">
+                <group name="exam_bank_group"
+                       string="Banque de questions"
+                       invisible="not is_bank_question">
+                    <group>
+                        <field name="exam_category_id"
+                               options="{'no_create_edit': True, 'no_quick_create': True}"/>
+                        <field name="exam_subcategory_id"
+                               readonly="not exam_category_id"
+                               options="{'no_create_edit': True, 'no_quick_create': True}"/>
+                        <field name="exam_difficulty"/>
+                        <field name="cognitive_type"/>
+                        <field name="success_rate" readonly="1"
+                               invisible="times_answered == 0"/>
+                        <field name="times_answered" invisible="1"/>
+                    </group>
+                </group>
+                <!-- Info si c'est une copie générée depuis la banque -->
+                <div class="alert alert-info" role="alert"
+                     invisible="not bank_question_id">
+                    <i class="fa fa-info-circle me-1"/>
+                    Cette question est une copie générée depuis la banque.
+                    <field name="bank_question_id" class="ms-1" options="{'no_open': False}"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!--
+        Vue LIST pour la banque de questions
+        (questions indépendantes : is_bank_question=True, survey_id=False)
+    -->
+    <record id="exam_bank_question_view_list" model="ir.ui.view">
+        <field name="name">exam.bank.question.view.list</field>
+        <field name="model">survey.question</field>
+        <field name="arch" type="xml">
+            <list string="Banque de questions" create="true">
+                <field name="title" string="Question"/>
+                <field name="question_type" string="Type"/>
+                <field name="exam_category_id" string="Catégorie"/>
+                <field name="exam_subcategory_id" string="Sous-catégorie" optional="show"/>
+                <field name="cognitive_type" string="Type" optional="show"/>
+                <field name="exam_difficulty" string="Difficulté"
+                       decoration-success="exam_difficulty == 'easy'"
+                       decoration-warning="exam_difficulty == 'medium'"
+                       decoration-danger="exam_difficulty == 'hard'"
+                       widget="badge"/>
+                <field name="constr_mandatory" optional="hide"/>
+                <field name="is_bank_question" column_invisible="1"/>
+                <field name="survey_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!--
+        Vue SEARCH pour la banque de questions
+    -->
+    <record id="exam_bank_question_view_search" model="ir.ui.view">
+        <field name="name">exam.bank.question.view.search</field>
+        <field name="model">survey.question</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher une question">
+                <field name="title" string="Question"/>
+                <field name="exam_category_id" string="Catégorie"/>
+                <field name="exam_subcategory_id" string="Sous-catégorie"/>
+                <field name="exam_difficulty" string="Difficulté"/>
+                <separator/>
+                <filter name="filter_easy"   string="Facile"   domain="[('exam_difficulty','=','easy')]"/>
+                <filter name="filter_medium" string="Moyen"    domain="[('exam_difficulty','=','medium')]"/>
+                <filter name="filter_hard"   string="Difficile" domain="[('exam_difficulty','=','hard')]"/>
+                <group>
+                    <filter name="group_category"    string="Catégorie"     context="{'group_by':'exam_category_id'}"/>
+                    <filter name="group_subcategory" string="Sous-catégorie" context="{'group_by':'exam_subcategory_id'}"/>
+                    <filter name="group_difficulty"  string="Difficulté"    context="{'group_by':'exam_difficulty'}"/>
+                    <filter name="group_type"        string="Type"          context="{'group_by':'question_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!--
+        ACTION : Banque de questions
+        Domain : is_bank_question=True AND is_page=False AND survey_id=False
+    -->
+    <record id="action_bank_questions" model="ir.actions.act_window">
+        <field name="name">Banque de questions</field>
+        <field name="res_model">survey.question</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_bank_question','=',True),('is_page','=',False),('survey_id','=',False)]</field>
+        <field name="view_ids" eval="[(5,0,0),
+            (0,0,{'view_mode':'list','view_id':ref('exam_bank_question_view_list')}),
+            (0,0,{'view_mode':'form','view_id':ref('survey.survey_question_form')})]"/>
+        <field name="search_view_id" ref="exam_bank_question_view_search"/>
+        <field name="context">{
+            'default_is_bank_question': True,
+            'default_survey_id': False
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez votre première question dans la banque
+            </p>
+            <p>
+                Les questions de la banque sont indépendantes de tout examen.
+                Elles seront copiées lors de la génération d'un examen.
+            </p>
+        </field>
+    </record>
+
+</data>
+</odoo>

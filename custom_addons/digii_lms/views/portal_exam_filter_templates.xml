@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!--
+        Étend la page "/my/exams" (digii_exam_manager.portal_my_exams) :
+          1. Barre de recherche + filtres (cours / tag)
+          2. Affichage du cours et des tags sur chaque carte
+    -->
+    <template id="portal_my_exams_filters"
+              inherit_id="digii_exam_manager.portal_my_exams"
+              name="Examens : recherche et filtres">
+
+        <!-- 1. Barre de recherche/filtres après le header -->
+        <xpath expr="//div[hasclass('ex-header')]" position="after">
+
+            <style>
+                .ex-filter-bar {
+                    background: #fff;
+                    border: 1px solid var(--ex-border);
+                    border-radius: 14px;
+                    padding: 14px 16px;
+                    margin-bottom: 24px;
+                }
+                .ex-filter-form {
+                    display: flex; flex-wrap: wrap; gap: 10px;
+                    align-items: center;
+                }
+                .ex-filter-form .ex-search {
+                    flex: 1 1 220px; min-width: 180px;
+                    border: 1px solid var(--ex-border);
+                    border-radius: 10px; padding: 9px 12px;
+                    font-size: 13px; color: var(--ex-text);
+                    background: var(--ex-surface);
+                }
+                .ex-filter-form select {
+                    border: 1px solid var(--ex-border);
+                    border-radius: 10px; padding: 9px 12px;
+                    font-size: 13px; color: var(--ex-text);
+                    background: #fff; min-width: 160px;
+                }
+                .ex-filter-form .ex-btn {
+                    border: none; border-radius: 10px;
+                    padding: 9px 16px; font-size: 13px; font-weight: 600;
+                    cursor: pointer; text-decoration: none;
+                    display: inline-flex; align-items: center; gap: 6px;
+                }
+                .ex-filter-form .ex-btn-apply {
+                    background: var(--ex-accent); color: #fff;
+                }
+                .ex-filter-form .ex-btn-apply:hover { background: var(--ex-accent-h); }
+                .ex-filter-form .ex-btn-reset {
+                    background: var(--ex-surface); color: var(--ex-muted);
+                    border: 1px solid var(--ex-border);
+                }
+                /* Cours + tags sur la carte */
+                .exam-course-row {
+                    display: flex; align-items: center; gap: 6px;
+                    font-size: 12px; color: var(--ex-muted);
+                    margin: 8px 0 4px;
+                }
+                .exam-course-row i { color: var(--ex-accent); }
+                .exam-tags-row {
+                    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
+                }
+                .exam-tag-chip {
+                    background: var(--ex-accent-light);
+                    color: var(--ex-accent);
+                    border-radius: 999px;
+                    padding: 2px 10px; font-size: 11px; font-weight: 600;
+                }
+            </style>
+
+            <div class="ex-filter-bar">
+                <form class="ex-filter-form" method="get" action="/my/exams">
+                    <input type="text" name="search" class="ex-search"
+                           t-att-value="search or ''"
+                           placeholder="Rechercher un examen..."/>
+
+                    <select name="course_id" t-if="filter_courses">
+                        <option value="">Tous les cours</option>
+                        <t t-foreach="filter_courses" t-as="c">
+                            <option t-att-value="c.id"
+                                    t-att-selected="'selected' if active_course_id == c.id else None">
+                                <t t-out="c.name"/>
+                            </option>
+                        </t>
+                    </select>
+
+                    <select name="tag_id" t-if="filter_tags">
+                        <option value="">Tous les tags</option>
+                        <t t-foreach="filter_tags" t-as="tg">
+                            <option t-att-value="tg.id"
+                                    t-att-selected="'selected' if active_tag_id == tg.id else None">
+                                <t t-out="tg.name"/>
+                            </option>
+                        </t>
+                    </select>
+
+                    <select name="category_id" t-if="filter_categories">
+                        <option value="">Toutes les catégories</option>
+                        <t t-foreach="filter_categories" t-as="cat">
+                            <option t-att-value="cat.id"
+                                    t-att-selected="'selected' if active_category_id == cat.id else None">
+                                <t t-out="cat.name"/>
+                            </option>
+                        </t>
+                    </select>
+
+                    <button type="submit" class="ex-btn ex-btn-apply">
+                        <i class="fa fa-search"/> Filtrer
+                    </button>
+                    <a href="/my/exams" class="ex-btn ex-btn-reset">
+                        <i class="fa fa-times"/> Réinitialiser
+                    </a>
+                </form>
+            </div>
+        </xpath>
+
+        <!-- 2. Cours + tags sur chaque carte (après les méta-données) -->
+        <xpath expr="//div[@class='exam-meta-row']" position="after">
+            <t t-if="exam.course_id">
+                <div class="exam-course-row">
+                    <i class="fa fa-book"/>
+                    <span t-out="exam.course_id.name"/>
+                </div>
+            </t>
+            <t t-if="exam.exam_tag_ids">
+                <div class="exam-tags-row">
+                    <t t-foreach="exam.exam_tag_ids" t-as="etag">
+                        <span class="exam-tag-chip" t-out="etag.name"/>
+                    </t>
+                </div>
+            </t>
+        </xpath>
+
+    </template>
+
+</data>
+</odoo>

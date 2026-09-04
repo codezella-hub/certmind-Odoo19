@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!--
+        Extension de la vue form native survey_survey_view_form :
+        1. Flag "Est un examen" + boutons Générer/Réinitialiser
+        2. Onglet "Génération" avec règles (avec ou sans section)
+        3. Les champs allow_roaming/scoring_type/is_certification sont
+           forcés via le modèle Python (onchange + write + create).
+           On n'utilise PAS de xpath sur ces champs car leurs noms
+           peuvent varier selon la version d'Odoo.
+    -->
+    <record id="exam_survey_survey_view_form_inherit" model="ir.ui.view">
+        <field name="name">exam.survey.survey.view.form.inherit</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id" ref="survey.survey_survey_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 1. Boutons dans le header : UN SEUL flux clair -->
+            <xpath expr="//header/button[@name='action_send_survey']" position="before">
+                <button name="%(digii_exam_manager.action_exam_preview_wizard)d"
+                        string="Générer les questions"
+                        type="action"
+                        class="oe_highlight"
+                        invisible="not is_exam or not generation_rule_ids"
+                        icon="fa-magic"
+                        help="Ouvre l'aperçu : vous voyez les questions tirées, puis vous confirmez la génération."/>
+                <button name="action_reset_exam_questions"
+                        string="Réinitialiser"
+                        type="object"
+                        invisible="not is_exam or not exam_questions_generated"
+                        confirm="Supprimer toutes les questions générées ?"/>
+            </xpath>
+
+            <!-- 2. Stat button "Questions générées" -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button type="object"
+                        name="action_survey_user_input"
+                        class="oe_stat_button"
+                        icon="fa-copy"
+                        invisible="not is_exam or not exam_questions_generated">
+                    <field name="exam_generated_count" widget="statinfo" string="Générées"/>
+                </button>
+            </xpath>
+
+            <!-- 3. Champ is_exam + alerte info + alertes état génération -->
+            <xpath expr="//div[@class='oe_title']" position="after">
+                <group invisible="not allowed_survey_types">
+                    <field name="is_exam" widget="boolean_toggle"
+                           string="Mode examen (banque de questions)"/>
+                </group>
+
+                <!--
+                    Info : champs forcés automatiquement en mode examen.
+                    NOTE : les champs sont forcés via le modèle Python
+                    (onchange + write + create), pas via readonly dans la vue,
+                    pour éviter les erreurs de compatibilité Odoo.
+                -->
+                <div class="alert alert-info mb-0 py-2" role="alert"
+                     invisible="not is_exam">
+                    <i class="fa fa-lock me-1"/>
+                    <strong>Mode examen activé.</strong>
+                    Les paramètres suivants sont <strong>appliqués et verrouillés</strong>
+                    (toujours actifs, non modifiables) :
+                    <em>Allow Roaming</em>,
+                    <em>Scoring without answers</em>,
+                    <em>Special Certificate</em>,
+                    <em>Survey Time Limit</em>.
+                    <br/>
+                    <span class="text-muted">
+                        Vous pouvez seulement régler la <strong>durée</strong>
+                        (Time limit, en minutes).
+                    </span>
+                </div>
+
+                <!-- Alerte si questions pas encore générées -->
+                <div class="alert alert-warning mb-0" role="alert"
+                     invisible="not is_exam or exam_questions_generated or not generation_rule_ids">
+                    <i class="fa fa-exclamation-triangle me-1"/>
+                    Les questions n'ont pas encore été générées. Cliquez sur
+                    <strong>Générer les questions</strong> avant de partager cet examen.
+                </div>
+
+                <!-- Alerte si questions générées -->
+                <div class="alert alert-success mb-0" role="alert"
+                     invisible="not is_exam or not exam_questions_generated">
+                    <i class="fa fa-check-circle me-1"/>
+                    <field name="exam_generated_count" class="fw-bold d-inline"/> question(s) générée(s) et prêtes.
+                    Vous pouvez régénérer à tout moment.
+                </div>
+
+                <!-- Champs invisibles pour les conditions -->
+                <field name="is_exam" invisible="1"/>
+                <field name="exam_questions_generated" invisible="1"/>
+                <field name="exam_generated_count" invisible="1"/>
+            </xpath>
+
+            <!-- 4. Onglet "Génération aléatoire" avec colonnes use_section + section_title -->
+            <xpath expr="//page[@name='questions']" position="after">
+                <page string="Génération aléatoire" name="exam_generation"
+                      invisible="not is_exam">
+                    <div class="alert alert-info" role="alert">
+                        <strong>Comment ça marche ?</strong><br/>
+                        Définissez des règles ci-dessous. Chaque règle pioche des questions
+                        depuis la banque selon la catégorie et la difficulté choisies.<br/>
+                        <strong>Option "Avec section" :</strong> activez-la pour regrouper les
+                        questions de cette règle sous une section dédiée dans l'examen.
+                        Désactivez-la pour insérer les questions directement sans section.
+                    </div>
+
+                    <group>
+                        <field name="exam_group_by_type" widget="boolean_toggle"/>
+                        <div class="text-muted" colspan="2"
+                             invisible="not exam_group_by_type">
+                            <i class="fa fa-info-circle me-1"/>
+                            Quand cette option est active, les sections "par règle"
+                            sont ignorées : les questions générées sont regroupées sous
+                            <strong>une section par type</strong> (choix unique, choix
+                            multiple, texte, etc.).
+                        </div>
+                    </group>
+
+                    <field name="generation_rule_ids"
+                           widget="one2many"
+                           context="{'default_survey_id': id}"
+                           nolabel="1">
+                        <list string="Règles" editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name" string="Libellé"
+                                   placeholder="ex: Questions Python difficiles"/>
+                            <field name="exam_category_id" string="Catégorie"
+                                   placeholder="Toutes catégories"
+                                   options="{'no_create_edit': True, 'no_quick_create': True}"/>
+                            <field name="exam_subcategory_id" string="Sous-catégorie"
+                                   readonly="not exam_category_id"
+                                   placeholder="Toutes sous-catégories"
+                                   options="{'no_create_edit': True, 'no_quick_create': True}"/>
+                            <field name="exam_difficulty" string="Difficulté"
+                                   placeholder="Tous niveaux"/>
+                            <field name="cognitive_type" string="Type cognitif"
+                                   placeholder="Tous types"/>
+                            <field name="count" string="Nb à piocher"/>
+                            <field name="ensure_coverage" string="Couverture"
+                                   widget="boolean_toggle" optional="show"/>
+                            <field name="available_count" string="Disponibles" readonly="1"
+                                   decoration-danger="available_count &lt; count"
+                                   decoration-warning="available_count == 0"
+                                   decoration-success="available_count &gt;= count"/>
+                            <field name="use_section" string="Avec section"
+                                   widget="boolean_toggle"
+                                   optional="show"/>
+                            <field name="section_title" string="Titre section"
+                                   placeholder="Titre de la section (optionnel)"
+                                   readonly="not use_section"
+                                   optional="show"/>
+                            <field name="survey_id" column_invisible="1"/>
+                        </list>
+                    </field>
+
+                    <group>
+                        <div class="text-muted mt-2" colspan="2">
+                            <i class="fa fa-info-circle me-1"/>
+                            La colonne <strong>Disponibles</strong> : questions dans la banque
+                            correspondant aux filtres. En rouge si insuffisant.<br/>
+                            La colonne <strong>Avec section</strong> : regroupe les questions
+                            sous une section dédiée. Si le titre est vide, le libellé de la
+                            règle est utilisé.
+                        </div>
+                    </group>
+                </page>
+            </xpath>
+
+            <!-- Verrouillage visuel des champs forcés en mode examen -->
+            <xpath expr="//field[@name='users_can_go_back']" position="attributes">
+                <attribute name="readonly">is_exam</attribute>
+            </xpath>
+            <xpath expr="//field[@name='scoring_type']" position="attributes">
+                <attribute name="readonly">is_exam</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</data>
+</odoo>

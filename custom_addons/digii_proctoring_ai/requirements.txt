@@ -1,0 +1,31 @@
+# ============================================================
+# Dependances Python du module digii_proctoring_ai
+# A installer dans l'environnement Python qui fait tourner Odoo :
+#   pip install -r requirements.txt
+# ============================================================
+
+# --- OBLIGATOIRES (analyse video de base + schemas + rapport) ---
+opencv-python>=4.8.0        # lecture et traitement video (cv2)
+numpy>=1.24.0               # calculs numeriques
+pydantic>=2.0.0             # schemas de donnees (AnalysisResult...)
+reportlab>=4.0.0            # generation du rapport PDF
+
+# --- DETECTION DU VISAGE ET DU REGARD ---
+mediapipe>=0.10.0          # face mesh, estimation de la pose de la tete
+
+# --- DETECTION D'OBJETS (telephone, 2e personne, papier) ---
+ultralytics>=8.0.0         # YOLOv8
+torch>=2.0.0               # backend de YOLO et Silero (lourd : plusieurs Go)
+
+# --- ANALYSE AUDIO (detection de voix) ---
+librosa>=0.10.0            # extraction audio depuis la video
+silero-vad>=5.0            # detection d'activite vocale (VAD)
+
+# --- INTERPRETATION LLM (optionnel, pour le texte du rapport) ---
+requests>=2.31.0           # appel a l'API Groq
+
+# ============================================================
+# NOTE : ffmpeg doit aussi etre installe sur le systeme (pas via pip)
+#   - Windows : telecharger depuis https://www.gyan.dev/ffmpeg/builds/
+#   - Linux   : sudo apt install ffmpeg
+# ============================================================

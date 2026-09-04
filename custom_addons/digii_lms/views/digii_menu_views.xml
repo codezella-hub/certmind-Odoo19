@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         MENU RACINE  —  Smart LMS
+         Unique point d'entrée pour tout : LMS + Examens
+    ══════════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_digii_lms_root"
+              name="Smart LMS"
+              sequence="50"/>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         1. DASHBOARD
+    ══════════════════════════════════════════════════════════════ -->
+    <record id="action_digii_lms_dashboard" model="ir.actions.client">
+        <field name="name">Dashboard Smart LMS</field>
+        <field name="tag">digii_lms_dashboard</field>
+    </record>
+
+    <menuitem id="menu_digii_lms_dashboard"
+              name="Dashboard"
+              parent="menu_digii_lms_root"
+              action="action_digii_lms_dashboard"
+              sequence="1"/>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         2. WEBSITE
+    ══════════════════════════════════════════════════════════════ -->
+    <record id="action_lms_website_iframe" model="ir.actions.act_url">
+        <field name="name">Site Web</field>
+        <field name="url">/</field>
+        <field name="target">self</field>
+    </record>
+
+    <menuitem id="menu_lms_goto_website"
+              name="Website"
+              parent="menu_digii_lms_root"
+              action="action_lms_website_iframe"
+              sequence="2"/>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         3. PÉDAGOGIE  (Cours + Leçons)
+    ══════════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_digii_lms_courses"
+              name="Pédagogie"
+              parent="menu_digii_lms_root"
+              sequence="10"/>
+
+    <menuitem id="menu_digii_lms_course_list"
+              name="Tous les cours"
+              parent="menu_digii_lms_courses"
+              action="action_digii_slide_channel"
+              sequence="10"/>
+
+    <menuitem id="menu_digii_lms_lessons"
+              name="Leçons"
+              parent="menu_digii_lms_courses"
+              action="action_digii_slide_slide"
+              sequence="20"/>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         4. CLASSES
+    ══════════════════════════════════════════════════════════════ -->
+    <menuitem id="ixzdigii_menu_classes"
+              name="Classes"
+              parent="menu_digii_lms_root"
+              action="ixzdigii_action_digii_class"
+              sequence="20"/>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         5. EXAMENS  (toutes les vues de digii_exam_manager)
+    ══════════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_lms_exams_section"
+              name="Examens"
+              parent="menu_digii_lms_root"
+              sequence="30"/>
+
+    <!-- Dashboard examens (action client OWL) -->
+    <record id="action_digii_lms_exam_dashboard" model="ir.actions.client">
+        <field name="name">Dashboard Examens</field>
+        <field name="tag">digii_lms_exam_dashboard</field>
+    </record>
+
+    <menuitem id="menu_lms_exam_dashboard"
+              name="Dashboard Examens"
+              parent="menu_lms_exams_section"
+              action="action_digii_lms_exam_dashboard"
+              sequence="5"/>
+
+    <menuitem id="menu_lms_exam_surveys"
+              name="Examens"
+              parent="menu_lms_exams_section"
+              action="survey.action_survey_form"
+              sequence="10"/>
+
+    <menuitem id="menu_lms_exam_bank_questions"
+              name="Banque de questions"
+              parent="menu_lms_exams_section"
+              action="digii_exam_manager.action_bank_questions"
+              sequence="20"/>
+
+    <menuitem id="menu_lms_exam_import"
+              name="Importer des questions"
+              parent="menu_lms_exams_section"
+              action="digii_exam_manager.action_exam_question_import"
+              sequence="25"/>
+
+    <menuitem id="menu_lms_exam_results"
+              name="Résultats"
+              parent="menu_lms_exams_section"
+              action="survey.action_survey_user_input"
+              sequence="30"/>
+
+    <menuitem id="menu_lms_exam_certificates"
+              name="Certificats"
+              parent="menu_lms_exams_section"
+              action="digii_exam_manager.action_exam_certificate"
+              sequence="40"/>
+
+    <menuitem id="menu_lms_exam_proctoring"
+              name="Proctoring"
+              parent="menu_lms_exams_section"
+              action="digii_exam_manager.action_exam_proctoring_session"
+              sequence="50"/>
+
+    <menuitem id="menu_lms_exam_strikes"
+              name="Strikes / Sanctions"
+              parent="menu_lms_exams_section"
+              action="digii_exam_manager.action_exam_strike"
+              sequence="60"/>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         6. CONFIGURATION  (admin uniquement)
+    ══════════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_digii_lms_config"
+              name="Configuration"
+              parent="menu_digii_lms_root"
+              sequence="70"
+              groups="base.group_system"/>
+
+    <!-- ── Cours ── -->
+    <menuitem id="menu_digii_lms_config_section_cours"
+              name="Cours"
+              parent="menu_digii_lms_config"
+              sequence="10"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_digii_lms_categories"
+              name="Catégories de cours"
+              parent="menu_digii_lms_config_section_cours"
+              action="action_digii_course_category"
+              sequence="10"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_digii_lms_tags"
+              name="Tags des cours"
+              parent="menu_digii_lms_config_section_cours"
+              action="action_digii_slide_channel_tag"
+              sequence="20"
+              groups="base.group_system"/>
+
+    <!-- ── Examens (config) ── -->
+    <menuitem id="menu_digii_lms_config_section_exams"
+              name="Examens"
+              parent="menu_digii_lms_config"
+              sequence="20"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_lms_exam_categories_config"
+              name="Catégories d'examens"
+              parent="menu_digii_lms_config_section_exams"
+              action="digii_exam_manager.action_exam_category"
+              sequence="10"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_lms_exam_cert_templates_config"
+              name="Templates de certificat"
+              parent="menu_digii_lms_config_section_exams"
+              action="digii_exam_manager.action_exam_certificate_template"
+              sequence="20"
+              groups="base.group_system"/>
+
+    <!-- ── Administration ── -->
+    <menuitem id="menu_digii_lms_config_section_admin"
+              name="Administration"
+              parent="menu_digii_lms_config"
+              sequence="30"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_lms_users_config"
+              name="Utilisateurs"
+              parent="menu_digii_lms_config_section_admin"
+              action="action_lms_users"
+              sequence="10"
+              groups="base.group_system"/>
+
+    <!-- ── Blog ── -->
+    <menuitem id="menu_digii_lms_config_section_blog"
+              name="Blog"
+              parent="menu_digii_lms_config"
+              sequence="40"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_lms_blog_config"
+              name="Articles de blog"
+              parent="menu_digii_lms_config_section_blog"
+              action="action_lms_blog_posts"
+              sequence="10"
+              groups="base.group_system"/>
+
+    <!-- ── Forum ── -->
+    <menuitem id="menu_digii_lms_config_section_forum"
+              name="Forum"
+              parent="menu_digii_lms_config"
+              sequence="50"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_lms_forums_config"
+              name="Forums"
+              parent="menu_digii_lms_config_section_forum"
+              action="action_lms_forums"
+              sequence="10"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_lms_forum_posts_config"
+              name="Posts Forum"
+              parent="menu_digii_lms_config_section_forum"
+              action="action_lms_forum_posts"
+              sequence="20"
+              groups="base.group_system"/>
+
+    <!-- ── Apprenants ── -->
+    <menuitem id="menu_digii_lms_config_section_apprenants"
+              name="Apprenants"
+              parent="menu_digii_lms_config"
+              sequence="60"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_lms_apprenants_config"
+              name="Inscriptions"
+              parent="menu_digii_lms_config_section_apprenants"
+              action="action_digii_slide_channel_partner"
+              sequence="10"
+              groups="base.group_system"/>
+
+</odoo>

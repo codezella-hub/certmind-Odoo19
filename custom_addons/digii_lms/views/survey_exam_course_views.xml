@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!--
+        Ajoute le champ "Cours associé" + les tags hérités sur le formulaire
+        examen. On hérite de la vue déjà étendue par digii_exam_manager pour
+        se placer juste après le toggle "Mode examen".
+    -->
+    <record id="exam_survey_course_view_form_inherit" model="ir.ui.view">
+        <field name="name">exam.survey.course.view.form.inherit</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id"
+               ref="digii_exam_manager.exam_survey_survey_view_form_inherit"/>
+        <field name="arch" type="xml">
+
+            <!-- Après le toggle "Mode examen (banque de questions)" -->
+            <xpath expr="//field[@name='is_exam'][@widget='boolean_toggle']"
+                   position="after">
+                <field name="course_id"
+                       invisible="not is_exam"
+                       options="{'no_create_edit': True, 'no_quick_create': True}"
+                       placeholder="Sélectionner le cours rattaché..."/>
+                <field name="exam_tag_ids"
+                       invisible="not is_exam"
+                       widget="many2many_tags"
+                       options="{'color_field': 'color', 'no_create': True}"
+                       readonly="1"
+                       string="Tags (hérités du cours)"/>
+            </xpath>
+
+            <!-- Petite aide sous le bloc info examen -->
+            <xpath expr="//field[@name='is_exam'][@widget='boolean_toggle']"
+                   position="after">
+                <div class="text-muted small mt-1" colspan="2"
+                     invisible="not is_exam">
+                    <i class="fa fa-tags me-1"/>
+                    Les tags sont récupérés automatiquement depuis le cours
+                    associé et servent à la recherche dans le portail candidat.
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+</data>
+</odoo>

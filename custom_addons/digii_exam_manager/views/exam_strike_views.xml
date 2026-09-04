@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         VUE LISTE
+    ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_exam_strike_list" model="ir.ui.view">
+        <field name="name">exam.strike.list</field>
+        <field name="model">exam.strike</field>
+        <field name="arch" type="xml">
+            <list string="Strikes" default_order="create_date desc">
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="survey_id"/>
+                <field name="strike_type"
+                       decoration-danger="strike_type in ('exclusion','certificate_reject')"
+                       decoration-warning="strike_type == 'proctoring_reject'"
+                       widget="badge"/>
+                <field name="reason" optional="show"/>
+                <field name="proctor_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         VUE FORMULAIRE
+    ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_exam_strike_form" model="ir.ui.view">
+        <field name="name">exam.strike.form</field>
+        <field name="model">exam.strike</field>
+        <field name="arch" type="xml">
+            <form string="Strike">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="user_id"/>
+                            <field name="survey_id"/>
+                            <field name="strike_type"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="proctor_id"/>
+                            <field name="session_id"/>
+                            <field name="certificate_id"/>
+                        </group>
+                    </group>
+                    <group string="Motif">
+                        <field name="reason" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         VUE RECHERCHE  (regroupement par candidat / type / examen)
+    ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_exam_strike_search" model="ir.ui.view">
+        <field name="name">exam.strike.search</field>
+        <field name="model">exam.strike</field>
+        <field name="arch" type="xml">
+            <search string="Strikes">
+                <field name="partner_id"/>
+                <field name="survey_id"/>
+                <filter name="filter_rejection" string="Rejets (salle d'attente)"
+                        domain="[('strike_type','=','proctoring_reject')]"/>
+                <filter name="filter_exclusion" string="Exclusions"
+                        domain="[('strike_type','=','exclusion')]"/>
+                <filter name="filter_cert_reject" string="Rejets certificat"
+                        domain="[('strike_type','=','certificate_reject')]"/>
+                <group>
+                    <filter name="group_partner" string="Candidat"
+                            context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_type" string="Type"
+                            context="{'group_by': 'strike_type'}"/>
+                    <filter name="group_survey" string="Examen"
+                            context="{'group_by': 'survey_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         VUE PIVOT  (compter les strikes par candidat)
+    ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_exam_strike_pivot" model="ir.ui.view">
+        <field name="name">exam.strike.pivot</field>
+        <field name="model">exam.strike</field>
+        <field name="arch" type="xml">
+            <pivot string="Strikes par candidat">
+                <field name="partner_id" type="row"/>
+                <field name="strike_type" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         ACTION
+    ═══════════════════════════════════════════════════════════════ -->
+    <record id="action_exam_strike" model="ir.actions.act_window">
+        <field name="name">Strikes / Sanctions</field>
+        <field name="res_model">exam.strike</field>
+        <field name="view_mode">list,form,pivot</field>
+        <field name="search_view_id" ref="view_exam_strike_search"/>
+        <field name="context">{'search_default_group_partner': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun strike enregistré.
+            </p>
+            <p>
+                Les strikes sont créés automatiquement lorsqu'un candidat est
+                rejeté en salle d'attente, exclu en cours d'examen, ou que son
+                certificat est rejeté.
+            </p>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SMART BUTTON sur la fiche contact
+    ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_partner_form_exam_strike" model="ir.ui.view">
+        <field name="name">res.partner.form.exam.strike</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_exam_strikes" type="object"
+                        class="oe_stat_button" icon="fa-exclamation-triangle"
+                        invisible="exam_strike_count == 0">
+                    <field name="exam_strike_count" widget="statinfo"
+                           string="Strikes"/>
+                </button>
+            </div>
+        </field>
+    </record>
+
+</odoo>

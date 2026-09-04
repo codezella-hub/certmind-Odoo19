@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!--
+        Injecte dans la page /survey/.../<token> (vue native qui sert
+        les questions une a une) :
+        1. Un script qui bloque la navigation (back/forward, F5, Ctrl+R,
+           Ctrl+P, clic-droit, beforeunload)
+        2. Un script qui etablit le flux LIVE WebRTC vers le procteur
+           (s'execute des que is_proctored = True). S'il y a aussi
+           record_video = True, le meme script enregistre la video
+           localement pour upload a la fin de l'examen.
+
+        Le template natif est `survey.survey_fill_form`. On ajoute les
+        scripts a la racine du template (position inside) : xpath qui
+        marche quelle que soit la structure interne du template.
+    -->
+    <template id="exam_inject_on_survey_fill"
+              inherit_id="survey.survey_fill_form"
+              name="Exam : bloqueur de navigation + live WebRTC + enregistrement video">
+        <xpath expr="." position="inside">
+            <!-- N'injecter que si le survey est un examen -->
+            <t t-if="survey.is_exam">
+                <!-- Config pour les scripts JS -->
+                <!--
+                    proc_session_id is read from the HTTP session (set by
+                    /exam/proctoring/start-exam just before the redirect).
+                    We also fall back to the URL query param in case the
+                    session cookie is not available (e.g. incognito + strict
+                    cookies). Both sources are written by the server so there
+                    is no client-side tampering risk.
+                -->
+                <t t-set="_psid"
+                   t-value="request.session.get('exam_proc_session_id') or request.params.get('proc_session_id', '')"/>
+
+                <!--
+                    Grille de navigation des questions :
+                    On expose au JS deux donnees sous forme de JSON dans des
+                    data-attributes :
+                      - data-question-grid : liste ordonnee de toutes les
+                        questions de l'examen [{id, num, title}, ...]
+                        (issue de answer.predefined_question_ids ou de
+                         survey.question_ids en fallback)
+                      - data-answered-ids : liste des IDs deja repondus en
+                        base par le user_input courant
+
+                    On delegue le calcul a une methode Python (le module
+                    json n'est pas garanti disponible dans le contexte
+                    QWeb par defaut).
+
+                    La question courante est detectee cote JS via le DOM
+                    (l'input survey natif a un name="<question_id>...").
+                -->
+                <t t-set="_grid_data"
+                   t-value="answer.get_question_grid_json() if answer else {'grid_json': '[]', 'answered_json': '[]'}"/>
+
+                <div id="examRuntimeConfig"
+                     t-att-data-survey-id="survey.id"
+                     t-att-data-is-proctored="survey.is_proctored and '1' or '0'"
+                     t-att-data-record-video="survey.record_video and '1' or '0'"
+                     t-att-data-proc-session-id="_psid"
+                     t-att-data-question-grid="_grid_data['grid_json']"
+                     t-att-data-answered-ids="_grid_data['answered_json']"
+                     t-att-data-layout="_grid_data.get('layout', 'page_per_question')"
+                     style="display:none;"> </div>
+
+                <!-- 1. Blocage navigation (toujours actif pour examens) -->
+                <script type="text/javascript"
+                        src="/digii_exam_manager/static/src/js/exam_block_navigation.js"> </script>
+
+                <!-- 2. Grille de navigation des questions (panneau lateral droit) -->
+                <script type="text/javascript"
+                        src="/digii_exam_manager/static/src/js/exam_question_grid.js"> </script>
+
+                <!-- 3. Live WebRTC + (optionnel) enregistrement video
+                     Le script tourne des que le survey est proctore OU que
+                     l'enregistrement video est active. Le proctoring live
+                     n'a pas besoin de record_video. -->
+                <t t-if="survey.is_proctored or survey.record_video">
+                    <!-- LiveKit SDK (only needed when proctoring is on,
+                         but cheap to load; local-only recording works
+                         without it) -->
+                    <script type="text/javascript"
+                            src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.9/dist/livekit-client.umd.min.js"> </script>
+                    <script type="text/javascript"
+                            src="/digii_exam_manager/static/src/js/exam_recording.js"> </script>
+                </t>
+            </t>
+        </xpath>
+    </template>
+
+</data>
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <record id="action_report_exam_certificate" model="ir.actions.report">
+        <field name="name">Certificat</field>
+        <field name="model">exam.certificate</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">digii_exam_manager.report_exam_certificate_document</field>
+        <field name="report_file">digii_exam_manager.report_exam_certificate_document</field>
+        <field name="print_report_name">'Certificat_%s' % object.name</field>
+        <field name="binding_model_id" ref="model_exam_certificate"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="digii_exam_manager.paperformat_certificate"/>
+    </record>
+
+</data>
+</odoo>

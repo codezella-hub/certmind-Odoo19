@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!--
+        Extension du form survey.survey pour ajouter :
+        1. "Special Certificate" toggle dans l'onglet Options (natif)
+        2. Choix du template si activé
+        3. Stat button "Certificats"
+    -->
+    <record id="exam_survey_cert_view_form_inherit" model="ir.ui.view">
+        <field name="name">exam.survey.cert.view.form.inherit</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id" ref="survey.survey_survey_view_form"/>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+
+            <!-- Stat button Certificats -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button type="object"
+                        name="action_view_certificates"
+                        class="oe_stat_button"
+                        icon="fa-certificate"
+                        invisible="not is_certification">
+                    <field name="certificate_count" widget="statinfo" string="Certificats"/>
+                </button>
+            </xpath>
+
+            <!-- Ajouter "Special Certificate" dans l'onglet Options -->
+            <xpath expr="//page[@name='options']//group" position="inside">
+                <group string="Special Certificate">
+                    <field name="is_certification" widget="boolean_toggle"
+                           string="Activer Special Certificate"
+                           readonly="is_exam"/>
+                    <field name="certificate_template_id"
+                           string="Template de certificat"
+                           invisible="not is_certification"
+                           options="{'no_create_edit': True}"
+                           placeholder="Utiliser le template par défaut"/>
+                </group>
+            </xpath>
+
+            <!-- Champ invisible pour les conditions -->
+            <xpath expr="//field[@name='is_exam'][@invisible='1']" position="after">
+                <field name="is_certification" invisible="1"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</data>
+</odoo>

@@ -1,0 +1,37 @@
+/*
+   SCROLL FIX (méthode standard Odoo 19).
+
+   Le Layout reçoit les classes "h-100 overflow-auto" (voir exam_dashboard.xml) :
+     - h-100        : la racine du Layout prend toute la hauteur de .o_content
+                      parent (déjà borné par le webclient), donc une hauteur réelle.
+     - overflow-auto: dès que le contenu dépasse cette hauteur, un ascenseur
+                      vertical apparaît.
+
+   On garde ci-dessous uniquement le style visuel + une sécurité pour que la
+   zone de contenu interne du Layout puisse défiler quelle que soit la version.
+*/
+
+/* Sécurité : la zone de contenu native du Layout défile si besoin */
+.o_digii_exam_dashboard .o_content {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.digii-exam-dashboard {
+    background: #F8FAFC;
+    min-height: 100%;
+}
+
+.digii-exam-dashboard .digii-kpi-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.digii-exam-dashboard .digii-kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+}
+.digii-exam-dashboard .card {
+    transition: box-shadow 0.2s ease;
+}
+.digii-exam-dashboard .card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}

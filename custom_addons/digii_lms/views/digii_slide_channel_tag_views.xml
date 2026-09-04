@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════
+         HÉRITAGE vue FORMULAIRE slide.channel.tag
+    ═══════════════════════════════════════ -->
+    <record id="slide_channel_tag_form_inherit_digii" model="ir.ui.view">
+        <field name="name">slide.channel.tag.form.digii</field>
+        <field name="model">slide.channel.tag</field>
+        <field name="inherit_id" ref="website_slides.slide_channel_tag_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Ajout color après name -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="color" widget="color_picker"/>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <!-- ═══════════════════════════════════════
+         HÉRITAGE vue LISTE slide.channel.tag
+    ═══════════════════════════════════════ -->
+    <record id="slide_channel_tag_list_inherit_digii" model="ir.ui.view">
+        <field name="name">slide.channel.tag.list.digii</field>
+        <field name="model">slide.channel.tag</field>
+        <field name="inherit_id" ref="website_slides.slide_channel_tag_view_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="color" widget="color_picker"/>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <!-- ═══════════════════════════════════════
+         ACTION
+    ═══════════════════════════════════════ -->
+    <record id="action_digii_slide_channel_tag" model="ir.actions.act_window">
+        <field name="name">Tags des Cours</field>
+        <field name="res_model">slide.channel.tag</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez votre premier tag !
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!--
+            Ajoute un bouton "Assistant IA" dans le header de la fiche examen.
+            C'est un widget OWL (view_widgets) qui ouvre le panneau slide-over
+            en overlay, pre-lie a l'examen courant (pour le co-pilote regles).
+            Visible uniquement en mode examen.
+        -->
+        <record id="exam_survey_form_ai_button" model="ir.ui.view">
+            <field name="name">survey.survey.form.ai.button</field>
+            <field name="model">survey.survey</field>
+            <field name="inherit_id" ref="survey.survey_survey_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <widget name="digii_ai_assistant_button"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,90 +1,96 @@
-# Odoo 19 — Docker Setup
+# Certmind — Odoo 19 (LMS + Examens + Proctoring IA)
 
-## Structure du projet
+Plateforme d'apprentissage et de certification : cours en ligne, examens
+générés, surveillance par IA et agents conversationnels.
 
-```
-odoo19-docker/
-├── Dockerfile                  # Image Odoo 19 custom
-├── docker-compose.yml          # Services : odoo + postgresql
-├── .env                        # Variables d'environnement
-├── .gitignore
-├── config/
-│   └── odoo.conf               # Config Odoo (db, port, addons...)
-├── custom_addons/              # ← Tes modules custom ici
-│   └── my_module/
-│       ├── __manifest__.py
-│       └── __init__.py
-└── data/                       # Ignoré par git (filestore local si besoin)
-```
+## Modules
 
-## ⚠️ Port : 8070 (évite le conflit avec Odoo local sur 8069)
+| Module | Rôle |
+|---|---|
+| `digii_lms` | Cours, classes, portail eLearning |
+| `digii_exam_manager` | Examens, questions, certificats, proctoring |
+| `digii_proctoring_ai` | Analyse vidéo anti-triche (MediaPipe, YOLOv8) |
+| `digii_exam_ai_agent` | Agent IA : génération de questions et de règles |
+| `digii_lms_ai_agent` | Tuteur IA côté étudiant (portail) |
 
----
+Ordre d'installation : `digii_lms` → `digii_exam_manager` →
+`digii_proctoring_ai` → `digii_exam_ai_agent` → `digii_lms_ai_agent`.
 
-## Commandes
+## Démarrage en local
 
-### Démarrer
 ```bash
-docker compose up -d
+docker compose up -d --build   # --build est nécessaire après toute
+                               # modification du Dockerfile ou des
+                               # dépendances Python
 ```
 
-### Voir les logs
+Odoo est ensuite disponible sur <http://localhost:8070>.
+
 ```bash
-docker compose logs -f odoo
+docker compose logs -f odoo    # suivre les logs
+docker compose down            # arrêter
+docker compose down -v         # arrêter ET supprimer les données
 ```
 
-### Arrêter
+## Configuration
+
+Toute la configuration passe par des variables d'environnement.
+`entrypoint.sh` les injecte dans `config/odoo.conf.template` au démarrage,
+ce qui permet d'utiliser la même image en développement et en production.
+
+| Variable | Dev | Production Azure |
+|---|---|---|
+| `DB_HOST` | `db` | `certmind-db.postgres.database.azure.com` |
+| `DB_SSLMODE` | `disable` | `require` |
+| `ODOO_WORKERS` | `0` | `2` |
+| `ODOO_LOG_LEVEL` | `info` | `warn` |
+
+`ODOO_LOG_LEVEL` doit être en minuscules : `info`, `warn`, `error`, `debug`.
+
+### Clés API des agents IA
+
+Elles se configurent dans Odoo, pas dans les fichiers :
+**Paramètres → Technique → Paramètres système**
+
+| Clé | Usage |
+|---|---|
+| `digii_exam_ai_agent.api_key` | Agent examen |
+| `digii_exam_ai_agent.model` | Modèle Groq de l'agent examen |
+| `digii_lms_ai_agent.api_key` | Tuteur LMS |
+| `digii_lms_ai_agent.model` | Modèle Groq du tuteur |
+
+Modèle recommandé : `openai/gpt-oss-120b`.
+`llama-3.3-70b-versatile` a été déprécié par Groq et renvoie une erreur 404.
+
+## Note sur torch et CUDA
+
+`ultralytics` et `silero-vad` déclarent `torch` en dépendance. Installés
+normalement, pip télécharge la version GPU depuis PyPI, soit environ 1 Go
+de bibliothèques CUDA inutiles (Azure Container Apps n'a pas de GPU).
+
+Le Dockerfile installe donc d'abord torch en version CPU depuis l'index
+PyTorch dédié, puis ces deux paquets avec `--no-deps` afin que pip ne
+résolve pas leurs dépendances et réutilise le torch déjà présent.
+
+## Dépendances système
+
+Installées par le Dockerfile : `ffmpeg` (conversion vidéo),
+`wkhtmltopdf` (rapports PDF), `gettext-base` (envsubst), et les
+bibliothèques natives requises par OpenCV et MediaPipe.
+
+## Déploiement Azure
+
+Ressources créées :
+
+- Groupe de ressources `rg-certmind` (France Central)
+- PostgreSQL Flexible Server `certmind-db`
+- Container Registry `certmindacr`
+
 ```bash
-docker compose down
+# Build et publication de l'image
+docker build -t certmindacr.azurecr.io/certmind-odoo:latest .
+docker push certmindacr.azurecr.io/certmind-odoo:latest
 ```
 
-### Arrêter + supprimer les volumes (reset complet)
-```bash
-docker compose down -v
-```
-
-### Rebuild après modification du Dockerfile
-```bash
-docker compose up -d --build
-```
-
-### Accéder au shell du container Odoo
-```bash
-docker exec -it odoo19_app bash
-```
-
-### Accéder à psql
-```bash
-docker exec -it odoo19_db psql -U odoo
-```
-
----
-
-## Ajouter un module custom
-
-1. Crée ton dossier dans `custom_addons/mon_module/`
-2. Ajoute `__manifest__.py` et `__init__.py`
-3. Restart Odoo :
-```bash
-docker compose restart odoo
-```
-4. Dans Odoo → Activer le mode développeur → Mettre à jour la liste des applications
-
----
-
-## Accès
-
-| Service   | URL / Hôte              |
-|-----------|------------------------|
-| Odoo      | http://localhost:8070  |
-| Master PW | `admin123`             |
-| DB user   | `odoo` / `odoo`        |
-
----
-
-## Odoo local (pas de conflit)
-
-Ton Odoo local tourne sur `localhost:8069` avec ses propres fichiers.  
-Docker tourne sur `localhost:8070` avec sa propre base PostgreSQL dans un volume isolé.  
-Les deux coexistent sans interférence.
-"# certmind-Odoo19" 
+Les secrets (mots de passe, clés API) doivent passer par Azure Key Vault
+et être référencés depuis Container Apps, jamais écrits dans le dépôt.

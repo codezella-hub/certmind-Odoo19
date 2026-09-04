@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!--
+        Vue LIST inline des regles (utilisee dans le form de survey.survey).
+
+        Le champ exam_subcategory_id est filtre dynamiquement selon la
+        categorie choisie : seules les sous-categories enfants de
+        exam_category_id apparaitront. Si aucune categorie n'est
+        choisie, le champ sous-categorie est masque.
+    -->
+    <record id="exam_generation_rule_view_list_inline" model="ir.ui.view">
+        <field name="name">exam.generation.rule.view.list.inline</field>
+        <field name="model">exam.generation.rule</field>
+        <field name="arch" type="xml">
+            <list string="Règles de génération" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name" string="Libellé" placeholder="ex: Python POO niveau Moyen"/>
+
+                <!-- Categorie principale (toujours premier niveau) -->
+                <field name="exam_category_id" string="Catégorie"
+                       placeholder="Toutes catégories"
+                       options="{'no_create_edit': True, 'no_quick_create': True}"/>
+
+                <!-- Sous-categorie (filtree dynamiquement) :
+                     - readonly si pas de categorie choisie
+                     - placeholder qui change selon le contexte -->
+                <field name="exam_subcategory_id" string="Sous-catégorie"
+                       readonly="not exam_category_id"
+                       placeholder="Toutes sous-catégories"
+                       options="{'no_create_edit': True, 'no_quick_create': True}"/>
+
+                <field name="exam_difficulty" string="Difficulté"
+                       placeholder="Tous niveaux"/>
+                <field name="cognitive_type" string="Type cognitif"
+                       placeholder="Tous types"/>
+                <field name="count" string="Nb à piocher"/>
+                <field name="ensure_coverage" string="Couverture"
+                       widget="boolean_toggle"/>
+                <field name="available_count" string="Disponibles" readonly="1"
+                       decoration-danger="available_count &lt; count"
+                       decoration-success="available_count &gt;= count"/>
+                <field name="survey_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!--
+        Vue FORM (popup quand on edite une regle individuellement)
+    -->
+    <record id="exam_generation_rule_view_form" model="ir.ui.view">
+        <field name="name">exam.generation.rule.view.form</field>
+        <field name="model">exam.generation.rule</field>
+        <field name="arch" type="xml">
+            <form string="Règle de génération">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="ex: Python POO niveau Moyen"/></h1>
+                    </div>
+                    <group>
+                        <group string="Filtres">
+                            <field name="exam_category_id"
+                                   options="{'no_create_edit': True, 'no_quick_create': True}"/>
+                            <field name="exam_subcategory_id"
+                                   readonly="not exam_category_id"
+                                   options="{'no_create_edit': True, 'no_quick_create': True}"/>
+                            <field name="exam_difficulty"/>
+                            <field name="cognitive_type"/>
+                        </group>
+                        <group string="Quantité">
+                            <field name="count"/>
+                            <field name="ensure_coverage" widget="boolean_toggle"/>
+                            <field name="available_count" readonly="1"
+                                   decoration-danger="available_count &lt; count"
+                                   decoration-success="available_count &gt;= count"/>
+                            <field name="sequence"/>
+                            <field name="survey_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</data>
+</odoo>

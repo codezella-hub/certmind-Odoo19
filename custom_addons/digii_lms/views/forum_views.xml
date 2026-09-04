@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LIST VIEW forum.forum -->
+    <record id="view_forum_forum_list_lms" model="ir.ui.view">
+        <field name="name">forum.forum.list.lms</field>
+        <field name="model">forum.forum</field>
+        <field name="arch" type="xml">
+            <list string="Forums">
+                <field name="name" string="Nom"/>
+                <field name="description" string="Description"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- LIST VIEW forum.post -->
+    <record id="view_forum_post_list_lms" model="ir.ui.view">
+        <field name="name">forum.post.list.lms</field>
+        <field name="model">forum.post</field>
+        <field name="arch" type="xml">
+            <list string="Posts Forum"
+                  decoration-muted="active == False"
+                  decoration-danger="state == 'flagged'"
+                  decoration-success="state == 'active'">
+                <field name="name" string="Titre"/>
+                <field name="forum_id" string="Forum"/>
+                <field name="create_uid" string="Auteur"/>
+                <field name="create_date" string="Créé le"/>
+                <field name="views" string="Vues"/>
+                <field name="vote_count" string="Votes"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'active'"
+                       decoration-danger="state == 'flagged'"
+                       decoration-warning="state == 'close'"
+                       string="Statut"/>
+                <field name="active" widget="boolean_toggle"
+                       groups="digii_lms.group_lms_admin"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ACTION forum.forum -->
+    <record id="action_lms_forums" model="ir.actions.act_window">
+        <field name="name">Forums</field>
+        <field name="res_model">forum.forum</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_forum_forum_list_lms')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun forum trouvé
+            </p>
+        </field>
+    </record>
+
+    <!-- ACTION forum.post -->
+    <record id="action_lms_forum_posts" model="ir.actions.act_window">
+        <field name="name">Posts Forum</field>
+        <field name="res_model">forum.post</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_forum_post_list_lms')}),
+        ]"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun post trouvé
+            </p>
+        </field>
+    </record>
+
+</odoo>

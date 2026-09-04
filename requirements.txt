@@ -1,1 +1,27 @@
-pytesseract
+# ─────────────────────────────────────────────────────────────────
+# requirements.txt — Dépendances Python Certmind (Python 3.12)
+#
+# ⚠ torch / torchvision / torchaudio sont installés SÉPARÉMENT dans
+#   le Dockerfile, en version CPU. Ne pas les ajouter ici : pip
+#   téléchargerait la version GPU (~1 Go de CUDA inutile sur Azure).
+# ─────────────────────────────────────────────────────────────────
+
+# ── digii_exam_manager ────────────────────────────────────────────
+requests>=2.31.0          # appels HTTP (Groq, LiveKit)
+PyJWT>=2.8.0              # tokens LiveKit  → import jwt
+openpyxl>=3.1.0           # import/export Excel des questions
+boto3>=1.34.0             # Minio / Azure Blob Storage (vidéos)
+
+# ── digii_proctoring_ai (pipeline IA) ────────────────────────────
+opencv-python>=4.8.0      # traitement vidéo        → import cv2
+numpy>=1.24.0             # calculs numériques
+pydantic>=2.0.0           # schémas du pipeline
+python-dotenv>=1.0.0      # config pipeline         → import dotenv
+mediapipe==0.10.13        # visage/regard ⚠ version exacte (Python 3.12)
+librosa>=0.10.0           # extraction audio
+ultralytics>=8.0.0        # YOLOv8 (installé --no-deps, voir Dockerfile)
+silero-vad>=5.0           # détection voix (installé --no-deps)
+reportlab>=4.0.0          # rapports PDF de proctoring
+
+# ── digii_exam_ai_agent + digii_lms_ai_agent ─────────────────────
+openai>=1.0.0             # SDK Groq (API compatible OpenAI)

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════
+         HÉRITAGE vue FORMULAIRE slide.slide
+    ═══════════════════════════════════════════════════ -->
+    <record id="slide_slide_form_inherit_digii" model="ir.ui.view">
+        <field name="name">slide.slide.form.digii</field>
+        <field name="model">slide.slide</field>
+        <field name="inherit_id" ref="website_slides.view_slide_slide_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Boutons dans le button_box existant -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_publish_slide"
+                        string="Publier"
+                        type="object"
+                        class="oe_stat_button btn-success"
+                        icon="fa-globe"
+                        invisible="is_published or is_category"/>
+                <button name="action_unpublish_slide"
+                        string="Dépublier"
+                        type="object"
+                        class="oe_stat_button btn-warning"
+                        icon="fa-eye-slash"
+                        invisible="not is_published or is_category"/>
+            </xpath>
+
+            <!-- Renommer la page ressources en français -->
+            <xpath expr="//page[@name='external_links']" position="attributes">
+                <attribute name="string">Ressources</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         HÉRITAGE vue LISTE slide.slide
+    ═══════════════════════════════════════════════════ -->
+    <record id="slide_slide_list_inherit_digii" model="ir.ui.view">
+        <field name="name">slide.slide.list.digii</field>
+        <field name="model">slide.slide</field>
+        <field name="inherit_id" ref="website_slides.view_slide_slide_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='is_published']" position="before">
+                <field name="slide_resource_ids"
+                       string="Ressources"
+                       widget="many2many_tags"
+                       optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         HÉRITAGE vue RECHERCHE slide.slide
+    ═══════════════════════════════════════════════════ -->
+    <record id="slide_slide_search_inherit_digii" model="ir.ui.view">
+        <field name="name">slide.slide.search.digii</field>
+        <field name="model">slide.slide</field>
+        <field name="inherit_id" ref="website_slides.view_slide_slide_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='inactive']" position="after">
+                <separator/>
+                <filter string="Avec Ressources"
+                        name="filter_has_resources"
+                        domain="[('slide_resource_ids', '!=', False)]"/>
+                <filter string="Sans Ressources"
+                        name="filter_no_resources"
+                        domain="[('slide_resource_ids', '=', False)]"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         ACTION
+    ═══════════════════════════════════════════════════ -->
+    <record id="action_digii_slide_slide" model="ir.actions.act_window">
+        <field name="name">Leçons</field>
+        <field name="res_model">slide.slide</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_category', '=', False)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez votre première leçon !
+            </p>
+        </field>
+    </record>
+
+</odoo>

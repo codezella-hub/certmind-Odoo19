@@ -1,0 +1,664 @@
+/* =====================================================================
+   DIGII — Design moderne du passage d'examen (portail)
+   ---------------------------------------------------------------------
+   100% CSS, AUCUNE modification de logique ni de template.
+   Scopé via :has(#examRuntimeConfig) -> ne s'applique QU'aux examens
+   (ce div caché n'est injecté que lorsque survey.is_exam = True).
+   On stylise les classes natives du module survey.
+   ===================================================================== */
+
+/* Palette ---------------------------------------------------------- */
+/* Alignee sur la maquette quiz.html fournie par l'utilisateur :
+   fond beige #F1EFE8, accent violet #534AB7, succes vert #639922. */
+body:has(#examRuntimeConfig) {
+    --ex-accent:       #534AB7;
+    --ex-accent-2:     #534AB7;
+    --ex-accent-h:     #463F9D;
+    --ex-accent-soft:  #EEEDFE;
+    --ex-text:         #1a1a1a;
+    --ex-muted:        #5F5E5A;
+    --ex-border:       rgba(0,0,0,0.1);
+    --ex-surface:      #F1EFE8;
+    --ex-success:      #639922;
+    --ex-danger:       #E24B4A;
+}
+
+/* Fond général ----------------------------------------------------- */
+body:has(#examRuntimeConfig).o_survey_background,
+body:has(#examRuntimeConfig) .o_survey_background {
+    background: #F1EFE8 !important;
+}
+
+body:has(#examRuntimeConfig) .o_survey_wrap {
+    padding-top: 8px;
+}
+
+/* Carte principale du formulaire ----------------------------------- */
+body:has(#examRuntimeConfig) .o_container_small.o_survey_form {
+    background: #FFFFFF;
+    border: 0.5px solid var(--ex-border);
+    border-radius: 16px;
+    box-shadow: none;
+    padding: 28px 34px 34px;
+    margin-top: 26px;
+    margin-bottom: 60px !important;
+}
+
+/* Titres ----------------------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_main_title {
+    color: var(--ex-text);
+    font-weight: 600;
+    letter-spacing: normal;
+}
+
+/* Bandeau titre + timer ------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_main_title_fade {
+    color: var(--ex-text);
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    -webkit-text-fill-color: initial;
+}
+
+/* Titre de section (h2) ------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_title {
+    color: var(--ex-text);
+    font-weight: 600;
+    border-left: 4px solid var(--ex-accent);
+    padding-left: 12px;
+}
+
+/* Minuterie -------------------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_timer_container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    color: var(--ex-accent);
+    border: 0.5px solid var(--ex-border);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 1rem !important;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    box-shadow: none;
+}
+body:has(#examRuntimeConfig) .o_survey_timer_container:before {
+    content: "\f017"; /* fa-clock-o */
+    font-family: "FontAwesome";
+    font-size: 0.95rem;
+    opacity: 0.8;
+}
+
+/* Barre de progression -------------------------------------------- */
+body:has(#examRuntimeConfig) .progress,
+body:has(#examRuntimeConfig) .o_survey_progress_wrapper .progress {
+    height: 6px;
+    border-radius: 999px;
+    background: #F1EFE8;
+    overflow: hidden;
+}
+body:has(#examRuntimeConfig) .progress-bar {
+    background: var(--ex-success) !important;
+    border-radius: 999px;
+}
+
+/* Fil d'Ariane des sections --------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_breadcrumb_container .breadcrumb-item.active,
+body:has(#examRuntimeConfig) .breadcrumb .active {
+    color: var(--ex-accent);
+    font-weight: 600;
+}
+
+/* ----------------------------------------------------------------- */
+/* QUESTIONS                                                          */
+/* ----------------------------------------------------------------- */
+body:has(#examRuntimeConfig) .js_question-wrapper {
+    background: #FFFFFF;
+    border: 0.5px solid var(--ex-border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 22px;
+    transition: none;
+}
+body:has(#examRuntimeConfig) .js_question-wrapper:hover {
+    box-shadow: none;
+}
+
+body:has(#examRuntimeConfig) .js_question-wrapper h3 {
+    color: var(--ex-text);
+    font-weight: 500;
+    font-size: 1.18rem;
+    line-height: 1.5;
+}
+body:has(#examRuntimeConfig) .js_question-wrapper h3 .text-danger {
+    color: var(--ex-danger) !important;
+}
+
+/* ----------------------------------------------------------------- */
+/* CHOIX (radio / cases)                                             */
+/* ----------------------------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_choice_btn {
+    display: flex;
+    align-items: center;
+    background: #F1EFE8;
+    border: 0.5px solid var(--ex-border);
+    border-radius: 8px !important;
+    padding: 14px 16px !important;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    font-weight: 400;
+    color: var(--ex-text);
+    min-height: 54px;
+}
+body:has(#examRuntimeConfig) .o_survey_choice_btn:hover {
+    border-color: rgba(0,0,0,0.25);
+}
+
+/* État sélectionné */
+body:has(#examRuntimeConfig) .o_survey_choice_btn.o_survey_selected {
+    border-color: var(--ex-accent);
+    background: var(--ex-accent-soft);
+    box-shadow: none;
+    color: var(--ex-accent-h);
+    font-weight: 500;
+}
+
+/* Lettre de raccourci (A, B, C...) */
+body:has(#examRuntimeConfig) .o_survey_selection_key,
+body:has(#examRuntimeConfig) .o_survey_radio_btn {
+    background: var(--ex-accent-soft);
+    border: none;
+    color: var(--ex-accent-h);
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin-right: 6px;
+    transition: none;
+}
+body:has(#examRuntimeConfig) .o_survey_choice_btn:hover .o_survey_selection_key,
+body:has(#examRuntimeConfig) .o_survey_choice_btn:hover .o_survey_radio_btn {
+    color: var(--ex-accent-h);
+}
+body:has(#examRuntimeConfig) .o_survey_choice_btn.o_survey_selected .o_survey_selection_key,
+body:has(#examRuntimeConfig) .o_survey_choice_btn.o_survey_selected .o_survey_radio_btn {
+    background: var(--ex-accent);
+    border-color: var(--ex-accent);
+    color: #fff;
+}
+
+/* Icônes de coche à droite */
+body:has(#examRuntimeConfig) .o_survey_choice_btn .fa-check-circle {
+    color: var(--ex-accent);
+}
+body:has(#examRuntimeConfig) .o_survey_choice_btn .fa-circle-thin {
+    color: #B4B2A9;
+}
+
+/* ----------------------------------------------------------------- */
+/* CHAMPS TEXTE / NOMBRE / DATE                                      */
+/* ----------------------------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_answer_wrapper {
+    background: #fff;
+    border: 0.5px solid var(--ex-border);
+    border-radius: 8px;
+    padding: 6px 14px !important;
+    transition: border-color 0.15s ease;
+}
+body:has(#examRuntimeConfig) .o_survey_answer_wrapper:focus-within {
+    border-color: var(--ex-accent);
+    box-shadow: none;
+}
+body:has(#examRuntimeConfig) .o_survey_comment_container {
+    background: #fff;
+    border: 0.5px solid var(--ex-border);
+    border-radius: 8px;
+    padding: 10px 14px !important;
+    transition: border-color 0.15s ease;
+}
+body:has(#examRuntimeConfig) .o_survey_comment_container:focus-within {
+    border-color: var(--ex-accent);
+    box-shadow: none;
+}
+body:has(#examRuntimeConfig) .o_survey_question_text_box {
+    color: var(--ex-text);
+    font-size: 1rem;
+}
+body:has(#examRuntimeConfig) .o_survey_question_text_box::placeholder {
+    color: #B4B2A9;
+}
+
+/* ----------------------------------------------------------------- */
+/* BOUTONS                                                           */
+/* ----------------------------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_form_content .btn-primary,
+body:has(#examRuntimeConfig) .o_survey_form_content .btn-secondary {
+    border: none;
+    border-radius: 8px;
+    padding: 13px 28px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: normal;
+    box-shadow: none;
+    transition: background 0.15s ease, opacity 0.15s ease;
+}
+body:has(#examRuntimeConfig) .o_survey_form_content .btn-primary {
+    background: var(--ex-accent);
+    color: #fff;
+}
+body:has(#examRuntimeConfig) .o_survey_form_content .btn-primary:hover:not(.disabled) {
+    background: var(--ex-accent-h);
+}
+body:has(#examRuntimeConfig) .o_survey_form_content .btn-secondary {
+    background: #fff;
+    color: var(--ex-accent);
+    border: 0.5px solid var(--ex-border);
+    box-shadow: none;
+}
+body:has(#examRuntimeConfig) .o_survey_form_content .btn-secondary:hover:not(.disabled) {
+    border-color: var(--ex-accent);
+    color: var(--ex-accent-h);
+}
+body:has(#examRuntimeConfig) .o_survey_form_content .btn.disabled,
+body:has(#examRuntimeConfig) .o_survey_form_content .btn:disabled {
+    opacity: 0.45;
+    box-shadow: none;
+}
+
+/* ----------------------------------------------------------------- */
+/* ÉCRAN DE DÉMARRAGE                                                 */
+/* ----------------------------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_start {
+    text-align: center;
+    padding: 18px 6px;
+}
+body:has(#examRuntimeConfig) .o_survey_start .text-danger {
+    background: #FCEBEB;
+    border-radius: 10px;
+    padding: 2px 12px;
+    display: inline-block;
+}
+
+/* ----------------------------------------------------------------- */
+/* ÉCRAN DE FIN                                                       */
+/* ----------------------------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_finished {
+    text-align: center;
+}
+body:has(#examRuntimeConfig) .o_survey_finished .fs-2 {
+    font-weight: 600;
+    color: var(--ex-accent);
+    margin: 10px 0 18px;
+}
+
+/* ----------------------------------------------------------------- */
+/* MESSAGES D'ERREUR                                                 */
+/* ----------------------------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_question_error,
+body:has(#examRuntimeConfig) .o_survey_error {
+    border-radius: 8px !important;
+    border: none !important;
+    background: #FCEBEB !important;
+    color: #791F1F !important;
+    font-weight: 500;
+}
+
+/* ----------------------------------------------------------------- */
+/* "POWERED BY ODOO" -> masqué                                       */
+/* ----------------------------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_brand_message > div.px-2,
+body:has(#examRuntimeConfig) .o_brand_promotion,
+body:has(#examRuntimeConfig) .o_survey_brand_message .o_brand_promotion {
+    display: none !important;
+}
+
+/* ----------------------------------------------------------------- */
+/* BOUTONS PRÉCÉDENT / SUIVANT — repositionnés en barre flottante    */
+/* ----------------------------------------------------------------- */
+body:has(#examRuntimeConfig) .o_survey_brand_message {
+    position: fixed !important;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    float: none !important;
+    margin: 0 !important;
+    border: 0.5px solid var(--ex-border) !important;
+    background: #FFFFFF;
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    padding: 7px;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 10px;
+    z-index: 1045;
+}
+body:has(#examRuntimeConfig) .o_survey_navigation_wrapper,
+body:has(#examRuntimeConfig) .o_survey_navigation_wrapper > .d-inline-block {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 10px;
+    padding: 0 !important;
+}
+
+/* Boutons chevron ronds (précédent / suivant) */
+body:has(#examRuntimeConfig) .o_survey_navigation_submit {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none !important;
+    background: #F1EFE8 !important;
+    color: #5F5E5A !important;
+    font-weight: 500;
+    transition: background 0.15s ease, color 0.15s ease;
+    box-shadow: none !important;
+}
+body:has(#examRuntimeConfig) .o_survey_navigation_submit[value="previous"],
+body:has(#examRuntimeConfig) .o_survey_navigation_submit[value="next"] {
+    width: 44px;
+    height: 44px;
+    border-radius: 50% !important;
+    padding: 0 !important;
+}
+body:has(#examRuntimeConfig) .o_survey_navigation_submit[value="finish"] {
+    border-radius: 999px !important;
+    padding: 12px 26px !important;
+    background: #534AB7 !important;
+    color: #fff !important;
+    font-size: 0.95rem;
+}
+body:has(#examRuntimeConfig) .o_survey_navigation_submit .oi {
+    padding: 0 !important;
+    font-size: 1.1rem;
+}
+body:has(#examRuntimeConfig) .o_survey_navigation_submit:hover:not([disabled]) {
+    background: #534AB7 !important;
+    color: #fff !important;
+}
+body:has(#examRuntimeConfig) .o_survey_navigation_submit[value="finish"]:hover:not([disabled]) {
+    background: #463F9D !important;
+}
+body:has(#examRuntimeConfig) .o_survey_navigation_submit[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ----------------------------------------------------------------- */
+/* RESPONSIVE                                                         */
+/* ----------------------------------------------------------------- */
+@media (max-width: 768px) {
+    body:has(#examRuntimeConfig) .o_container_small.o_survey_form {
+        padding: 18px 16px 24px;
+        border-radius: 16px;
+        margin-top: 14px;
+    }
+    body:has(#examRuntimeConfig) .js_question-wrapper {
+        padding: 16px 16px;
+    }
+}
+/* =====================================================================
+   PAGES CERTIFICATS PORTAIL — thème LMS (bleu + orange, Crimson Pro)
+   Harmonisé avec digii_lms : cartes arrondies 24px, hero dégradé animé,
+   boutons pilule, hover translateY, touches modernes (shimmer, fade-in).
+   La police 'Crimson Pro' est chargée globalement par le thème website
+   (comme dans digii_lms) ; on retombe sur serif si elle est absente.
+   NE PAS ajouter de @import ici : Odoo concatène les CSS du portail en un
+   seul bundle et un @import au milieu casse tout le CSS du portail.
+   ===================================================================== */
+.o_digii_cert_page {
+    --primary:      #2C5F8D;
+    --primary-dark: #1A3A5C;
+    --accent:       #E67E22;
+    --accent-light: #F39C12;
+    --bg-light:     #F8F9FA;
+    --bg-cream:     #FFF8F0;
+    --text-dark:    #2C3E50;
+    --text-muted:   #6C757D;
+    --border-color: #E0E6ED;
+    color: var(--text-dark);
+    animation: dcertFade .6s ease-out;
+}
+
+@keyframes dcertFade { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes dcertShimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+@keyframes dcertFloat { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-40px, 40px) rotate(12deg); } }
+
+/* ── HERO ───────────────────────────────────────────── */
+.o_digii_cert_page .dcert-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    border-radius: 24px;
+    padding: 34px 36px;
+    margin-bottom: 32px;
+    overflow: hidden;
+    box-shadow: 0 16px 45px rgba(44, 95, 141, 0.28);
+}
+.o_digii_cert_page .dcert-hero::after {
+    content: '';
+    position: absolute;
+    top: -60%;
+    right: -10%;
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%);
+    animation: dcertFloat 20s ease-in-out infinite;
+    pointer-events: none;
+}
+.o_digii_cert_page .dcert-hero-icon {
+    position: relative;
+    z-index: 1;
+    width: 62px; height: 62px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.9rem;
+    box-shadow: 0 8px 22px rgba(230, 126, 34, 0.45);
+}
+.o_digii_cert_page .dcert-hero-title {
+    position: relative; z-index: 1;
+    margin: 0; font-family: 'Crimson Pro', serif;
+    font-weight: 700; font-size: 2rem; letter-spacing: .3px;
+}
+.o_digii_cert_page .dcert-hero-sub { position: relative; z-index: 1; margin: 4px 0 0; opacity: .92; font-size: 1rem; }
+.o_digii_cert_page .dcert-hero-count {
+    position: relative; z-index: 1;
+    margin-left: auto; text-align: center; line-height: 1;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 18px;
+    padding: 14px 22px;
+    backdrop-filter: blur(8px);
+}
+.o_digii_cert_page .dcert-hero-count span { font-family: 'Crimson Pro', serif; font-size: 2.4rem; font-weight: 700; }
+.o_digii_cert_page .dcert-hero-count small { display: block; opacity: .9; font-size: .8rem; margin-top: 2px; }
+
+/* ── BARRE DE RECHERCHE / FILTRE ────────────────────── */
+.o_digii_cert_page .dcert-search {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    background: #fff;
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 14px 16px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+.o_digii_cert_page .dcert-search-input { position: relative; flex: 1 1 260px; display: flex; align-items: center; }
+.o_digii_cert_page .dcert-search-input i { position: absolute; left: 16px; color: var(--primary); opacity: .6; }
+.o_digii_cert_page .dcert-search-input input {
+    width: 100%;
+    border: 2px solid var(--border-color);
+    border-radius: 50px;
+    padding: 11px 16px 11px 42px;
+    font-size: .95rem; outline: none;
+    transition: all .25s ease;
+}
+.o_digii_cert_page .dcert-search-input input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.12);
+}
+.o_digii_cert_page .dcert-search-select {
+    flex: 0 1 220px;
+    border: 2px solid var(--border-color);
+    border-radius: 50px;
+    padding: 11px 18px;
+    font-size: .95rem; background: #fff; color: var(--text-dark); outline: none;
+    transition: all .25s ease;
+}
+.o_digii_cert_page .dcert-search-select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.12); }
+.o_digii_cert_page .dcert-search-btn { flex: 0 0 auto; display: inline-flex; align-items: center; white-space: nowrap; }
+
+/* ── ÉTAT VIDE ──────────────────────────────────────── */
+.o_digii_cert_page .dcert-empty {
+    text-align: center;
+    background: var(--bg-cream);
+    border: 2px dashed var(--border-color);
+    border-radius: 24px;
+    padding: 60px 24px;
+    color: var(--text-muted);
+}
+.o_digii_cert_page .dcert-empty i { font-size: 3.4rem; color: var(--accent); opacity: .5; }
+.o_digii_cert_page .dcert-empty h4 { margin: 18px 0 8px; color: var(--primary-dark); font-family: 'Crimson Pro', serif; font-weight: 700; font-size: 1.5rem; }
+
+/* ── GRILLE + CARTES ────────────────────────────────── */
+.o_digii_cert_page .dcert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 26px;
+}
+.o_digii_cert_page .dcert-card {
+    background: #fff;
+    border: 2px solid var(--border-color);
+    border-radius: 24px;
+    overflow: hidden;
+    transition: all .4s ease;
+    display: flex; flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+.o_digii_cert_page .dcert-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 14px 44px rgba(44, 95, 141, 0.18);
+    border-color: var(--accent);
+}
+.o_digii_cert_page .dcert-card-top {
+    position: relative;
+    padding: 28px 22px;
+    color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 160%);
+    overflow: hidden;
+}
+.o_digii_cert_page .dcert-card-top::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.14) 50%, transparent 70%);
+    animation: dcertShimmer 3.5s infinite;
+}
+.o_digii_cert_page .dcert-card-badge { position: relative; z-index: 1; font-size: 2.5rem; opacity: .9; }
+.o_digii_cert_page .dcert-score {
+    position: relative; z-index: 1;
+    background: rgba(255,255,255,0.22);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 16px;
+    padding: 9px 15px;
+    font-weight: 700; line-height: 1;
+    backdrop-filter: blur(6px);
+}
+.o_digii_cert_page .dcert-score-val { font-family: 'Crimson Pro', serif; font-size: 1.8rem; }
+.o_digii_cert_page .dcert-score-pct { font-size: 1rem; opacity: .9; }
+.o_digii_cert_page .dcert-card-body { padding: 20px 22px 10px; flex: 1; }
+.o_digii_cert_page .dcert-card-title {
+    font-family: 'Crimson Pro', serif;
+    font-weight: 700; color: var(--primary-dark); font-size: 1.25rem; margin: 0 0 12px; line-height: 1.3;
+}
+.o_digii_cert_page .dcert-meta { display: flex; flex-direction: column; gap: 6px; color: var(--text-muted); font-size: .9rem; }
+.o_digii_cert_page .dcert-meta i { color: var(--accent); width: 18px; }
+
+/* ── BOUTONS PILULE ─────────────────────────────────── */
+.o_digii_cert_page .dcert-card-actions { display: flex; gap: 10px; padding: 16px 22px 22px; }
+.o_digii_cert_page .dcert-btn {
+    flex: 1; text-align: center;
+    border-radius: 50px;
+    padding: 11px 14px;
+    font-weight: 600; font-size: .9rem;
+    text-decoration: none;
+    transition: all .3s ease;
+    border: 2px solid transparent;
+}
+.o_digii_cert_page .dcert-btn-primary {
+    background: var(--accent);
+    color: #fff !important;
+    box-shadow: 0 6px 20px rgba(230, 126, 34, 0.35);
+}
+.o_digii_cert_page .dcert-btn-primary:hover { background: var(--accent-light); transform: translateY(-3px); }
+.o_digii_cert_page .dcert-btn-light {
+    background: var(--bg-cream); color: var(--primary) !important;
+    border: 2px solid var(--border-color);
+}
+.o_digii_cert_page .dcert-btn-light:hover { border-color: var(--primary); transform: translateY(-3px); }
+
+/* =====================================================================
+   PAGE DÉTAIL D'UN CERTIFICAT — thème LMS
+   ===================================================================== */
+.dcert-detail-card {
+    border: 2px solid var(--border-color, #E0E6ED);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 12px 44px rgba(44, 95, 141, 0.14);
+    animation: dcertFade .6s ease-out;
+}
+.dcert-detail-header {
+    position: relative;
+    background: linear-gradient(135deg, #2C5F8D 0%, #1A3A5C 100%);
+    border: none;
+    padding: 22px 28px;
+    overflow: hidden;
+}
+.dcert-detail-header::after {
+    content: '';
+    position: absolute; top: -70%; right: -6%;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(255,255,255,0.09) 0%, transparent 70%);
+    animation: dcertFloat 22s ease-in-out infinite;
+    pointer-events: none;
+}
+.dcert-detail-header h3 { position: relative; z-index: 1; font-family: 'Crimson Pro', serif; font-weight: 700; }
+.dcert-detail-card .card-body h5 { font-family: 'Crimson Pro', serif; color: #1A3A5C; font-weight: 700; }
+.dcert-detail-card .card-footer { background: #FFF8F0; border-top: 2px solid #E0E6ED; padding: 18px 24px; }
+.dcert-detail-card .card-footer .btn-primary {
+    background: #E67E22; border: none; border-radius: 50px; font-weight: 600;
+    box-shadow: 0 6px 20px rgba(230, 126, 34, 0.35); transition: all .3s ease;
+}
+.dcert-detail-card .card-footer .btn-primary:hover { background: #F39C12; transform: translateY(-3px); }
+.dcert-detail-card .card-footer .btn-secondary { border-radius: 50px; font-weight: 600; }
+
+/* Cadre d'aperçu ratio A4 paysage (297 x 209) */
+.dcert-preview-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 297 / 209;
+    background: #eef0f4;
+    border: 2px solid #E0E6ED;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(44, 95, 141, 0.10);
+}
+@supports not (aspect-ratio: 1 / 1) { .dcert-preview-frame { padding-top: 70.4%; } }
+.dcert-preview-frame iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
+/* Responsive */
+@media (max-width: 640px) {
+    .o_digii_cert_page .dcert-hero { flex-direction: column; text-align: center; padding: 26px 22px; }
+    .o_digii_cert_page .dcert-hero-count { margin: 6px 0 0; }
+    .o_digii_cert_page .dcert-hero-title { font-size: 1.6rem; }
+}

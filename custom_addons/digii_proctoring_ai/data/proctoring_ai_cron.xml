@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="cron_proctoring_ai_local" model="ir.cron">
+            <field name="name">Proctoring IA : analyser les sessions en attente</field>
+            <field name="model_id" ref="digii_exam_manager.model_exam_proctoring_session"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_run_pending_analyses()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

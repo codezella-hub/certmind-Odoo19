@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!--
+        Pour les examens (is_exam=True) OU les certifications (is_certification=True) :
+        1. Masquer les boutons "Retry" et "Retake"
+        2. Rediriger automatiquement vers /my/exams apres 4 secondes
+    -->
+    <template id="exam_survey_done_override"
+              inherit_id="survey.survey_fill_form_done"
+              name="Exam : masquer retry + redirection auto">
+        <xpath expr="//div[hasclass('o_survey_finished')]" position="before">
+            <t t-if="survey.is_exam or survey.is_certification">
+                <style>
+                    /* Cacher tout bouton retry / retake / restart */
+                    .o_survey_finished .btn-primary[href*="retry"],
+                    .o_survey_finished a[href*="retry"],
+                    .o_survey_finished a[href*="restart"],
+                    .o_survey_finished .o_survey_btn_retake,
+                    .o_survey_finished form[action*="retry"],
+                    .o_survey_finished .js_survey_retry,
+                    .o_survey_finished button[name="retry"] {
+                        display: none !important;
+                    }
+                </style>
+
+                <!-- Bouton simple vers la liste des examens (lien HTML, pas de JS) -->
+                <div class="text-center" style="margin-top:28px;">
+                    <a href="/my/exams"
+                       style="display:inline-block;text-decoration:none;
+                              background:linear-gradient(135deg,#2C5F8D,#1A3A5C);
+                              color:#ffffff;border:none;border-radius:14px;
+                              padding:14px 34px;font-weight:700;font-size:1.05rem;
+                              box-shadow:0 10px 24px rgba(79,70,229,0.30);">
+                        <i class="fa fa-list-ul" style="margin-right:8px;"/>
+                        Retour a mes examens
+                    </a>
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+</data>
+</odoo>

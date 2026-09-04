@@ -1,0 +1,21 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_exam_category_user,exam.category user,model_exam_category,survey.group_survey_user,1,1,1,1
+access_exam_category_manager,exam.category manager,model_exam_category,survey.group_survey_manager,1,1,1,1
+access_exam_generation_rule_user,exam.generation.rule user,model_exam_generation_rule,survey.group_survey_user,1,1,1,1
+access_exam_generation_rule_manager,exam.generation.rule manager,model_exam_generation_rule,survey.group_survey_manager,1,1,1,1
+access_exam_preview_wizard_user,exam.preview.wizard user,model_exam_preview_wizard,survey.group_survey_user,1,1,1,1
+access_exam_preview_wizard_line_user,exam.preview.wizard.line user,model_exam_preview_wizard_line,survey.group_survey_user,1,1,1,1
+access_exam_preview_wizard_question_user,exam.preview.wizard.question user,model_exam_preview_wizard_question,survey.group_survey_user,1,1,1,1
+access_exam_certificate_template_user,exam.certificate.template user,model_exam_certificate_template,survey.group_survey_user,1,0,0,0
+access_exam_certificate_template_manager,exam.certificate.template manager,model_exam_certificate_template,survey.group_survey_manager,1,1,1,1
+access_exam_certificate_user,exam.certificate user,model_exam_certificate,survey.group_survey_user,1,0,0,0
+access_exam_certificate_manager,exam.certificate manager,model_exam_certificate,survey.group_survey_manager,1,1,1,1
+access_exam_certificate_portal,exam.certificate portal,model_exam_certificate,base.group_portal,1,0,0,0
+access_exam_certificate_reject_wizard_manager,exam.certificate.reject.wizard manager,model_exam_certificate_reject_wizard,survey.group_survey_manager,1,1,1,1
+access_exam_proctoring_session_user,exam.proctoring.session user,model_exam_proctoring_session,survey.group_survey_user,1,0,0,0
+access_exam_proctoring_session_manager,exam.proctoring.session manager,model_exam_proctoring_session,survey.group_survey_manager,1,1,1,1
+access_exam_proctoring_session_portal,exam.proctoring.session portal,model_exam_proctoring_session,base.group_portal,1,1,1,0
+access_exam_question_import_user,exam.question.import user,model_exam_question_import,survey.group_survey_user,1,1,1,1
+access_exam_question_import_manager,exam.question.import manager,model_exam_question_import,survey.group_survey_manager,1,1,1,1
+access_exam_strike_user,exam.strike user,model_exam_strike,survey.group_survey_user,1,1,1,0
+access_exam_strike_manager,exam.strike manager,model_exam_strike,survey.group_survey_manager,1,1,1,1

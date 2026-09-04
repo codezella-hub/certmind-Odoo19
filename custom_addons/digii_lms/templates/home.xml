@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="lms_home_page" name="CertMind Home">
+        <t t-call="website.layout">
+            <div id="wrap">
+
+                <!-- ══════════════════════════════
+                     HERO
+                ══════════════════════════════ -->
+                <section class="lms-hero">
+                    <div class="lms-hero__bg-circle"/>
+                    <div class="lms-hero__bg-circle lms-hero__bg-circle--2"/>
+                    <div class="lms-hero__content">
+                        <div class="lms-hero__text">
+                            <span class="lms-hero__eyebrow">🎓 Plateforme d'apprentissage &amp; certification</span>
+                            <h1>Apprenez, certifiez-vous,<br/><span class="lms-hero__accent">progressez</span></h1>
+                            <p>CertMind réunit cours, examens surveillés et certifications
+                               dans une expérience moderne, pensée pour votre réussite.</p>
+                            <div class="lms-hero__buttons">
+                                <t t-if="not is_public">
+                                    <a href="/slides" class="lms-btn lms-btn--primary">Mes cours</a>
+                                    <a href="/my/exams" class="lms-btn lms-btn--secondary">Mes examens</a>
+                                </t>
+                                <t t-else="">
+                                    <a href="/slides" class="lms-btn lms-btn--primary">Explorer les cours</a>
+                                    <a href="#lms-features" class="lms-btn lms-btn--secondary">En savoir plus</a>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="lms-hero__stats">
+                            <div class="lms-stat">
+                                <div class="lms-stat__number"><t t-esc="stat_courses"/></div>
+                                <div class="lms-stat__label">Cours publiés</div>
+                            </div>
+                            <div class="lms-stat">
+                                <div class="lms-stat__number"><t t-esc="stat_lessons"/></div>
+                                <div class="lms-stat__label">Leçons disponibles</div>
+                            </div>
+                            <div class="lms-stat">
+                                <div class="lms-stat__number"><t t-esc="stat_learners"/></div>
+                                <div class="lms-stat__label">Apprenants inscrits</div>
+                            </div>
+                            <div class="lms-stat">
+                                <div class="lms-stat__number"><t t-esc="stat_categories"/></div>
+                                <div class="lms-stat__label">Catégories</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════════════════════
+                     FEATURES
+                ══════════════════════════════ -->
+                <section class="lms-features" id="lms-features">
+                    <div class="lms-section-header">
+                        <h2>Pourquoi choisir CertMind ?</h2>
+                        <p>Tout ce qu'il faut pour apprendre efficacement et valoriser vos compétences</p>
+                    </div>
+                    <div class="lms-features__grid">
+                        <div class="lms-feature-card">
+                            <div class="lms-feature-card__icon">📚</div>
+                            <h3>Contenu riche</h3>
+                            <p>Vidéos, documents, quiz interactifs : des ressources variées
+                               pour apprendre à votre rythme.</p>
+                        </div>
+                        <div class="lms-feature-card">
+                            <div class="lms-feature-card__icon">🛡️</div>
+                            <h3>Examens surveillés</h3>
+                            <p>Passez des examens en ligne avec proctoring intégré,
+                               fiable et sécurisé.</p>
+                        </div>
+                        <div class="lms-feature-card">
+                            <div class="lms-feature-card__icon">🏆</div>
+                            <h3>Certifications</h3>
+                            <p>Obtenez des certificats reconnus pour valoriser vos
+                               compétences et booster votre carrière.</p>
+                        </div>
+                        <div class="lms-feature-card">
+                            <div class="lms-feature-card__icon">🎯</div>
+                            <h3>Parcours adaptés</h3>
+                            <p>Des contenus organisés par catégorie et par niveau,
+                               de débutant à expert.</p>
+                        </div>
+                        <div class="lms-feature-card">
+                            <div class="lms-feature-card__icon">📊</div>
+                            <h3>Suivi de progression</h3>
+                            <p>Visualisez votre avancement en temps réel sur chacun
+                               de vos cours.</p>
+                        </div>
+                        <div class="lms-feature-card">
+                            <div class="lms-feature-card__icon">📱</div>
+                            <h3>Multi-plateforme</h3>
+                            <p>Apprenez où vous voulez, quand vous voulez, sur tous
+                               vos appareils.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════════════════════
+                     MES COURS INSCRITS (dynamique)
+                ══════════════════════════════ -->
+                <section class="lms-courses">
+                    <div class="lms-courses__container">
+                        <div class="lms-section-header">
+                            <h2>Mes cours</h2>
+                            <p>Les cours de votre classe</p>
+                        </div>
+
+                        <t t-if="my_courses">
+                            <div class="lms-courses__grid">
+                                <t t-foreach="my_courses" t-as="course">
+                                    <t t-set="variants" t-value="['blue','green','purple']"/>
+                                    <t t-set="emojis" t-value="['📘','🎨','📊','💡','🧪','🌍']"/>
+                                    <a t-att-href="course.website_url"
+                                       class="lms-course-card lms-course-card--link">
+                                        <div t-attf-class="lms-course-card__image lms-course-card__image--#{variants[course_index % 3]}">
+                                            <t t-if="course.image_1920">
+                                                <img t-attf-src="/web/image/slide.channel/#{course.id}/image_512"
+                                                     class="lms-course-card__img"
+                                                     t-att-alt="course.name"/>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-esc="emojis[course_index % 6]"/>
+                                            </t>
+                                            <t t-set="diff_labels"
+                                               t-value="{'beginner':'Débutant','intermediate':'Intermédiaire','advanced':'Avancé','expert':'Expert'}"/>
+                                            <span t-if="course.custom_difficulty"
+                                                  class="lms-course-card__level">
+                                                <t t-esc="diff_labels.get(course.custom_difficulty, '')"/>
+                                            </span>
+                                        </div>
+                                        <div class="lms-course-card__body">
+                                            <span t-if="course.course_category_id"
+                                                  class="lms-course-card__tag">
+                                                <t t-esc="course.course_category_id.name"/>
+                                            </span>
+                                            <span t-else="" class="lms-course-card__tag">Cours</span>
+                                            <h3><t t-esc="course.name"/></h3>
+                                            <div class="lms-course-card__meta">
+                                                <span>📖 <t t-esc="course.total_slides"/> leçons</span>
+                                                <span>👥 <t t-esc="course.members_count"/> inscrits</span>
+                                            </div>
+                                            <t t-set="prog" t-value="completion_map.get(course.id, 0)"/>
+                                            <t t-if="prog">
+                                                <div class="lms-progress">
+                                                    <div class="lms-progress__bar"
+                                                         t-attf-style="width: #{prog}%"/>
+                                                </div>
+                                                <div class="lms-progress__label">
+                                                    <t t-esc="prog"/>% complété
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </a>
+                                </t>
+                            </div>
+                            <div class="lms-courses__cta">
+                                <a href="/slides" class="lms-btn lms-btn--primary">Voir tous mes cours</a>
+                            </div>
+                        </t>
+
+                        <!-- Connecté mais aucune inscription -->
+                        <t t-elif="not is_public">
+                            <div class="lms-empty">
+                                <div class="lms-empty__icon">🎓</div>
+                                <h2>Vous n'êtes inscrit à aucun cours</h2>
+                                <p>Explorez le catalogue et rejoignez votre premier cours pour
+                                   le retrouver ici.</p>
+                                <a href="/slides" class="lms-btn lms-btn--primary">Découvrir les cours</a>
+                            </div>
+                        </t>
+
+                        <!-- Visiteur non connecté -->
+                        <t t-else="">
+                            <div class="lms-empty">
+                                <div class="lms-empty__icon">🔒</div>
+                                <h2>Connectez-vous pour voir vos cours</h2>
+                                <p>Identifiez-vous pour retrouver ici toutes vos formations en cours.</p>
+                                <a href="/web/login" class="lms-btn lms-btn--primary">Se connecter</a>
+                            </div>
+                        </t>
+                    </div>
+                </section>
+
+                <!-- ══════════════════════════════
+                     CATÉGORIES (dynamique)
+                ══════════════════════════════ -->
+                <t t-if="categories">
+                    <section class="lms-categories">
+                        <div class="lms-categories__container">
+                            <div class="lms-section-header">
+                                <h2>Explorez par catégorie</h2>
+                                <p>Trouvez la thématique qui vous correspond</p>
+                            </div>
+                            <div class="lms-cat-grid">
+                                <t t-foreach="categories" t-as="cat">
+                                    <t t-set="cat_emojis" t-value="['🧠','💻','🎨','📈','🔬','🌱','⚙️','📚']"/>
+                                    <a href="/slides" class="lms-cat-card">
+                                        <div class="lms-cat-card__icon">
+                                            <t t-if="cat.image">
+                                                <img t-attf-src="/web/image/digii.course.category/#{cat.id}/image"
+                                                     t-att-alt="cat.name"/>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-esc="cat_emojis[cat_index % 8]"/>
+                                            </t>
+                                        </div>
+                                        <h3><t t-esc="cat.name"/></h3>
+                                        <span class="lms-cat-card__count">
+                                            <t t-esc="cat.channel_count"/>
+                                            <t t-if="cat.channel_count &gt; 1"> cours</t>
+                                            <t t-else=""> cours</t>
+                                        </span>
+                                    </a>
+                                </t>
+                            </div>
+                        </div>
+                    </section>
+                </t>
+
+                <!-- ══════════════════════════════
+                     CTA
+                ══════════════════════════════ -->
+                <section class="lms-cta">
+                    <div class="lms-cta__bg-shape"/>
+                    <div class="lms-cta__content">
+                        <t t-if="not is_public">
+                            <h2>Continuez votre progression</h2>
+                            <p>Reprenez vos cours là où vous vous êtes arrêté et
+                               préparez vos prochaines certifications.</p>
+                            <div class="lms-hero__buttons">
+                                <a href="/slides" class="lms-btn lms-btn--accent">Reprendre mes cours</a>
+                                <a href="/my/exams" class="lms-btn lms-btn--outline">Mes examens</a>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <h2>Prêt à commencer votre aventure ?</h2>
+                            <p>Rejoignez les apprenants qui se forment et se certifient
+                               déjà sur CertMind.</p>
+                            <div class="lms-hero__buttons">
+                                <a href="/web/signup" class="lms-btn lms-btn--accent">S'inscrire gratuitement</a>
+                                <a href="/web/login" class="lms-btn lms-btn--outline">Se connecter</a>
+                            </div>
+                        </t>
+                    </div>
+                </section>
+
+            </div>
+        </t>
+    </template>
+</odoo>

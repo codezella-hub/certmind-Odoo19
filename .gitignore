@@ -1,30 +1,31 @@
-# Odoo data
-data/
-*.log
-
-# Docker volumes
-.docker/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.egg-info/
-dist/
-build/
-
-# Environment
+# ── Secrets : jamais sur GitHub ───────────────────────────────────
+.env
 .env.local
-.env.*.local
+.env.prod
+# .env.azure contient les vraies valeurs Azure.
+# Le dépôt est privé, mais on le garde hors de git par précaution :
+# si le dépôt devenait public, les secrets ne partiraient pas avec.
+# Pour le versionner malgré tout : commentez la ligne ci-dessous.
+.env.azure
 
-# OS
-.DS_Store
-Thumbs.db
+# ── Python ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
 
-# IDE
+# ── Odoo ──────────────────────────────────────────────────────────
+/filestore/
+/sessions/
+*.log
+*.pid
+
+# ── Docker ────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── IDE / OS ──────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
-*.swo
+.DS_Store
+Thumbs.db

@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+<t t-name="digii_lms.ExamDashboard">
+    <Layout display="display" className="'o_digii_exam_dashboard h-100 overflow-auto'">
+    <div class="digii-exam-dashboard">
+
+        <!-- ── LOADER ── -->
+        <div t-if="state.loading"
+             class="d-flex justify-content-center align-items-center"
+             style="height:60vh;">
+            <div class="text-center">
+                <i class="fa fa-spinner fa-spin fa-3x mb-3" style="color:#7C3AED;"/>
+                <p class="text-muted fw-semibold">Chargement du dashboard examens...</p>
+            </div>
+        </div>
+
+        <div t-else="" class="p-4">
+
+            <!-- ── HEADER ── -->
+            <div class="digii-exam-header mb-4 p-4 rounded-4"
+                 style="background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #6366F1 100%);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h1 class="text-white fw-bold mb-1" style="font-size:2rem;">
+                            <i class="fa fa-graduation-cap me-3"/>
+                            Dashboard Examens
+                        </h1>
+                        <p class="text-white opacity-75 mb-0">
+                            Suivi des examens, résultats, certificats et surveillance
+                        </p>
+                    </div>
+                    <div class="text-white opacity-75">
+                        <i class="fa fa-pie-chart" style="font-size:5rem;"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── KPI CARDS PRINCIPALES ── -->
+            <div class="row g-3 mb-3">
+
+                <!-- Examens -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="digii-kpi-card card border-0 shadow-sm h-100"
+                         style="background:linear-gradient(135deg,#4F46E5,#7C3AED);
+                                border-radius:20px; cursor:pointer;"
+                         t-on-click="goToExams">
+                        <div class="card-body p-4 text-white">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="digii-kpi-icon"
+                                     style="background:rgba(255,255,255,0.2); border-radius:14px;
+                                            padding:14px; width:52px; height:52px; display:flex;
+                                            align-items:center; justify-content:center;">
+                                    <i class="fa fa-file-text-o fa-lg"/>
+                                </div>
+                                <span class="badge"
+                                      style="background:rgba(255,255,255,0.25); border-radius:8px; font-size:0.75rem;">
+                                    <t t-esc="state.stats.proctored_exams"/> surveillés
+                                </span>
+                            </div>
+                            <div class="fw-bold mb-1" style="font-size:2.5rem; line-height:1;">
+                                <t t-esc="state.stats.total_exams"/>
+                            </div>
+                            <div class="opacity-75 small">Total Examens</div>
+                            <div class="mt-2 pt-2" style="border-top:1px solid rgba(255,255,255,0.2);">
+                                <small class="opacity-75">
+                                    <i class="fa fa-certificate me-1"/>
+                                    <t t-esc="state.stats.certified_exams"/> certifiants
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tentatives -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="digii-kpi-card card border-0 shadow-sm h-100"
+                         style="background:linear-gradient(135deg,#059669,#10B981);
+                                border-radius:20px; cursor:pointer;"
+                         t-on-click="goToResults">
+                        <div class="card-body p-4 text-white">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="digii-kpi-icon"
+                                     style="background:rgba(255,255,255,0.2); border-radius:14px;
+                                            padding:14px; width:52px; height:52px; display:flex;
+                                            align-items:center; justify-content:center;">
+                                    <i class="fa fa-check-square-o fa-lg"/>
+                                </div>
+                                <span class="badge"
+                                      style="background:rgba(255,255,255,0.25); border-radius:8px; font-size:0.75rem;">
+                                    <t t-esc="state.stats.in_progress"/> en cours
+                                </span>
+                            </div>
+                            <div class="fw-bold mb-1" style="font-size:2.5rem; line-height:1;">
+                                <t t-esc="state.stats.total_attempts"/>
+                            </div>
+                            <div class="opacity-75 small">Tentatives terminées</div>
+                            <div class="mt-2 pt-2" style="border-top:1px solid rgba(255,255,255,0.2);">
+                                <small class="opacity-75">
+                                    <i class="fa fa-trophy me-1"/>
+                                    <t t-esc="state.stats.passed_attempts"/> réussies
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificats -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="digii-kpi-card card border-0 shadow-sm h-100"
+                         style="background:linear-gradient(135deg,#D97706,#F59E0B);
+                                border-radius:20px; cursor:pointer;"
+                         t-on-click="goToCertificates">
+                        <div class="card-body p-4 text-white">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="digii-kpi-icon"
+                                     style="background:rgba(255,255,255,0.2); border-radius:14px;
+                                            padding:14px; width:52px; height:52px; display:flex;
+                                            align-items:center; justify-content:center;">
+                                    <i class="fa fa-certificate fa-lg"/>
+                                </div>
+                                <span class="badge"
+                                      style="background:rgba(255,255,255,0.25); border-radius:8px; font-size:0.75rem;">
+                                    <t t-esc="state.stats.cert_pending"/> en attente
+                                </span>
+                            </div>
+                            <div class="fw-bold mb-1" style="font-size:2.5rem; line-height:1;">
+                                <t t-esc="state.stats.cert_approved"/>
+                            </div>
+                            <div class="opacity-75 small">Certificats approuvés</div>
+                            <div class="mt-2 pt-2" style="border-top:1px solid rgba(255,255,255,0.2);">
+                                <small class="opacity-75">
+                                    <i class="fa fa-clock-o me-1"/>
+                                    À valider par le procteur
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proctoring -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="digii-kpi-card card border-0 shadow-sm h-100"
+                         style="background:linear-gradient(135deg,#2563EB,#3B82F6);
+                                border-radius:20px; cursor:pointer;"
+                         t-on-click="goToProctoring">
+                        <div class="card-body p-4 text-white">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="digii-kpi-icon"
+                                     style="background:rgba(255,255,255,0.2); border-radius:14px;
+                                            padding:14px; width:52px; height:52px; display:flex;
+                                            align-items:center; justify-content:center;">
+                                    <i class="fa fa-video-camera fa-lg"/>
+                                </div>
+                                <span class="badge"
+                                      style="background:rgba(255,255,255,0.25); border-radius:8px; font-size:0.75rem;">
+                                    <t t-esc="state.stats.sessions_with_video"/> vidéos
+                                </span>
+                            </div>
+                            <div class="fw-bold mb-1" style="font-size:2.5rem; line-height:1;">
+                                <t t-esc="state.stats.sessions_total"/>
+                            </div>
+                            <div class="opacity-75 small">Sessions de surveillance</div>
+                            <div class="mt-2 pt-2" style="border-top:1px solid rgba(255,255,255,0.2);">
+                                <small class="opacity-75">
+                                    <i class="fa fa-film me-1"/>
+                                    Enregistrements disponibles
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── STAT CHIPS SECONDAIRES ── -->
+            <div class="row g-3 mb-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm h-100" style="border-radius:16px;">
+                        <div class="card-body d-flex align-items-center">
+                            <div style="background:#EEF2FF; border-radius:12px; padding:12px; margin-right:14px;">
+                                <i class="fa fa-percent" style="color:#4F46E5; font-size:1.2rem;"/>
+                            </div>
+                            <div>
+                                <div class="fw-bold" style="font-size:1.6rem; line-height:1;">
+                                    <t t-esc="state.stats.pass_rate"/>%
+                                </div>
+                                <div class="text-muted small">Taux de réussite</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm h-100" style="border-radius:16px;">
+                        <div class="card-body d-flex align-items-center">
+                            <div style="background:#ECFDF5; border-radius:12px; padding:12px; margin-right:14px;">
+                                <i class="fa fa-star" style="color:#10B981; font-size:1.2rem;"/>
+                            </div>
+                            <div>
+                                <div class="fw-bold" style="font-size:1.6rem; line-height:1;">
+                                    <t t-esc="state.stats.avg_score"/>%
+                                </div>
+                                <div class="text-muted small">Score moyen</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm h-100" style="border-radius:16px;">
+                        <div class="card-body d-flex align-items-center">
+                            <div style="background:#FEF3C7; border-radius:12px; padding:12px; margin-right:14px;">
+                                <i class="fa fa-certificate" style="color:#F59E0B; font-size:1.2rem;"/>
+                            </div>
+                            <div>
+                                <div class="fw-bold" style="font-size:1.6rem; line-height:1;">
+                                    <t t-esc="state.stats.certified_exams"/>
+                                </div>
+                                <div class="text-muted small">Examens certifiants</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm h-100" style="border-radius:16px;">
+                        <div class="card-body d-flex align-items-center">
+                            <div style="background:#F3E8FF; border-radius:12px; padding:12px; margin-right:14px;">
+                                <i class="fa fa-database" style="color:#7C3AED; font-size:1.2rem;"/>
+                            </div>
+                            <div>
+                                <div class="fw-bold" style="font-size:1.6rem; line-height:1;">
+                                    <t t-esc="state.stats.bank_questions"/>
+                                </div>
+                                <div class="text-muted small">Questions en banque</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── GRAPHIQUES ── -->
+            <div class="row g-4">
+
+                <!-- Doughnut — Type d'examens -->
+                <div class="col-xl-4 col-md-6">
+                    <div class="card border-0 shadow-sm h-100" style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#F3E8FF; border-radius:10px; padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-shield" style="color:#7C3AED;"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">Examens par type</h6>
+                            </div>
+                            <canvas t-ref="chartExamType" style="max-height:260px;"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doughnut — Résultats -->
+                <div class="col-xl-4 col-md-6">
+                    <div class="card border-0 shadow-sm h-100" style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#ECFDF5; border-radius:10px; padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-check-circle text-success"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">Résultats des tentatives</h6>
+                            </div>
+                            <canvas t-ref="chartResults" style="max-height:260px;"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doughnut — Certificats -->
+                <div class="col-xl-4 col-md-6">
+                    <div class="card border-0 shadow-sm h-100" style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#FEF3C7; border-radius:10px; padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-certificate" style="color:#F59E0B;"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">Certificats par statut</h6>
+                            </div>
+                            <canvas t-ref="chartCertStatus" style="max-height:260px;"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pie — Sessions proctoring -->
+                <div class="col-xl-4 col-md-6">
+                    <div class="card border-0 shadow-sm h-100" style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#EFF6FF; border-radius:10px; padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-video-camera" style="color:#3B82F6;"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">Sessions de surveillance</h6>
+                            </div>
+                            <canvas t-ref="chartSessionStatus" style="max-height:260px;"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bar — Top examens par tentatives -->
+                <div class="col-xl-8">
+                    <div class="card border-0 shadow-sm h-100" style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#EEF2FF; border-radius:10px; padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-bar-chart" style="color:#4F46E5;"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">Top 5 examens — nombre de tentatives</h6>
+                            </div>
+                            <canvas t-ref="chartTopAttempts" style="max-height:300px;"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bar horizontal — Score moyen par examen -->
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm" style="border-radius:20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="background:#ECFDF5; border-radius:10px; padding:8px 12px; margin-right:12px;">
+                                    <i class="fa fa-line-chart text-success"/>
+                                </div>
+                                <h6 class="fw-bold mb-0">Score moyen par examen (Top 5)</h6>
+                            </div>
+                            <canvas t-ref="chartAvgScore" style="max-height:300px;"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </Layout>
+</t>
+
+</templates>

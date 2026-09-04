@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <record id="exam_preview_wizard_view_form" model="ir.ui.view">
+        <field name="name">exam.preview.wizard.view.form</field>
+        <field name="model">exam.preview.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Simulation de la génération d'examen">
+
+                <field name="has_warnings" invisible="1"/>
+                <field name="survey_id" invisible="1"/>
+
+                <!-- Bandeau titre -->
+                <div class="alert alert-info d-flex align-items-center mb-3"
+                     role="alert" style="border-left:4px solid #2980B9;">
+                    <i class="fa fa-flask fa-2x me-3" style="color:#2980B9;"/>
+                    <div>
+                        <strong>Aperçu avant génération</strong><br/>
+                        <span class="text-muted">
+                            Voici les questions qui seront tirées. Rien n'est
+                            encore généré. Cliquez sur une règle pour voir ses
+                            questions en détail. Utilisez "Tout re-simuler"
+                            pour un autre tirage, puis "Confirmer et générer".
+                        </span>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning" role="alert"
+                     invisible="not has_warnings">
+                    <i class="fa fa-exclamation-triangle me-1"/>
+                    <strong>Attention :</strong> certaines règles n'ont pas
+                    assez de questions dans la banque. Ajoutez des questions
+                    ou réduisez le nombre demandé.
+                </div>
+
+                <!-- Cartes de stats -->
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body py-2">
+                                <div style="font-size:1.8rem;font-weight:bold;color:#2980B9;">
+                                    <field name="total_requested" nolabel="1" readonly="1"/>
+                                </div>
+                                <small class="text-muted">Demandé</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body py-2">
+                                <div style="font-size:1.8rem;font-weight:bold;color:#7F8C8D;">
+                                    <field name="total_available" nolabel="1" readonly="1"/>
+                                </div>
+                                <small class="text-muted">Dans la banque</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body py-2">
+                                <div style="font-size:1.8rem;font-weight:bold;color:#1D9E75;">
+                                    <field name="total_will_generate" nolabel="1" readonly="1"/>
+                                </div>
+                                <small class="text-muted">Sera généré</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Détail par règle : chaque règle avec ses questions + bouton re-simuler -->
+                <div class="o_horizontal_separator fw-bold mb-2">
+                    Détail par règle
+                </div>
+                <field name="preview_line_ids" nolabel="1" readonly="1">
+                    <list decoration-warning="has_warning" create="false"
+                          delete="false">
+                        <field name="rule_name" string="Règle"/>
+                        <field name="category_name" string="Catégorie"/>
+                        <field name="difficulty" string="Difficulté"/>
+                        <field name="cognitive_type_label" string="Type cognitif"/>
+                        <field name="count_requested" string="Demandé"/>
+                        <field name="count_available" string="Disponible"
+                               decoration-danger="count_available == 0"
+                               decoration-warning="count_available &lt; count_requested"
+                               decoration-success="count_available &gt;= count_requested"/>
+                        <field name="count_will_generate" string="Sera généré"
+                               decoration-muted="count_will_generate == 0"/>
+                        <field name="has_warning" column_invisible="1"/>
+                    </list>
+                    <form string="Questions de cette règle">
+                        <sheet>
+                            <div class="oe_title mb-3">
+                                <h2>Règle : <field name="rule_name" readonly="1" class="d-inline"/></h2>
+                            </div>
+                            <group>
+                                <group>
+                                    <field name="category_name" string="Catégorie" readonly="1"/>
+                                    <field name="difficulty" string="Difficulté" readonly="1"/>
+                                    <field name="cognitive_type_label" string="Type cognitif" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="count_requested" string="Demandé" readonly="1"/>
+                                    <field name="count_available" string="Disponible" readonly="1"/>
+                                    <field name="count_will_generate" string="Sera généré" readonly="1"/>
+                                </group>
+                            </group>
+                            <div class="o_horizontal_separator fw-bold mt-3 mb-2">
+                                Questions tirées pour cette règle
+                            </div>
+                            <field name="question_preview_ids" nolabel="1" readonly="1">
+                                <list create="false" delete="false" open_form_view="false">
+                                    <field name="question_title" string="Question"/>
+                                    <field name="cognitive_type" string="Type cognitif" optional="show"/>
+                                    <field name="exam_category_id" string="Catégorie" optional="show"/>
+                                    <field name="exam_subcategory_id" string="Sous-catégorie" optional="show"/>
+                                    <field name="exam_difficulty" string="Difficulté"
+                                           decoration-success="exam_difficulty == 'easy'"
+                                           decoration-warning="exam_difficulty == 'medium'"
+                                           decoration-danger="exam_difficulty == 'hard'"
+                                           widget="badge"/>
+                                </list>
+                            </field>
+                        </sheet>
+                        <footer>
+                            <button string="Fermer" class="btn-primary" special="cancel"/>
+                        </footer>
+                    </form>
+                </field>
+
+                <!-- Questions tirées, groupées par règle -->
+                <div class="o_horizontal_separator fw-bold mb-2 mt-3">
+                    Questions tirées (aperçu)
+                </div>
+                <field name="all_question_preview_ids" nolabel="1" readonly="1">
+                    <list decoration-warning="has_warning" create="false"
+                          delete="false" open_form_view="false">
+                        <field name="rule_name" string="Règle"/>
+                        <field name="question_title" string="Question"/>
+                        <field name="cognitive_type" string="Type cognitif" optional="show"/>
+                        <field name="exam_category_id" string="Catégorie" optional="show"/>
+                        <field name="exam_subcategory_id" string="Sous-catégorie" optional="show"/>
+                        <field name="exam_difficulty" string="Difficulté"
+                               decoration-success="exam_difficulty == 'easy'"
+                               decoration-warning="exam_difficulty == 'medium'"
+                               decoration-danger="exam_difficulty == 'hard'"
+                               widget="badge"/>
+                        <field name="question_type" string="Format" optional="hide"/>
+                        <field name="has_warning" column_invisible="1"/>
+                    </list>
+                </field>
+
+                <footer>
+                    <button name="action_confirm_generate"
+                            string="Confirmer et générer"
+                            type="object" class="btn-primary" icon="fa-check"
+                            close="1"/>
+                    <button name="action_resimulate"
+                            string="Tout re-simuler"
+                            type="object" class="btn-secondary" icon="fa-refresh"
+                            help="Relance un nouveau tirage pour toutes les règles"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_exam_preview_wizard" model="ir.actions.act_window">
+        <field name="name">Prévisualiser et générer</field>
+        <field name="res_model">exam.preview.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="exam_preview_wizard_view_form"/>
+        <field name="target">new</field>
+        <field name="context">{'default_survey_id': active_id}</field>
+    </record>
+
+</data>
+</odoo>

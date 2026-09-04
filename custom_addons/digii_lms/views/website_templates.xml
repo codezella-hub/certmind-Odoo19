@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════
+         HEADER - design Moodle Learning
+    ══════════════════════════════════ -->
+    <template id="custom_header" inherit_id="website.layout">
+        <xpath expr="//header" position="replace">
+
+            <!-- Cacher le header custom sur les pages survey/examen -->
+            <t t-if="request.httprequest.path.startswith('/survey') or request.httprequest.path.startswith('/exam')">
+                <header t-att-class="'o_header_standard'"/>
+            </t>
+            <t t-else="">
+            <header class="lms-header">
+                <div class="nav-container">
+                    <button class="menu-toggle" id="lmsMenuToggle">☰</button>
+                    <div class="logo">CertMind</div>
+                    <nav>
+                        <ul class="nav-menu">
+                            <li><a href="/">Accueil</a></li>
+                            <li><a href="/slides">My Courses</a></li>
+                            <li><a href="/my/exams">My Exams</a></li>
+                            <li><a href="/blog">Blogs</a></li>
+                            <li><a href="/forum/help-1">Forum</a></li>
+                            <li><a href="/contactus">Contact</a></li>
+                        </ul>
+                    </nav>
+                    <!-- Auth -->
+                    <t t-if="not request.env.user._is_public()">
+                        <div class="lms-user dropdown">
+                            <a href="#" class="lms-user__toggle dropdown-toggle"
+                               role="button" data-bs-toggle="dropdown"
+                               aria-expanded="false">
+                                <t t-if="request.env.user.image_1920">
+                                    <img class="lms-avatar lms-avatar--img"
+                                         t-attf-src="/web/image/res.users/#{request.env.user.id}/avatar_128"
+                                         t-att-alt="request.env.user.name"/>
+                                </t>
+                                <t t-else="">
+                                    <span class="lms-avatar lms-avatar--initials"
+                                          t-attf-style="background-color: #{request.env.user.lms_avatar_color};">
+                                        <t t-esc="request.env.user.lms_initials"/>
+                                    </span>
+                                </t>
+                                <span class="lms-user__name d-none d-lg-inline">
+                                    <t t-esc="request.env.user.name"/>
+                                </span>
+                                <i class="fa fa-chevron-down lms-user__caret"/>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end lms-user__menu">
+                                <li class="lms-user__head">
+                                    <t t-if="request.env.user.image_1920">
+                                        <img class="lms-avatar lms-avatar--img"
+                                             t-attf-src="/web/image/res.users/#{request.env.user.id}/avatar_128"/>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="lms-avatar lms-avatar--initials"
+                                              t-attf-style="background-color: #{request.env.user.lms_avatar_color};">
+                                            <t t-esc="request.env.user.lms_initials"/>
+                                        </span>
+                                    </t>
+                                    <div class="lms-user__head-info">
+                                        <strong t-esc="request.env.user.name"/>
+                                        <small t-esc="request.env.user.email"/>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"/></li>
+                                <li>
+                                    <a class="dropdown-item" href="/my">
+                                        <i class="fa fa-th-large me-2"/>Mon espace
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/my/account">
+                                        <i class="fa fa-pencil me-2"/>Modifier le profil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/my/exams">
+                                        <i class="fa fa-graduation-cap me-2"/>Mes examens
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"/></li>
+                                <li>
+                                    <a class="dropdown-item lms-user__logout"
+                                       href="/web/session/logout">
+                                        <i class="fa fa-sign-out me-2"/>Déconnexion
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <a href="/web/login" class="login-btn">Connexion</a>
+                    </t>
+                </div>
+            </header>
+
+            <!-- Mobile Overlay -->
+            <div class="mobile-overlay" id="lmsOverlay"/>
+
+            <!-- Mobile Menu -->
+            <div class="mobile-menu" id="lmsMobileMenu">
+                <div class="mobile-menu-header">
+                    <div class="logo">CertMind</div>
+                    <button class="close-menu" id="lmsCloseMenu">×</button>
+                </div>
+                <ul class="mobile-nav">
+                    <li><a href="/">Accueil</a></li>
+                    <li><a href="/slides">My Courses</a></li>
+                    <li><a href="/my/exams">My Exams</a></li>
+                    <li><a href="/blog">Blogs</a></li>
+                    <li><a href="/forum/help-1">Forum</a></li>
+                    <li><a href="/contactus">Contact</a></li>
+                    <t t-if="not request.env.user._is_public()">
+                        <li><a href="/my">Mon espace</a></li>
+                        <li><a href="/my/account">Modifier le profil</a></li>
+                        <li><a href="/web/session/logout">Déconnexion</a></li>
+                    </t>
+                    <t t-else="">
+                        <li><a href="/web/login">Connexion</a></li>
+                    </t>
+                </ul>
+            </div>
+            </t><!-- fin t-else header custom -->
+
+        </xpath>
+    </template>
+
+    <!-- ══════════════════════════════════
+         FOOTER - design Moodle Learning
+    ══════════════════════════════════ -->
+    <template id="custom_footer" inherit_id="website.layout">
+        <xpath expr="//footer" position="replace">
+
+            <t t-if="request.httprequest.path.startswith('/survey') or request.httprequest.path.startswith('/exam')">
+                <footer/>
+            </t>
+            <t t-else="">
+            <footer class="lms-footer">
+                <div class="footer-content">
+
+                    <div class="footer-about">
+                        <h3>CertMind</h3>
+                        <p>Votre partenaire pour une éducation de qualité.
+                           Nous nous engageons à offrir les meilleures
+                           ressources d'apprentissage pour tous.</p>
+                    </div>
+
+                    <div class="footer-section">
+                        <h4>Navigation</h4>
+                        <ul>
+                            <li><a href="/lms">Accueil</a></li>
+                            <li><a href="/lms/courses">Nos cours</a></li>
+                            <li><a href="/lms/resources">Ressources</a></li>
+                            <li><a href="/lms/contact">Contact</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-section">
+                        <h4>Ressources</h4>
+                        <ul>
+                            <li><a href="#">Guide de démarrage</a></li>
+                            <li><a href="#">FAQ</a></li>
+                            <li><a href="#">Support technique</a></li>
+                            <li><a href="#">Documentation</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-section">
+                        <h4>Légal</h4>
+                        <ul>
+                            <li><a href="#">Mentions légales</a></li>
+                            <li><a href="#">Confidentialité</a></li>
+                            <li><a href="#">CGU</a></li>
+                            <li><a href="#">Cookies</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+                <div class="footer-bottom">
+                    <p>© 2026 CertMind. Tous droits réservés.</p>
+                </div>
+            </footer>
+            </t><!-- fin t-else footer custom -->
+
+        </xpath>
+    </template>
+
+</odoo>

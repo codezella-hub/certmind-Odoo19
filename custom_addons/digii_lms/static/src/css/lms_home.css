@@ -1,0 +1,496 @@
+
+
+:root {
+    --primary:      #2C5F8D;
+    --primary-dark: #1A3A5C;
+    --accent:       #E67E22;
+    --accent-light: #F39C12;
+    --bg-light:     #F8F9FA;
+    --bg-cream:     #FFF8F0;
+    --text-dark:    #2C3E50;
+    --text-muted:   #6C757D;
+    --border-color: #E0E6ED;
+}
+
+/* ══════════════════════════════════
+   BOUTONS
+══════════════════════════════════ */
+.lms-btn {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.lms-btn--primary {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 6px 25px rgba(230, 126, 34, 0.4);
+}
+.lms-btn--primary:hover {
+    background: var(--accent-light);
+    transform: translateY(-3px);
+    color: white;
+}
+
+.lms-btn--secondary {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+}
+.lms-btn--secondary:hover {
+    background: white;
+    color: var(--primary);
+}
+
+.lms-btn--accent {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+}
+.lms-btn--accent:hover {
+    transform: translateY(-3px);
+    color: var(--primary);
+}
+
+.lms-btn--outline {
+    background: transparent;
+    color: white;
+    border: 2px solid rgba(255,255,255,0.7);
+}
+.lms-btn--outline:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* ══════════════════════════════════
+   SECTION HEADER
+══════════════════════════════════ */
+.lms-section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 4rem;
+}
+.lms-section-header h2 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 2.8rem;
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+}
+.lms-section-header p {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+/* ══════════════════════════════════
+   HERO
+══════════════════════════════════ */
+.lms-hero {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 5rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.lms-hero__bg-circle {
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    animation: lmsFloat 20s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes lmsFloat {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50%       { transform: translate(-50px, 50px) rotate(10deg); }
+}
+
+.lms-hero__content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.lms-hero__text h1 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    animation: lmsSlideLeft 0.8s ease-out;
+}
+
+.lms-hero__text p {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    margin-bottom: 2rem;
+    line-height: 1.7;
+    animation: lmsSlideLeft 0.8s ease-out 0.2s backwards;
+}
+
+.lms-hero__buttons {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    animation: lmsSlideLeft 0.8s ease-out 0.4s backwards;
+}
+
+@keyframes lmsSlideLeft {
+    from { opacity: 0; transform: translateX(-50px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.lms-hero__stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    animation: lmsFadeIn 1s ease-out 0.5s backwards;
+}
+
+@keyframes lmsFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.lms-stat {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+}
+.lms-stat:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-5px);
+}
+.lms-stat__number {
+    font-family: 'Crimson Pro', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.lms-stat__label {
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+/* ══════════════════════════════════
+   FEATURES
+══════════════════════════════════ */
+.lms-features {
+    padding: 5rem 2rem;
+    background: var(--bg-cream);
+}
+.lms-features__grid {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
+}
+.lms-feature-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: all 0.4s ease;
+    border: 2px solid transparent;
+}
+.lms-feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(44,95,141,0.15);
+    border-color: var(--accent);
+}
+.lms-feature-card__icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+}
+.lms-feature-card h3 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.5rem;
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+}
+.lms-feature-card p {
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+/* ══════════════════════════════════
+   COURSES
+══════════════════════════════════ */
+.lms-courses {
+    padding: 5rem 2rem;
+    background: white;
+}
+.lms-courses__container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+.lms-courses__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+.lms-courses__cta {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.lms-course-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.4s ease;
+    border: 2px solid var(--border-color);
+}
+.lms-course-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(44,95,141,0.15);
+    border-color: var(--primary);
+}
+.lms-course-card__image {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+.lms-course-card__image--blue   { background: linear-gradient(135deg, #2C5F8D, #E67E22); }
+.lms-course-card__image--green  { background: linear-gradient(135deg, #27AE60, #2ECC71); }
+.lms-course-card__image--purple { background: linear-gradient(135deg, #8E44AD, #9B59B6); }
+
+.lms-course-card__image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+    animation: lmsShimmer 3s infinite;
+}
+@keyframes lmsShimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.lms-course-card__body { padding: 1.8rem; }
+.lms-course-card__tag {
+    display: inline-block;
+    background: var(--bg-cream);
+    color: var(--accent);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+.lms-course-card h3 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.4rem;
+    color: var(--primary-dark);
+    margin-bottom: 0.8rem;
+}
+.lms-course-card__meta {
+    display: flex;
+    gap: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 1.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* ══════════════════════════════════
+   CTA SECTION
+══════════════════════════════════ */
+.lms-cta {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 5rem 2rem;
+    text-align: center;
+    color: white;
+}
+.lms-cta__content {
+    max-width: 700px;
+    margin: 0 auto;
+}
+.lms-cta h2 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+}
+.lms-cta p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 2.5rem;
+    line-height: 1.7;
+}
+
+/* ══════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════ */
+@media (max-width: 1024px) {
+    .lms-hero__content { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
+    .lms-hero__buttons { justify-content: center; }
+    .lms-hero__text h1 { font-size: 3rem; }
+    .lms-features__grid { grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 768px) {
+    .lms-hero__text h1  { font-size: 2.2rem; }
+    .lms-hero__stats    { grid-template-columns: repeat(2,1fr); }
+    .lms-features__grid { grid-template-columns: 1fr; }
+    .lms-courses__grid  { grid-template-columns: 1fr; }
+    .lms-cta h2         { font-size: 2rem; }
+    .lms-hero__buttons  { flex-direction: column; align-items: center; }
+    .lms-btn            { width: 100%; max-width: 300px; text-align: center; }
+}
+
+@media (max-width: 480px) {
+    .lms-hero__text h1  { font-size: 1.8rem; }
+    .lms-hero__stats    { grid-template-columns: 1fr; }
+    .lms-stat__number   { font-size: 2rem; }
+}
+/* ════════════════════════════════════════════════════════════
+   HOME — AMÉLIORATIONS MODERNES (CertMind)
+════════════════════════════════════════════════════════════ */
+
+/* Eyebrow + titre accentué dans le hero */
+.lms-hero__eyebrow {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    padding: 0.45rem 1.1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    animation: lmsSlideLeft 0.7s ease-out;
+}
+.lms-hero__accent {
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Deuxième cercle flottant (profondeur) */
+.lms-hero__bg-circle--2 {
+    top: auto;
+    bottom: -40%;
+    right: auto;
+    left: -15%;
+    width: 480px;
+    height: 480px;
+    animation-duration: 26s;
+    animation-direction: reverse;
+}
+
+/* ── SECTION CATÉGORIES ── */
+.lms-categories {
+    padding: 5rem 2rem;
+    background: var(--bg-cream);
+}
+.lms-categories__container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+.lms-cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.8rem;
+}
+.lms-cat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.6rem;
+    background: #fff;
+    border: 2px solid var(--border-color);
+    border-radius: 22px;
+    padding: 2.2rem 1.4rem;
+    text-decoration: none;
+    transition: all 0.35s ease;
+}
+.lms-cat-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--accent);
+    box-shadow: 0 14px 40px rgba(44, 95, 141, 0.15);
+}
+.lms-cat-card__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.1rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(44, 95, 141, 0.25);
+}
+.lms-cat-card__icon img { width: 100%; height: 100%; object-fit: cover; }
+.lms-cat-card h3 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.25rem;
+    color: var(--primary-dark);
+    margin: 0;
+}
+.lms-cat-card__count {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--bg-cream);
+    padding: 0.25rem 0.9rem;
+    border-radius: 50px;
+}
+
+/* ── CTA améliorée ── */
+.lms-cta { position: relative; overflow: hidden; }
+.lms-cta__bg-shape {
+    position: absolute;
+    top: -60%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(230, 126, 34, 0.18) 0%, transparent 65%);
+    pointer-events: none;
+    animation: lmsFloat 24s ease-in-out infinite;
+}
+.lms-cta__content { position: relative; z-index: 1; }
+
+@media (max-width: 768px) {
+    .lms-cat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+    .lms-cat-grid { grid-template-columns: 1fr; }
+}

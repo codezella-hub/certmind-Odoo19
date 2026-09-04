@@ -1,0 +1,168 @@
+<odoo>
+
+    <!-- ================= FORM : design clair ================= -->
+    <record id="ixzdigii_view_digii_class_form" model="ir.ui.view">
+        <field name="name">ixzdigii.digii.class.form</field>
+        <field name="model">digii.class</field>
+        <field name="arch" type="xml">
+
+            <form string="Classe">
+                <sheet>
+
+                    <!-- Smart buttons : stats cliquables en haut a droite -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_students" type="object"
+                                class="oe_stat_button" icon="fa-graduation-cap">
+                            <field name="student_count" widget="statinfo"
+                                   string="Étudiants"/>
+                        </button>
+                        <button name="action_open_courses" type="object"
+                                class="oe_stat_button" icon="fa-book">
+                            <field name="course_count" widget="statinfo"
+                                   string="Cours"/>
+                        </button>
+                    </div>
+
+                    <!-- Titre en grand -->
+                    <div class="oe_title">
+                        <label for="name" string="Nom de la classe"/>
+                        <h1>
+                            <field name="name" placeholder="ex : Licence Info 2026 - Groupe A"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <field name="description"
+                               placeholder="Description courte de la classe (niveau, année, spécialité...)"/>
+                    </group>
+
+                    <notebook>
+
+                        <!-- ============ ÉTUDIANTS : vraie liste lisible ============ -->
+                        <page string="Étudiants" name="students">
+                            <field name="student_ids" nolabel="1">
+                                <list editable="bottom" create="false" delete="true">
+                                    <field name="avatar_128" widget="image"
+                                           class="oe_avatar" options="{'size': [32, 32]}"
+                                           string=""/>
+                                    <field name="name" string="Nom" readonly="1"/>
+                                    <field name="login" string="Identifiant" readonly="1"/>
+                                    <field name="email" string="Email" readonly="1" optional="show"/>
+                                </list>
+                            </field>
+                            <div class="text-muted mt-2">
+                                <i class="fa fa-info-circle me-1"/>
+                                Utilisez « Ajouter une ligne » pour inscrire des étudiants dans la classe.
+                            </div>
+                        </page>
+
+                        <!-- ============ COURS : liste avec infos utiles ============ -->
+                        <page string="Cours" name="courses">
+                            <field name="course_ids" nolabel="1">
+                                <list create="false" delete="true">
+                                    <field name="image_128" widget="image"
+                                           class="oe_avatar" options="{'size': [40, 40]}"
+                                           string=""/>
+                                    <field name="name" string="Titre du cours" readonly="1"/>
+                                    <field name="total_slides" string="Leçons" readonly="1" optional="show"/>
+                                    <field name="members_count" string="Inscrits" readonly="1" optional="show"/>
+                                </list>
+                            </field>
+                            <div class="text-muted mt-2">
+                                <i class="fa fa-info-circle me-1"/>
+                                Utilisez « Ajouter une ligne » pour associer des cours à la classe.
+                            </div>
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+            </form>
+
+        </field>
+    </record>
+
+    <!-- ================= KANBAN (retouché) ================= -->
+    <record id="ixzdigii_view_digii_class_kanban" model="ir.ui.view">
+        <field name="name">ixzdigii.digii.class.kanban</field>
+        <field name="model">digii.class</field>
+        <field name="arch" type="xml">
+
+            <kanban class="o_kanban_small_column">
+
+                <field name="name"/>
+                <field name="description"/>
+                <field name="student_ids"/>
+                <field name="course_ids"/>
+
+                <templates>
+                    <t t-name="card">
+                        <div class="o_kanban_card oe_kanban_global_click shadow-sm rounded p-3">
+
+                            <!-- Header -->
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="me-2">
+                                    <i class="fa fa-graduation-cap fa-2x text-primary"/>
+                                </div>
+                                <div>
+                                    <strong class="fs-5"><field name="name"/></strong>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="text-muted mb-3">
+                                <field name="description"/>
+                            </div>
+
+                            <!-- Stats -->
+                            <div class="d-flex justify-content-between mt-2">
+                                <div class="badge bg-info text-dark p-2">
+                                    <i class="fa fa-graduation-cap me-1"/>
+                                    <t t-esc="record.student_ids.raw_value.length"/> Étudiants
+                                </div>
+                                <div class="badge bg-success p-2">
+                                    <i class="fa fa-book me-1"/>
+                                    <t t-esc="record.course_ids.raw_value.length"/> Cours
+                                </div>
+                            </div>
+
+                            <!-- Simple button pour action -->
+                            <div class="mt-3">
+                                <button type="object"
+                                        name="action_open_courses"
+                                        class="btn btn-sm btn-primary w-100">
+                                    Voir les Cours
+                                </button>
+                            </div>
+
+                        </div>
+                    </t>
+                </templates>
+
+            </kanban>
+
+        </field>
+    </record>
+
+    <!-- ================= LISTE : compteurs au lieu de tags ================= -->
+    <record id="ixzdigii_view_digii_class_list" model="ir.ui.view">
+        <field name="name">ixzdigii.digii.class.list</field>
+        <field name="model">digii.class</field>
+        <field name="arch" type="xml">
+
+            <list>
+                <field name="name" string="Classe"/>
+                <field name="student_count" string="Étudiants"/>
+                <field name="course_count" string="Cours"/>
+                <field name="description" optional="hide"/>
+            </list>
+
+        </field>
+    </record>
+
+    <record id="ixzdigii_action_digii_class" model="ir.actions.act_window">
+        <field name="name">Classes</field>
+        <field name="res_model">digii.class</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+</odoo>

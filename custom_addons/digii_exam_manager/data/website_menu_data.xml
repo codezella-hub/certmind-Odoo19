@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Liens dans la barre de navigation du site -->
+    <record id="menu_website_my_exams" model="website.menu">
+        <field name="name">My Exams</field>
+        <field name="url">/my/exams</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="menu_website_my_certificates" model="website.menu">
+        <field name="name">My Certificates</field>
+        <field name="url">/my/certificates</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence">61</field>
+    </record>
+
+</odoo>

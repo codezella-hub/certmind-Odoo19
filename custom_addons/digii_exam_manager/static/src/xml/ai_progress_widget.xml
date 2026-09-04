@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="digii_exam_manager.AiProgressWidget">
+        <div class="o_ai_progress_widget">
+
+            <!-- ETAT : pas encore analyse -->
+            <div t-if="state.analysisState === 'not_started'" class="text-center py-3">
+                <button class="btn btn-primary btn-lg"
+                        t-on-click="onAnalyzeClick"
+                        t-att-disabled="state.launching">
+                    <i class="fa fa-shield me-2"/>
+                    <span t-if="!state.launching">Analyser la vidéo (IA)</span>
+                    <span t-else="">Lancement...</span>
+                </button>
+                <p class="text-muted mt-2 mb-0">
+                    Lance la détection de triche par intelligence artificielle.
+                </p>
+            </div>
+
+            <!-- ETAT : analyse en cours (barre de progression animee) -->
+            <div t-if="state.analysisState === 'processing'" class="py-3">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fa fa-spinner fa-spin text-primary me-2"/>
+                    <strong>Analyse en cours...</strong>
+                    <span class="ms-auto badge bg-primary"
+                          t-esc="state.progress + '%'"/>
+                </div>
+                <div class="progress" style="height: 24px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                         role="progressbar"
+                         t-att-style="'width: ' + state.progress + '%;'"
+                         t-att-aria-valuenow="state.progress"
+                         aria-valuemin="0" aria-valuemax="100">
+                        <span t-esc="state.progress + '%'"/>
+                    </div>
+                </div>
+                <p class="text-muted mt-2 mb-0 small">
+                    Détection des visages, objets et voix... Le résultat
+                    s'affichera automatiquement.
+                </p>
+            </div>
+
+            <!-- ETAT : termine (resultat) -->
+            <div t-if="state.analysisState === 'done'" class="py-2">
+                <div class="row align-items-center text-center">
+                    <div class="col-4">
+                        <div style="font-size: 2.2rem; font-weight: bold;"
+                             t-att-class="riskColorClass">
+                            <t t-esc="state.riskScore"/><span style="font-size: 1rem;">/100</span>
+                        </div>
+                        <small class="text-muted">Score de risque</small>
+                    </div>
+                    <div class="col-4">
+                        <div style="font-size: 1.2rem; font-weight: bold;"
+                             t-att-class="riskColorClass"
+                             t-esc="riskLevelLabel"/>
+                        <small class="text-muted d-block">Niveau</small>
+                    </div>
+                    <div class="col-4">
+                        <div style="font-size: 1.8rem; font-weight: bold;"
+                             t-esc="state.alertsCount"/>
+                        <small class="text-muted">Alertes</small>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 10px;">
+                    <div class="progress-bar"
+                         t-att-class="progressBarClass"
+                         role="progressbar"
+                         t-att-style="'width: ' + state.riskScore + '%;'"/>
+                </div>
+                <div class="text-center mt-3">
+                    <button class="btn btn-sm btn-outline-secondary"
+                            t-on-click="onAnalyzeClick">
+                        <i class="fa fa-refresh me-1"/>Relancer l'analyse
+                    </button>
+                </div>
+            </div>
+
+            <!-- ETAT : erreur -->
+            <div t-if="state.analysisState === 'error'"
+                 class="alert alert-danger py-2 mb-0">
+                <i class="fa fa-exclamation-triangle me-2"/>
+                <span t-esc="state.errorMsg || 'L\'analyse a échoué.'"/>
+                <button class="btn btn-sm btn-outline-danger ms-3"
+                        t-on-click="onAnalyzeClick">
+                    Réessayer
+                </button>
+            </div>
+
+            <!-- Message d'erreur transitoire -->
+            <div t-if="state.errorMsg and state.analysisState !== 'error'"
+                 class="text-danger small mt-2">
+                <t t-esc="state.errorMsg"/>
+            </div>
+
+        </div>
+    </t>
+
+</templates>

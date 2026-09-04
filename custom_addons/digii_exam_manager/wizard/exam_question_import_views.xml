@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_exam_question_import_form" model="ir.ui.view">
+        <field name="name">exam.question.import.form</field>
+        <field name="model">exam.question.import</field>
+        <field name="arch" type="xml">
+            <form string="Importer des questions">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Importer des questions dans la banque</h1>
+                    </div>
+
+                    <!-- Résultat après import -->
+                    <div invisible="not result_message">
+                        <field name="result_message" readonly="1"
+                               nolabel="1"
+                               style="white-space:pre-wrap;font-family:monospace;"/>
+                        <button name="action_view_bank" type="object"
+                                string="Voir la banque de questions"
+                                class="btn-primary" icon="fa-database"/>
+                    </div>
+
+                    <!-- Formulaire d'import -->
+                    <group invisible="result_message">
+                        <group>
+                            <field name="import_file" filename="import_filename"
+                                   required="1"/>
+                            <field name="import_filename" invisible="1"/>
+                            <field name="default_category_id"
+                                   options="{'no_create_edit': True}"/>
+                            <field name="create_missing_categories"/>
+                            <field name="skip_duplicates"/>
+                        </group>
+                        <group>
+                            <div class="alert alert-info" role="alert"
+                                 style="margin:0;">
+                                <p><b>Format attendu</b> (1re ligne = en-têtes) :</p>
+                                <p style="font-family:monospace;font-size:12px;">
+                                    category | subcategory | difficulty | type |
+                                    question | choice_a … choice_e | correct
+                                </p>
+                                <p class="mb-1">
+                                    <i class="fa fa-info-circle me-1"/>
+                                    <b>correct</b> = lettre(s), ex. « A » ou « A,C ».
+                                </p>
+                                <button name="action_download_template" type="object"
+                                        string="Télécharger le modèle Excel"
+                                        class="btn-secondary btn-sm" icon="fa-download"/>
+                            </div>
+                        </group>
+                    </group>
+                </sheet>
+                <footer invisible="result_message">
+                    <button name="action_import" type="object"
+                            string="Importer" class="btn-primary" icon="fa-upload"/>
+                    <button string="Annuler" class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+                <footer invisible="not result_message">
+                    <button string="Fermer" class="btn-primary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_exam_question_import" model="ir.actions.act_window">
+        <field name="name">Importer des questions</field>
+        <field name="res_model">exam.question.import</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

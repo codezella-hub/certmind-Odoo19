@@ -1,73 +1,87 @@
-version: "3.8"
+# ─────────────────────────────────────────────────────────────────
+# docker-compose.yml — DÉVELOPPEMENT LOCAL
+#
+# Odoo est rattaché à DEUX réseaux :
+#   - certmind_net : son propre réseau, avec PostgreSQL
+#   - livekit_net  : le réseau externe où tournent LiveKit, Redis et Minio
+#
+# Sans ce second réseau, Odoo ne peut pas joindre LiveKit et le
+# proctoring affiche « LiveKit disconnected ».
+#
+# Usage :
+#   docker compose up -d --build
+#   docker compose logs -f odoo
+#   docker compose down
+# ─────────────────────────────────────────────────────────────────
 
 services:
 
-  # ─────────────────────────────────────────
-  # PostgreSQL 16
-  # ─────────────────────────────────────────
   db:
     image: postgres:16
-    container_name: odoo19_db
+    container_name: certmind_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: odoo
-      POSTGRES_PASSWORD: odoo
-      POSTGRES_DB: odoo
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB:       ${POSTGRES_DB}
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - odoo19_db_data:/var/lib/postgresql/data
+      - certmind_db_data:/var/lib/postgresql/data
     networks:
-      - odoo19_net
+      - certmind_net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # ─────────────────────────────────────────
-  # Odoo 19
-  # ─────────────────────────────────────────
   odoo:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: odoo19_app
+    image: certmind-odoo:local
+    container_name: certmind_app
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     ports:
-      # Host 8070 → Container 8069
-      # Évite le conflit avec ton Odoo local sur 8069
-      - "8070:8069"
+      - "${ODOO_PORT}:8069"
     environment:
-      HOST: db
-      PORT: 5432
-      USER: odoo
-      PASSWORD: odoo
+      DB_HOST:     ${DB_HOST}
+      DB_PORT:     ${DB_PORT}
+      DB_USER:     ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSLMODE:  ${DB_SSLMODE}
+      ODOO_ADMIN_PASSWD: ${ODOO_ADMIN_PASSWD}
+      ODOO_WORKERS:      ${ODOO_WORKERS}
+      ODOO_LOG_LEVEL:    ${ODOO_LOG_LEVEL}
+      # Limite les threads d'OpenBLAS (numpy, torch, mediapipe).
+      # Sans cela, pthread_create échoue et Odoo meurt silencieusement
+      # au chargement des librairies IA.
+      OPENBLAS_NUM_THREADS: 1
+      OMP_NUM_THREADS: 1
+      MKL_NUM_THREADS: 1
+      NUMEXPR_NUM_THREADS: 1
     volumes:
-      # Custom addons (live reload en dev)
       - ./custom_addons:/mnt/extra-addons
-      # Odoo filestore & sessions
-      - odoo19_web_data:/var/lib/odoo
-      # Config
-      - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
+      - certmind_web_data:/var/lib/odoo
     networks:
-      - odoo19_net
+      - certmind_net
+      - livekit_net
 
-# ─────────────────────────────────────────
-# Volumes persistants
-# ─────────────────────────────────────────
 volumes:
-  odoo19_db_data:
-    name: odoo19_db_data
-  odoo19_web_data:
-    name: odoo19_web_data
+  certmind_db_data:
+  certmind_web_data:
 
-# ─────────────────────────────────────────
-# Réseau isolé
-# ─────────────────────────────────────────
 networks:
-  odoo19_net:
-    name: odoo19_net
+  certmind_net:
     driver: bridge
+
+  # Réseau EXTERNE : celui créé par le docker-compose de LiveKit,
+  # où tournent livekit, livekit-egress, redis et minio.
+  # Sans ce rattachement, Odoo ne peut pas résoudre le nom « livekit »
+  # et le proctoring affiche « LiveKit disconnected ».
+  livekit_net:
+    external: true
+    name: digii_exam_manager_exam_net

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--
+            LiveKit : parametres de connexion.
+            En dev : livekit-server sur localhost:7880
+            En prod : remplacer via Settings > Technical > System Parameters
+        -->
+        <record id="livekit_url_param" model="ir.config_parameter">
+            <field name="key">digii_exam_manager.livekit_url</field>
+            <field name="value">ws://localhost:7880</field>
+        </record>
+        <record id="livekit_api_key_param" model="ir.config_parameter">
+            <field name="key">digii_exam_manager.livekit_api_key</field>
+            <field name="value">devkey</field>
+        </record>
+        <record id="livekit_api_secret_param" model="ir.config_parameter">
+            <field name="key">digii_exam_manager.livekit_api_secret</field>
+            <field name="value">p919yuLsAbqLWtT5BjlxznGVD7lBPAzAznI5zFIoWYS3hzmX</field>
+        </record>
+
+        <!--
+            Minio : stockage des videos MP4 enregistrees par Egress.
+
+            minio_endpoint   = URL interne Docker (http://minio:9000)
+                               ou externe (https://minio.mondomaine.com)
+            minio_public_url = URL accessible par le navigateur
+                               du procteur pour lire la video.
+                               En dev  = http://localhost:9000
+                               En prod = https://minio.mondomaine.com
+        -->
+        <record id="minio_endpoint_param" model="ir.config_parameter">
+            <field name="key">digii_exam_manager.minio_endpoint</field>
+            <field name="value">http://minio:9000</field>
+        </record>
+        <record id="minio_access_key_param" model="ir.config_parameter">
+            <field name="key">digii_exam_manager.minio_access_key</field>
+            <field name="value">minioadmin</field>
+        </record>
+        <record id="minio_secret_key_param" model="ir.config_parameter">
+            <field name="key">digii_exam_manager.minio_secret_key</field>
+            <field name="value">minioadmin</field>
+        </record>
+        <record id="minio_bucket_param" model="ir.config_parameter">
+            <field name="key">digii_exam_manager.minio_bucket</field>
+            <field name="value">exam-recordings</field>
+        </record>
+        <record id="minio_public_url_param" model="ir.config_parameter">
+            <field name="key">digii_exam_manager.minio_public_url</field>
+            <field name="value">http://localhost:9000</field>
+        </record>
+        <!-- Endpoint Minio VU PAR EGRESS (container Docker interne) -->
+        <!-- Ne pas changer sauf si Minio est sur un serveur externe -->
+        <record id="minio_docker_endpoint_param" model="ir.config_parameter">
+            <field name="key">digii_exam_manager.minio_docker_endpoint</field>
+            <field name="value">http://minio:9000</field>
+        </record>
+
+        <!-- URL du microservice d'analyse IA (proctoring) -->
+        <!-- Meme machine : http://localhost:8000 -->
+        <!-- Serveur separe : http://IP_DU_SERVEUR:8000 -->
+        <record id="proctoring_ai_url_param" model="ir.config_parameter">
+            <field name="key">digii_exam_manager.proctoring_ai_url</field>
+            <field name="value">http://localhost:8000</field>
+        </record>
+    </data>
+</odoo>

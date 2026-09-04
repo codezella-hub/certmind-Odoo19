@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!-- ==================================================================
+         FORM
+         ================================================================== -->
+    <record id="exam_category_view_form" model="ir.ui.view">
+        <field name="name">exam.category.view.form</field>
+        <field name="model">exam.category</field>
+        <field name="arch" type="xml">
+            <form string="Catégorie">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_bank_questions"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-question-circle">
+                            <field name="question_count" widget="statinfo" string="Questions"/>
+                        </button>
+                    </div>
+
+                    <!-- Bandeau d'info pour les sous-categories -->
+                    <div class="alert alert-info mb-3"
+                         role="alert"
+                         invisible="not parent_id">
+                        <i class="fa fa-info-circle me-1"/>
+                        Cette catégorie est une <b>sous-catégorie</b> de
+                        <field name="parent_id" readonly="1" nolabel="1" class="ms-1" options="{'no_open': True}"/>
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="ex: Python, SQL, Réseau..."/></h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="parent_id"
+                                   options="{'no_create_edit': True, 'no_quick_create': True}"
+                                   help="Si rempli, cette catégorie devient une sous-catégorie."/>
+                            <field name="color" widget="color_picker"/>
+                            <field name="active"/>
+                            <field name="is_subcategory" invisible="1"/>
+                            <field name="parent_path" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="description" nolabel="1"
+                                   placeholder="Description de la catégorie..."/>
+                        </group>
+                    </group>
+
+                    <!-- Notebook : sous-categories (visible uniquement pour
+                         les categories parentes, pas pour les sous-cats) -->
+                    <notebook invisible="parent_id">
+                        <page string="Sous-catégories" name="subcategories">
+                            <field name="child_ids" context="{'default_parent_id': id}">
+                                <list editable="bottom" string="Sous-catégories">
+                                    <field name="name" placeholder="ex: POO, Décorateurs, Async..."/>
+                                    <field name="description"/>
+                                    <field name="color" widget="color_picker" optional="show"/>
+                                    <field name="question_count" string="Questions" readonly="1"/>
+                                    <field name="active" optional="hide"/>
+                                </list>
+                            </field>
+                            <p class="text-muted mt-2">
+                                <i class="fa fa-info-circle me-1"/>
+                                Les sous-catégories permettent un filtrage plus précis
+                                lors de la génération d'examens
+                                (ex: <i>Python &gt; POO</i> au lieu de juste <i>Python</i>).
+                            </p>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ==================================================================
+         LIST (vue par defaut, plate)
+         ================================================================== -->
+    <record id="exam_category_view_list" model="ir.ui.view">
+        <field name="name">exam.category.view.list</field>
+        <field name="model">exam.category</field>
+        <field name="arch" type="xml">
+            <list string="Catégories" decoration-muted="is_subcategory">
+                <field name="display_name" string="Catégorie"/>
+                <field name="parent_id" string="Catégorie parente" optional="show"/>
+                <field name="child_count" string="Sous-cats" optional="show"/>
+                <field name="question_count" string="Questions"/>
+                <field name="active" optional="hide"/>
+                <field name="is_subcategory" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ==================================================================
+         SEARCH
+         ================================================================== -->
+    <record id="exam_category_view_search" model="ir.ui.view">
+        <field name="name">exam.category.view.search</field>
+        <field name="model">exam.category</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher une catégorie">
+                <field name="name"/>
+                <field name="parent_id"/>
+                <separator/>
+                <filter name="filter_top_level"
+                        string="Catégories principales"
+                        domain="[('parent_id', '=', False)]"/>
+                <filter name="filter_subcategories"
+                        string="Sous-catégories"
+                        domain="[('parent_id', '!=', False)]"/>
+                <separator/>
+                <filter name="filter_active"
+                        string="Actives"
+                        domain="[('active', '=', True)]"/>
+                <filter name="filter_inactive"
+                        string="Archivees"
+                        domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_parent"
+                            string="Catégorie parente"
+                            context="{'group_by':'parent_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ==================================================================
+         ACTION : Categories (vue par defaut groupee par parent)
+         ================================================================== -->
+    <record id="action_exam_category" model="ir.actions.act_window">
+        <field name="name">Catégories</field>
+        <field name="res_model">exam.category</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="exam_category_view_search"/>
+        <field name="context">{'search_default_group_parent': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez votre première catégorie de questions
+            </p>
+            <p>
+                Les catégories peuvent être organisées en 2 niveaux :<br/>
+                <b>Catégorie principale</b> (ex: Python) <br/>
+                &#160;&#160;└ <b>Sous-catégorie</b> (ex: POO, Décorateurs, Async)
+            </p>
+        </field>
+    </record>
+
+</data>
+</odoo>

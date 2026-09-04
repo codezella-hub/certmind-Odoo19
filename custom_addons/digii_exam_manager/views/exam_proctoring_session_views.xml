@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <record id="exam_proctoring_session_view_form" model="ir.ui.view">
+        <field name="name">exam.proctoring.session.view.form</field>
+        <field name="model">exam.proctoring.session</field>
+        <field name="arch" type="xml">
+            <form string="Session de proctoring">
+                <header>
+                    <button name="action_authorize"
+                            string="Autoriser"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'waiting'"/>
+                    <button name="action_analyze_video"
+                            string="Analyser la vidéo (IA)"
+                            type="object"
+                            class="btn-primary"
+                            invisible="not has_video_recording"/>
+                    <button name="action_fetch_ai_result"
+                            string="Récupérer le résultat"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="ai_analysis_state != 'processing'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="waiting,authorized,in_exam,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+
+                    <div class="alert alert-danger" role="alert"
+                         invisible="state != 'rejected'">
+                        <strong>Session rejetee</strong>
+                        <field name="rejection_reason" readonly="1" nolabel="1"
+                               class="d-block mt-1"/>
+                    </div>
+
+                    <group>
+                        <group string="Examen">
+                            <field name="survey_id"/>
+                            <field name="user_input_id"/>
+                        </group>
+                        <group string="Candidat">
+                            <field name="partner_id"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Proctoring">
+                            <field name="proctor_id"/>
+                            <field name="date_authorized"/>
+                            <field name="date_exam_start"/>
+                            <field name="date_completed"/>
+                        </group>
+                        <group string="Technique">
+                            <field name="access_token"/>
+                            <field name="egress_id" readonly="1"
+                                   invisible="not egress_id"/>
+                        </group>
+                    </group>
+
+                    <!-- Enregistrement video -->
+                    <group string="Enregistrement video"
+                           invisible="not has_video_recording">
+                        <field name="has_video_recording" invisible="1"/>
+                        <field name="video_filename" invisible="1"/>
+
+                        <!-- Enregistrement local (WebM navigateur) -->
+                        <field name="video_recording"
+                               filename="video_filename"
+                               widget="binary"
+                               string="Enregistrement (télécharger)"
+                               invisible="not video_recording"/>
+                        <div colspan="2" invisible="not video_recording">
+                            <button name="action_open_video" type="object"
+                                    class="btn btn-primary btn-sm" icon="fa-play">
+                                Lire la vidéo
+                            </button>
+                        </div>
+
+                        <!-- Enregistrement Egress/Minio (si utilisé) -->
+                        <field name="video_minio_key" readonly="1"
+                               string="Fichier dans Minio"
+                               invisible="not video_minio_key"/>
+                        <div colspan="2" class="text-muted"
+                             invisible="not video_minio_key">
+                            <i class="fa fa-info-circle me-1"/>
+                            La video MP4 est stockee dans Minio.
+                            Consultez la fiche Certificat pour la visionner et valider.
+                        </div>
+                        <div colspan="2" invisible="not certificate_id">
+                            <field name="certificate_id" readonly="1"
+                                   string="Certificat lie"/>
+                        </div>
+                    </group>
+
+                    <!-- Analyse IA (proctoring) -->
+                    <group string="Analyse IA (détection de triche)"
+                           invisible="ai_analysis_state == 'not_started'">
+                        <group>
+                            <field name="ai_analysis_state"/>
+                            <field name="ai_risk_score"
+                                   widget="progressbar"
+                                   invisible="ai_analysis_state != 'done'"/>
+                            <field name="ai_risk_level"
+                                   invisible="ai_analysis_state != 'done'"/>
+                            <field name="ai_alerts_count"
+                                   invisible="ai_analysis_state != 'done'"/>
+                        </group>
+                        <group>
+                            <field name="ai_report_filename" invisible="1"/>
+                            <field name="ai_report"
+                                   filename="ai_report_filename"
+                                   string="Rapport PDF"
+                                   invisible="not ai_report"/>
+                        </group>
+                    </group>
+
+                    <group string="Analyse en langage naturel (LLM)"
+                           invisible="not ai_conclusion">
+                        <field name="ai_conclusion" nolabel="1" readonly="1"/>
+                        <separator string="Interprétation des signaux"/>
+                        <field name="ai_interpretation" nolabel="1" readonly="1"/>
+                        <separator string="Recommandation au procteur"/>
+                        <field name="ai_recommendation" nolabel="1" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="exam_proctoring_session_view_list" model="ir.ui.view">
+        <field name="name">exam.proctoring.session.view.list</field>
+        <field name="model">exam.proctoring.session</field>
+        <field name="arch" type="xml">
+            <list string="Sessions de proctoring"
+                  decoration-warning="state == 'waiting'"
+                  decoration-success="state == 'authorized'"
+                  decoration-info="state == 'in_exam'"
+                  decoration-muted="state in ('completed', 'expired')"
+                  decoration-danger="state == 'rejected'">
+                <field name="name"/>
+                <field name="partner_id" string="Candidat"/>
+                <field name="survey_id" string="Examen"/>
+                <field name="state" string="Statut" widget="badge"
+                       decoration-warning="state == 'waiting'"
+                       decoration-success="state == 'authorized'"
+                       decoration-info="state == 'in_exam'"
+                       decoration-danger="state == 'rejected'"/>
+                <field name="has_video_recording" string="Video" widget="boolean_toggle" optional="show"/>
+                <field name="proctor_id" string="Procteur" optional="show"/>
+                <field name="create_date" string="Date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="exam_proctoring_session_view_search" model="ir.ui.view">
+        <field name="name">exam.proctoring.session.view.search</field>
+        <field name="model">exam.proctoring.session</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher">
+                <field name="partner_id"/>
+                <field name="survey_id"/>
+                <separator/>
+                <filter name="filter_waiting" string="En attente"
+                        domain="[('state','=','waiting')]"/>
+                <filter name="filter_authorized" string="Autorises"
+                        domain="[('state','=','authorized')]"/>
+                <filter name="filter_in_exam" string="En examen"
+                        domain="[('state','=','in_exam')]"/>
+                <filter name="filter_active" string="Actifs"
+                        domain="[('state','in',('waiting','authorized','in_exam'))]"/>
+                <group>
+                    <filter name="group_state" string="Statut"
+                            context="{'group_by':'state'}"/>
+                    <filter name="group_survey" string="Examen"
+                            context="{'group_by':'survey_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_exam_proctoring_session" model="ir.actions.act_window">
+        <field name="name">Sessions de proctoring</field>
+        <field name="res_model">exam.proctoring.session</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="exam_proctoring_session_view_search"/>
+        <field name="context">{'search_default_filter_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune session de proctoring
+            </p>
+            <p>
+                Les sessions sont creees automatiquement quand un candidat
+                entre dans la salle d'attente d'un examen avec proctoring.
+            </p>
+        </field>
+    </record>
+
+</data>
+</odoo>

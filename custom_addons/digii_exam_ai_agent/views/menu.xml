@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!--
+            Entree "Assistant IA" sous le menu Examens du LMS.
+            Pointe vers la vue de validation en masse des questions proposees.
+            Le panneau conversationnel, lui, s'ouvre depuis les boutons
+            contextuels (fiche examen / systray).
+        -->
+        <menuitem id="menu_lms_exam_ai_review"
+                  name="Assistant IA (validation)"
+                  parent="digii_lms.menu_lms_exams_section"
+                  action="action_ai_question_review"
+                  sequence="35"/>
+
+        <!-- Sessions IA (trace/debug) sous la config -->
+        <menuitem id="menu_lms_exam_ai_sessions"
+                  name="Sessions IA"
+                  parent="digii_lms.menu_lms_exams_section"
+                  action="action_ai_generation_session"
+                  sequence="36"/>
+
+    </data>
+</odoo>

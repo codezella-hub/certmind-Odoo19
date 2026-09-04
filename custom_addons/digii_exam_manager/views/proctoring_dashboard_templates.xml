@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!-- ============================================================ -->
+    <!-- Dashboard Procteur : Grille de caméras                        -->
+    <!-- ============================================================ -->
+    <template id="proctoring_dashboard" name="Dashboard Proctoring">
+        <t t-call="web.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <style>
+                :root {
+                    --pd-bg: #0B0F19;
+                    --pd-surface: #151B2B;
+                    --pd-surface-hover: #1C2438;
+                    --pd-border: #1E293B;
+                    --pd-accent: #2C5F8D;
+                    --pd-success: #10B981;
+                    --pd-danger: #EF4444;
+                    --pd-warning: #F59E0B;
+                    --pd-text: #E2E8F0;
+                    --pd-text-muted: #64748B;
+                    --pd-radius: 12px;
+                }
+
+                * { box-sizing: border-box; }
+
+                body, html {
+                    background: var(--pd-bg) !important;
+                    color: var(--pd-text);
+                    overflow-x: hidden;
+                }
+
+                .pd-layout {
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                /* Top Bar */
+                .pd-topbar {
+                    background: var(--pd-surface);
+                    border-bottom: 1px solid var(--pd-border);
+                    padding: 14px 28px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    position: sticky;
+                    top: 0;
+                    z-index: 100;
+                }
+                .pd-topbar-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                }
+                .pd-topbar-logo {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: #fff;
+                    letter-spacing: -0.3px;
+                }
+                .pd-topbar-logo i {
+                    font-size: 20px;
+                    color: var(--pd-accent);
+                }
+                .pd-topbar-divider {
+                    width: 1px;
+                    height: 24px;
+                    background: var(--pd-border);
+                }
+                .pd-exam-name {
+                    font-size: 14px;
+                    color: var(--pd-text-muted);
+                    font-weight: 500;
+                }
+                .pd-topbar-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                }
+                .pd-counter {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 6px 14px;
+                    background: rgba(59, 130, 246, 0.1);
+                    border: 1px solid rgba(59, 130, 246, 0.2);
+                    border-radius: 8px;
+                    font-size: 13px;
+                    color: var(--pd-accent);
+                    font-weight: 600;
+                }
+                .pd-counter .count-num {
+                    font-size: 18px;
+                    font-weight: 800;
+                }
+                .pd-btn-back {
+                    padding: 8px 16px;
+                    background: var(--pd-surface-hover);
+                    border: 1px solid var(--pd-border);
+                    border-radius: 8px;
+                    color: var(--pd-text);
+                    font-size: 13px;
+                    text-decoration: none;
+                    transition: all 0.2s;
+                }
+                .pd-btn-back:hover {
+                    background: var(--pd-border);
+                    color: #fff;
+                    text-decoration: none;
+                }
+
+                /* Main Grid */
+                .pd-main {
+                    flex: 1;
+                    padding: 24px;
+                }
+                .pd-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+                    gap: 20px;
+                }
+
+                /* Session Card */
+                .pd-card {
+                    background: var(--pd-surface);
+                    border: 1px solid var(--pd-border);
+                    border-radius: var(--pd-radius);
+                    overflow: hidden;
+                    transition: all 0.3s;
+                }
+                .pd-card:hover {
+                    border-color: var(--pd-accent);
+                    box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+                }
+                .pd-card.authorized {
+                    border-color: var(--pd-success);
+                    box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+                }
+                .pd-card.rejected {
+                    border-color: var(--pd-danger);
+                    opacity: 0.5;
+                }
+                .pd-card.excluded {
+                    border-color: #d97706 !important;
+                    opacity: 0.5;
+                    transform: scale(0.97);
+                    transition: all 0.4s ease;
+                }
+
+                /* Card header */
+                .pd-card-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 16px;
+                    border-bottom: 1px solid var(--pd-border);
+                }
+                .pd-candidate-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .pd-avatar {
+                    width: 36px; height: 36px;
+                    border-radius: 50%;
+                    background: var(--pd-accent);
+                    color: #fff;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 700;
+                    font-size: 14px;
+                }
+                .pd-candidate-name {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #fff;
+                }
+                .pd-candidate-email {
+                    font-size: 11px;
+                    color: var(--pd-text-muted);
+                }
+                .pd-state-badge {
+                    padding: 4px 10px;
+                    border-radius: 6px;
+                    font-size: 11px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                .pd-state-badge.waiting {
+                    background: rgba(245, 158, 11, 0.15);
+                    color: var(--pd-warning);
+                }
+                .pd-state-badge.authorized {
+                    background: rgba(16, 185, 129, 0.15);
+                    color: var(--pd-success);
+                }
+                .pd-state-badge.in_exam {
+                    background: rgba(59, 130, 246, 0.15);
+                    color: var(--pd-accent);
+                }
+
+                /* Video area */
+                .pd-video-area {
+                    position: relative;
+                    aspect-ratio: 4/3;
+                    background: #000;
+                    overflow: hidden;
+                }
+                .pd-video-area img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                }
+                .pd-video-area .pd-no-feed {
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--pd-text-muted);
+                    font-size: 13px;
+                }
+                .pd-no-feed i {
+                    font-size: 32px;
+                    margin-bottom: 8px;
+                    opacity: 0.4;
+                }
+
+                /* Time stamp overlay */
+                .pd-timestamp {
+                    position: absolute;
+                    bottom: 8px;
+                    right: 8px;
+                    padding: 3px 8px;
+                    background: rgba(0,0,0,0.65);
+                    color: #fff;
+                    font-size: 10px;
+                    border-radius: 4px;
+                    font-family: 'Courier New', monospace;
+                }
+
+                /* Card actions */
+                .pd-card-actions {
+                    display: flex;
+                    gap: 8px;
+                    padding: 12px 16px;
+                    border-top: 1px solid var(--pd-border);
+                }
+                .pd-btn {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                    padding: 10px 16px;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .pd-btn-authorize {
+                    background: var(--pd-success);
+                    color: #fff;
+                }
+                .pd-btn-authorize:hover {
+                    background: #059669;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+                }
+                .pd-btn-reject {
+                    background: rgba(239, 68, 68, 0.15);
+                    color: var(--pd-danger);
+                    border: 1px solid rgba(239, 68, 68, 0.25);
+                }
+                .pd-btn-reject:hover {
+                    background: var(--pd-danger);
+                    color: #fff;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+                }
+                .pd-btn-exclude {
+                    background: rgba(245, 158, 11, 0.15);
+                    color: #d97706;
+                    border: 1px solid rgba(245, 158, 11, 0.3);
+                }
+                .pd-btn-exclude:hover {
+                    background: #d97706;
+                    color: #fff;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+                }
+                .pd-btn:disabled {
+                    opacity: 0.4;
+                    cursor: not-allowed;
+                    transform: none !important;
+                    box-shadow: none !important;
+                }
+
+                /* Empty state */
+                .pd-empty {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 50vh;
+                    color: var(--pd-text-muted);
+                    text-align: center;
+                }
+                .pd-empty i {
+                    font-size: 64px;
+                    opacity: 0.15;
+                    margin-bottom: 20px;
+                }
+                .pd-empty h4 {
+                    color: var(--pd-text);
+                    font-size: 18px;
+                    margin: 0 0 8px;
+                }
+                .pd-empty p {
+                    font-size: 14px;
+                    margin: 0;
+                }
+
+                /* Reject modal */
+                .pd-modal-overlay {
+                    display: none;
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0,0,0,0.7);
+                    z-index: 1000;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .pd-modal-overlay.visible {
+                    display: flex;
+                }
+                .pd-modal {
+                    background: var(--pd-surface);
+                    border: 1px solid var(--pd-border);
+                    border-radius: var(--pd-radius);
+                    padding: 28px;
+                    width: 90%;
+                    max-width: 440px;
+                }
+                .pd-modal h4 {
+                    color: #fff;
+                    font-size: 18px;
+                    margin: 0 0 6px;
+                }
+                .pd-modal p {
+                    color: var(--pd-text-muted);
+                    font-size: 13px;
+                    margin: 0 0 18px;
+                }
+                .pd-modal textarea {
+                    width: 100%;
+                    background: var(--pd-bg);
+                    border: 1px solid var(--pd-border);
+                    border-radius: 8px;
+                    color: var(--pd-text);
+                    padding: 12px;
+                    font-size: 14px;
+                    resize: vertical;
+                    min-height: 80px;
+                    margin-bottom: 16px;
+                }
+                .pd-modal textarea:focus {
+                    outline: none;
+                    border-color: var(--pd-accent);
+                }
+                .pd-modal-actions {
+                    display: flex;
+                    gap: 10px;
+                    justify-content: flex-end;
+                }
+                .pd-modal-btn {
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .pd-modal-btn.cancel {
+                    background: var(--pd-surface-hover);
+                    color: var(--pd-text);
+                }
+                .pd-modal-btn.confirm {
+                    background: var(--pd-danger);
+                    color: #fff;
+                }
+            </style>
+
+            <div class="pd-layout">
+                <!-- Top Bar -->
+                <div class="pd-topbar">
+                    <div class="pd-topbar-left">
+                        <div class="pd-topbar-logo">
+                            <i class="fa fa-shield"/>
+                            Proctoring
+                        </div>
+                        <div class="pd-topbar-divider"/>
+                        <span class="pd-exam-name">
+                            <t t-out="exam.title"/>
+                        </span>
+                    </div>
+                    <div class="pd-topbar-right">
+                        <div class="pd-counter">
+                            <i class="fa fa-users"/>
+                            <span class="count-num" id="sessionCount">
+                                <t t-out="len(sessions)"/>
+                            </span>
+                            candidat(s) connecté(s)
+                        </div>
+                        <a href="/web" class="pd-btn-back">
+                            <i class="fa fa-arrow-left me-1"/> Retour Odoo
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Main content -->
+                <div class="pd-main">
+                    <!-- Grid -->
+                    <div class="pd-grid" id="sessionsGrid">
+                        <t t-foreach="sessions" t-as="s">
+                            <div class="pd-card" t-attf-id="card-#{s.id}"
+                                 t-attf-data-state="#{s.state}">
+                                <!-- Header -->
+                                <div class="pd-card-header">
+                                    <div class="pd-candidate-info">
+                                        <div class="pd-avatar">
+                                            <t t-out="(s.partner_id.name or 'X')[0].upper()"/>
+                                        </div>
+                                        <div>
+                                            <div class="pd-candidate-name">
+                                                <t t-out="s.partner_id.name"/>
+                                            </div>
+                                            <div class="pd-candidate-email">
+                                                <t t-out="s.partner_id.email or ''"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span t-attf-class="pd-state-badge #{s.state}"
+                                          t-attf-id="badge-#{s.id}">
+                                        <t t-if="s.state == 'waiting'">En attente</t>
+                                        <t t-if="s.state == 'authorized'">Autorisé</t>
+                                        <t t-if="s.state == 'in_exam'">En examen</t>
+                                    </span>
+                                </div>
+
+                                <!-- Video feed (live WebRTC only, injected via JS) -->
+                                <div class="pd-video-area" t-attf-id="video-area-#{s.id}">
+                                    <div class="pd-no-feed" t-attf-id="no-feed-#{s.id}">
+                                        <i class="fa fa-video-camera"/>
+                                        En attente du flux vidéo...
+                                    </div>
+                                    <div class="pd-timestamp" t-attf-id="ts-#{s.id}"/>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="pd-card-actions" t-attf-id="actions-#{s.id}">
+                                    <t t-if="s.state == 'waiting'">
+                                        <button class="pd-btn pd-btn-authorize"
+                                                t-attf-data-session-id="#{s.id}" data-action="authorize">
+                                            <i class="fa fa-check"/>
+                                            Autoriser
+                                        </button>
+                                        <button class="pd-btn pd-btn-reject"
+                                                t-attf-data-session-id="#{s.id}" data-action="reject">
+                                            <i class="fa fa-times"/>
+                                            Rejeter
+                                        </button>
+                                    </t>
+                                    <t t-if="s.state == 'authorized'">
+                                        <button class="pd-btn pd-btn-authorize" disabled="disabled">
+                                            <i class="fa fa-check-circle"/>
+                                            Autorisé
+                                        </button>
+                                    </t>
+                                    <t t-if="s.state == 'in_exam'">
+                                        <button class="pd-btn pd-btn-authorize" disabled="disabled"
+                                                style="background: rgba(59,130,246,0.15); color: var(--pd-accent);">
+                                            <i class="fa fa-pencil"/>
+                                            En cours d'examen
+                                        </button>
+                                        <button class="pd-btn pd-btn-exclude"
+                                                t-attf-data-session-id="#{s.id}" data-action="exclude">
+                                            <i class="fa fa-ban"/>
+                                            Exclure
+                                        </button>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Empty state (shown when no sessions) -->
+                    <div class="pd-empty" id="emptyState"
+                         t-attf-style="display: #{len(sessions) == 0 and 'flex' or 'none'}">
+                        <i class="fa fa-shield"/>
+                        <h4>Aucun candidat connecté</h4>
+                        <p>Les candidats apparaîtront ici dès qu'ils activeront leur caméra.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reject Modal -->
+            <div class="pd-modal-overlay" id="rejectModal">
+                <div class="pd-modal">
+                    <h4><i class="fa fa-exclamation-triangle" style="color: var(--pd-danger);"/> Rejeter le candidat</h4>
+                    <p>Indiquez la raison du rejet (optionnel) :</p>
+                    <textarea id="rejectReason" placeholder="Ex: Identité non vérifiable, environnement non conforme..."/>
+                    <input type="hidden" id="rejectSessionId" value=""/>
+                    <div class="pd-modal-actions">
+                        <button class="pd-modal-btn cancel" onclick="closeRejectModal()">Annuler</button>
+                        <button class="pd-modal-btn confirm" onclick="confirmReject()">
+                            <i class="fa fa-times me-1"/> Confirmer le rejet
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exclude Modal -->
+            <div class="pd-modal-overlay" id="excludeModal">
+                <div class="pd-modal">
+                    <h4><i class="fa fa-ban" style="color: #d97706;"/> Exclure le candidat</h4>
+                    <p>Le candidat sera <strong>immédiatement exclu</strong> et son examen sera soumis. Cette action est irréversible.</p>
+                    <textarea id="excludeReason" placeholder="Motif d'exclusion (ex: triche détectée, usage de téléphone...)"/>
+                    <input type="hidden" id="excludeSessionId" value=""/>
+                    <div class="pd-modal-actions">
+                        <button class="pd-modal-btn cancel" onclick="closeExcludeModal()">Annuler</button>
+                        <button class="pd-modal-btn confirm" style="background: #d97706;" onclick="confirmExclude()">
+                            <i class="fa fa-ban me-1"/> Confirmer l'exclusion
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Config for JS -->
+            <div id="proctoringConfig"
+                 t-att-data-survey-id="exam.id"
+                 style="display:none;"> </div>
+
+            <!-- LiveKit client SDK (published as UMD global: LivekitClient) -->
+            <script type="text/javascript"
+                    src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.9/dist/livekit-client.umd.min.js"> </script>
+
+            <!-- JavaScript : Dashboard Logic (external) -->
+            <script type="text/javascript" src="/digii_exam_manager/static/src/js/proctoring_dashboard.js"> </script>
+
+        </t>
+    </template>
+
+</data>
+</odoo>
