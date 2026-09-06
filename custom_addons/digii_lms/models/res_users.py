@@ -1,15 +1,22 @@
-from odoo import models, fields, api
-import hashlib
+# -*- coding: utf-8 -*-
+"""
+Extensions de res.users pour le LMS.
+
+Les rôles ne sont plus gérés par un champ maison : on utilise le système
+natif d'Odoo (groupes et permissions), visible dans l'onglet « Droits
+d'accès » du formulaire utilisateur. Les quatre rôles du projet sont
+définis dans security/lms_groups.xml et partagent un même privilège, ce
+qui les fait apparaître dans une seule liste déroulante.
+
+Ce fichier ne conserve que l'avatar affiché dans l'en-tête du portail.
+"""
+from odoo import api, fields, models
+
 
 class ResUsers(models.Model):
     _inherit = 'res.users'
-    lms_group = fields.Selection([ ('admin', 'Administrateur'),
-                                   ('professor', 'Professeur'),
-                                   ('student', 'Étudiant'), ],
-                                 string='Groupe LMS', required=True,
-                                 default='student')
 
-    # ── Avatar header (initiales + couleur déterministe) ──────────────
+    # ── Avatar de l'en-tête (initiales + couleur déterministe) ────────
     lms_initials = fields.Char(
         string="Initiales LMS", compute='_compute_lms_avatar')
     lms_avatar_color = fields.Char(
@@ -31,23 +38,4 @@ class ResUsers(models.Model):
             else:
                 initials = '?'
             user.lms_initials = initials.upper()
-            digest = hashlib.md5(name.encode('utf-8')).hexdigest()
-            user.lms_avatar_color = palette[int(digest, 16) % len(palette)]
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        users = super().create(vals_list)
-        for user in users:
-            user._assign_lms_groups()
-            return users
-    def write(self, vals):
-        res = super().write(vals)
-        if 'lms_group' in vals:
-            for user in self:
-                user._assign_lms_groups()
-                return res
-    def _assign_lms_groups(self):
-        group_admin = self.env.ref('digii_lms.group_lms_admin')
-        group_professor = self.env.ref('digii_lms.group_lms_professor')
-        group_student = self.env.ref('digii_lms.group_lms_student')
-        all_groups = [group_admin, group_professor, group_student] # sudo() obligatoire pour modifier les groupes user_sudo = self.sudo() # Retirer tous les groupes LMS for g in all_groups: if g in user_sudo.groups_id: user_sudo.groups_id = [(3, g.id)] # Ajouter le bon groupe mapping = { 'admin': group_admin, 'professor': group_professor, 'student': group_student, } group = mapping.get(self.lms_group) if group: user_sudo.groups_id = [(4, group.id)]
+            user.lms_avatar_color = palette[sum(map(ord, name)) % len(palette)]

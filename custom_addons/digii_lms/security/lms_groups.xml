@@ -1,17 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="group_lms_admin" model="res.groups">
-        <field name="name">Administrateur</field>
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         RÔLES DE LA PLATEFORME
+
+         Trois rôles seulement :
+
+             Étudiant       → portail, consultation de ses propres données
+             Professeur     → tout le back-office SAUF les utilisateurs
+             Administrateur → tout, y compris les comptes
+
+         L'Étudiant relève de `base.group_portal`, les deux autres de
+         `base.group_user` : c'est cette distinction qui ferme le
+         back-office aux étudiants.
+
+         ⚠ Odoo 19 : la catégorie ne se pose plus sur le groupe
+         (`category_id`) mais sur le privilège (`privilege_id`).
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <record id="module_category_lms" model="ir.module.category">
+        <field name="name">Smart LMS</field>
+        <field name="description">Rôles de la plateforme de formation</field>
+        <field name="sequence">10</field>
     </record>
 
-    <record id="group_lms_professor" model="res.groups">
-        <field name="name">Professeur</field>
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    <!-- Privilège commun : sert à regrouper les trois rôles et à les
+         isoler des dizaines d'autres groupes Odoo dans le formulaire. -->
+    <record id="privilege_lms_roles" model="res.groups.privilege">
+        <field name="name">Rôle Smart LMS</field>
+        <field name="category_id" ref="module_category_lms"/>
+        <field name="sequence">10</field>
     </record>
 
+    <!-- ── Étudiant : portail uniquement ─────────────────────────── -->
     <record id="group_lms_student" model="res.groups">
         <field name="name">Étudiant</field>
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="privilege_id" ref="privilege_lms_roles"/>
+        <field name="sequence">10</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
+        <field name="comment">
+            Accès au portail : ses cours, ses examens, ses certificats.
+            Aucun accès au back-office.
+        </field>
     </record>
+
+    <!-- ── Professeur ───────────────────────────────────────────────
+         Périmètre complet du back-office métier : pédagogie, examens,
+         surveillance, certificats, agent IA. Ne gère pas les comptes
+         utilisateurs — c'est la seule différence avec l'administrateur. -->
+    <record id="group_lms_professor" model="res.groups">
+        <field name="name">Professeur</field>
+        <field name="privilege_id" ref="privilege_lms_roles"/>
+        <field name="sequence">20</field>
+        <!-- Le professeur implique les groupes métier d'Odoo plutôt que
+             de dupliquer leurs droits.
+
+             C'est ce qui manquait : les modèles d'examen
+             (exam.category, exam.certificate, exam.proctoring.session…)
+             accordent leurs droits à `survey.group_survey_manager`.
+             Sans cette implication, Odoo masquait les menus
+             correspondants, car il cache automatiquement tout menu dont
+             l'utilisateur ne peut pas lire le modèle. -->
+        <field name="implied_ids" eval="[
+            (4, ref('base.group_user')),
+            (4, ref('survey.group_survey_manager')),
+            (4, ref('website_slides.group_website_slides_manager')),
+            (4, ref('website.group_website_designer')),
+        ]"/>
+        <field name="comment">
+            Cours, classes, examens, banque de questions, surveillance,
+            certificats et agent IA. Ne gère pas les comptes utilisateurs.
+        </field>
+    </record>
+
+    <!-- ── Administrateur ───────────────────────────────────────────
+         Ajoute la gestion des comptes et la configuration technique. -->
+    <record id="group_lms_admin" model="res.groups">
+        <field name="name">Administrateur</field>
+        <field name="privilege_id" ref="privilege_lms_roles"/>
+        <field name="sequence">30</field>
+        <field name="implied_ids" eval="[
+            (4, ref('group_lms_professor')),
+            (4, ref('base.group_system')),
+        ]"/>
+        <field name="comment">
+            Périmètre complet, y compris la gestion des comptes
+            utilisateurs et la configuration.
+        </field>
+    </record>
+
 </odoo>

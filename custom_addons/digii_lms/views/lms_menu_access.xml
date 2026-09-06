@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         VISIBILITÉ DES MENUS
+
+         Règle du projet :
+
+             Étudiant       → aucun menu (compte portail, pas de
+                              back-office du tout)
+             Professeur     → TOUS les menus, sauf la gestion des comptes
+             Administrateur → tous les menus
+
+         Les menus métier (pédagogie, examens, surveillance, certificats)
+         ne sont pas listés ici : ils sont déjà visibles de tout
+         utilisateur interne, et les étudiants relèvent du portail.
+
+         En revanche, TOUS les sous-menus de Configuration étaient
+         déclarés avec `groups="base.group_system"`, donc réservés à
+         l'administrateur. On les rouvre un par un au professeur, sauf
+         ceux qui touchent aux comptes utilisateurs.
+
+         ⚠ Odoo 19 : le champ `groups_id` de ir.ui.menu s'appelle
+         désormais `group_ids`.
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Ouverts au professeur (et donc à l'administrateur, qui
+           implique le professeur) ──────────────────────────────────── -->
+    <!-- Configuration -->
+    <record id="menu_digii_lms_config" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Configuration > Cours -->
+    <record id="menu_digii_lms_config_section_cours" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Catégories de cours -->
+    <record id="menu_digii_lms_categories" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Tags des cours -->
+    <record id="menu_digii_lms_tags" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Configuration > Examens -->
+    <record id="menu_digii_lms_config_section_exams" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Catégories d'examens -->
+    <record id="menu_lms_exam_categories_config" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Templates de certificat -->
+    <record id="menu_lms_exam_cert_templates_config" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Configuration > Blog -->
+    <record id="menu_digii_lms_config_section_blog" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Articles de blog -->
+    <record id="menu_lms_blog_config" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Configuration > Forum -->
+    <record id="menu_digii_lms_config_section_forum" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Forums -->
+    <record id="menu_lms_forums_config" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Posts Forum -->
+    <record id="menu_lms_forum_posts_config" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Configuration > Apprenants -->
+    <record id="menu_digii_lms_config_section_apprenants" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+    <!-- Inscriptions -->
+    <record id="menu_lms_apprenants_config" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_professor')])]"/>
+    </record>
+
+    <!-- ── Administrateur seul ──────────────────────────────────────
+         Cette section ne contient que la gestion des comptes : c'est la
+         seule chose que le professeur ne doit pas voir. -->
+    <!-- Administration -->
+    <record id="menu_digii_lms_config_section_admin" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_admin')])]"/>
+    </record>
+    <!-- Utilisateurs -->
+    <record id="menu_lms_users_config" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('group_lms_admin')])]"/>
+    </record>
+
+</odoo>

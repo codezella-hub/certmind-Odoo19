@@ -2,3 +2,5 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_digii_course_category_user,digii.course.category user,model_digii_course_category,base.group_user,1,0,0,0
 access_digii_course_category_manager,digii.course.category manager,model_digii_course_category,base.group_system,1,1,1,1
 access_digii_class_all,digii.class all,model_digii_class,base.group_user,1,1,1,1
+access_digii_course_category_professor,digii_course_category professor,model_digii_course_category,digii_lms.group_lms_professor,1,1,1,1
+access_digii_class_professor,digii_class professor,model_digii_class,digii_lms.group_lms_professor,1,1,1,1

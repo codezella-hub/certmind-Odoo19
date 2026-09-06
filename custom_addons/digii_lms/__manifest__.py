@@ -20,6 +20,7 @@
     'data': [
         'security/lms_groups.xml',
         'security/ir.model.access.csv',
+        'data/lms_config.xml',
         'views/digii_course_category_views.xml',
         'views/digii_slide_channel_views.xml',
         'views/digii_class_views.xml',
@@ -35,6 +36,7 @@
         'templates/slides_courses.xml',
         'views/portal_exam_filter_templates.xml',
         'views/digii_menu_views.xml',
+        'views/lms_menu_access.xml',
     ],    'assets': {
     'web.assets_backend': [
         'digii_lms/static/src/scss/digii_dashboard.css',

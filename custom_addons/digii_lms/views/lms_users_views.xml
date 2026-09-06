@@ -25,8 +25,17 @@
                             <field name="email"/>
                             <field name="phone"/>
                         </group>
-                        <group string="Groupe LMS">
-                            <field name="lms_group" widget="radio"/>
+                        <group string="Type de compte">
+                            <!-- `share` est le champ natif d'Odoo : coché,
+                                 le compte est un utilisateur PORTAIL, qui
+                                 n'accède pas au back-office. Décoché, c'est
+                                 un utilisateur interne. -->
+                            <field name="share" string="Utilisateur portail"
+                                   readonly="1"
+                                   help="Calculé d'après les groupes : un compte
+                                         appartenant au groupe Portail n'accède
+                                         qu'au site et à son espace personnel."/>
+                            <field name="active"/>
                         </group>
                     </group>
 
@@ -40,6 +49,32 @@
                                string="Nouveau mot de passe"
                                password="True"/>
                     </group>
+
+                    <notebook>
+                        <page string="Rôle" name="role">
+                            <!-- Champ NATIF `group_ids`, restreint aux seuls
+                                 rôles du projet par le domaine sur le
+                                 privilège. Sans ce filtre, le widget listerait
+                                 les dizaines de groupes d'Odoo (Comptabilité,
+                                 Produits, Sondages…), ce qui rend la sélection
+                                 illisible.
+
+                                 Un seul champ `group_ids` dans la vue : Odoo
+                                 refuse qu'un même champ y figure deux fois.
+                                 Pour accorder un droit hors de ces rôles,
+                                 passer par Paramètres > Utilisateurs. -->
+                            <div class="alert alert-info" role="status">
+                                <strong>Un seul rôle à cocher.</strong>
+                                L'Administrateur inclut automatiquement les
+                                droits du Professeur. L'Étudiant est un compte
+                                <em>portail</em> : il ne peut pas être combiné
+                                avec les deux autres.
+                            </div>
+                            <field name="group_ids" nolabel="1"
+                                   widget="many2many_checkboxes"
+                                   domain="[('privilege_id.name', '=', 'Rôle Smart LMS')]"/>
+                        </page>
+                    </notebook>
 
 
 
@@ -59,10 +94,10 @@
                 <field name="name"/>
                 <field name="login"/>
                 <field name="email"/>
-                <field name="lms_group" widget="badge"
-                       decoration-danger="lms_group == 'admin'"
-                       decoration-info="lms_group == 'professor'"
-                       decoration-success="lms_group == 'student'"/>
+                <!-- `share` distingue les comptes portail des comptes
+                     internes : c'est l'information la plus utile en liste. -->
+                <field name="share" string="Portail" widget="boolean_toggle"
+                       readonly="1"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>
         </field>

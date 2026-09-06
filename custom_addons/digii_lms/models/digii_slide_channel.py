@@ -33,7 +33,12 @@ class DigiiSlideChannel(models.Model):
     professor_ids = fields.Many2many(
         'res.users',
         string="Professeurs",
-        domain="[('lms_group','=','professor')]"
+        # Domaine calculé : on filtre sur le groupe natif plutôt que sur
+        # un champ maison. `group_ids` inclut les groupes impliqués, donc
+        # un administrateur (qui implique Professeur) reste sélectionnable.
+        domain=lambda self: [
+            ('all_group_ids', 'in',
+             self.env.ref('digii_lms.group_lms_professor').ids)],
     )
     # ── Méthodes publication ────────────────────────────
     def action_publish(self):

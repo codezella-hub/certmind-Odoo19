@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ═══════════════════════════════════════════════════════════
+             INSCRIPTION LIBRE DÉSACTIVÉE
+
+             `auth_signup.invitation_scope` :
+                b2b   → sur invitation uniquement  (choix retenu)
+                b2c   → inscription libre
+                False → aucune inscription
+
+             « b2b » plutôt que False : l'administrateur peut encore
+             inviter quelqu'un depuis le back-office, mais personne ne
+             crée de compte de lui-même depuis le site.
+
+             On passe par `set_param` : ces clés sont déjà créées par le
+             module `auth_signup` et la colonne `key` est unique — un
+             <record> déclencherait une erreur de doublon.
+             ═══════════════════════════════════════════════════════════ -->
+        <function model="ir.config_parameter" name="set_param">
+            <value>auth_signup.invitation_scope</value>
+            <value>b2b</value>
+        </function>
+
+        <!-- La réinitialisation de mot de passe reste ouverte : sans elle,
+             un étudiant ayant perdu son accès dépendrait de l'admin. -->
+        <function model="ir.config_parameter" name="set_param">
+            <value>auth_signup.reset_password</value>
+            <value>True</value>
+        </function>
+
+    </data>
+</odoo>

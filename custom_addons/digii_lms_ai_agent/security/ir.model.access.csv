@@ -1,5 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_lms_ai_chat_session_user,lms.ai.chat.session.user,model_digii_lms_ai_chat_session,base.group_portal,1,1,1,1
-access_lms_ai_chat_message_user,lms.ai.chat.message.user,model_digii_lms_ai_chat_message,base.group_portal,1,1,1,1
-access_lms_ai_chat_session_internal,lms.ai.chat.session.internal,model_digii_lms_ai_chat_session,base.group_user,1,1,1,1
-access_lms_ai_chat_message_internal,lms.ai.chat.message.internal,model_digii_lms_ai_chat_message,base.group_user,1,1,1,1

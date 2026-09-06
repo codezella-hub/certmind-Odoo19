@@ -19,11 +19,11 @@
                     <nav>
                         <ul class="nav-menu">
                             <li><a href="/">Accueil</a></li>
-                            <li><a href="/slides">My Courses</a></li>
-                            <li><a href="/my/exams">My Exams</a></li>
-                            <li><a href="/blog">Blogs</a></li>
-                            <li><a href="/forum/help-1">Forum</a></li>
-                            <li><a href="/contactus">Contact</a></li>
+                            <li><a href="/slides">Mes cours</a></li>
+                            <li><a href="/my/exams">Mes examens</a></li>
+                            <li><a href="/blog">Blog</a></li>
+                            <li><a href="/forum/help-1">Forum d'entraide</a></li>
+                            <li><a href="/contactus">Nous contacter</a></li>
                         </ul>
                     </nav>
                     <!-- Auth -->
@@ -81,6 +81,11 @@
                                         <i class="fa fa-graduation-cap me-2"/>Mes examens
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="dropdown-item" href="/my/certificates">
+                                        <i class="fa fa-certificate me-2"/>Mes certificats
+                                    </a>
+                                </li>
                                 <li><hr class="dropdown-divider"/></li>
                                 <li>
                                     <a class="dropdown-item lms-user__logout"
@@ -108,11 +113,11 @@
                 </div>
                 <ul class="mobile-nav">
                     <li><a href="/">Accueil</a></li>
-                    <li><a href="/slides">My Courses</a></li>
-                    <li><a href="/my/exams">My Exams</a></li>
-                    <li><a href="/blog">Blogs</a></li>
-                    <li><a href="/forum/help-1">Forum</a></li>
-                    <li><a href="/contactus">Contact</a></li>
+                    <li><a href="/slides">Mes cours</a></li>
+                    <li><a href="/my/exams">Mes examens</a></li>
+                    <li><a href="/blog">Blog</a></li>
+                    <li><a href="/forum/help-1">Forum d'entraide</a></li>
+                    <li><a href="/contactus">Nous contacter</a></li>
                     <t t-if="not request.env.user._is_public()">
                         <li><a href="/my">Mon espace</a></li>
                         <li><a href="/my/account">Modifier le profil</a></li>
