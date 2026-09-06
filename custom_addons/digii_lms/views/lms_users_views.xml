@@ -6,6 +6,21 @@
         <field name="model">res.users</field>
         <field name="arch" type="xml">
             <form string="Utilisateur LMS">
+                <header>
+                    <!-- Invitation NATIVE d'Odoo (module auth_signup) :
+                         le destinataire reçoit un lien à usage unique et
+                         choisit lui-même son mot de passe.
+
+                         Masqué à la création : le compte doit exister en
+                         base pour qu'un jeton d'invitation soit généré. -->
+                    <button name="action_lms_send_invitation" type="object"
+                            string="Envoyer une invitation"
+                            class="btn-primary"
+                            icon="fa-envelope-o"
+                            invisible="id == False"
+                            confirm="Envoyer un courriel d'invitation à cet utilisateur ?
+                                     Il pourra définir son mot de passe via le lien reçu."/>
+                </header>
                 <sheet>
 
                     <div class="oe_title d-flex align-items-center gap-3">

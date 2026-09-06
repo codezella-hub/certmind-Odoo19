@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         INVITATION EN LOT
+
+         Depuis la liste des utilisateurs, sélectionner plusieurs comptes
+         puis « Actions > Envoyer une invitation ». Utile à la rentrée,
+         quand une promotion entière doit recevoir ses accès.
+
+         L'action délègue à la même méthode que le bouton du formulaire,
+         donc à l'invitation native d'Odoo.
+         ═══════════════════════════════════════════════════════════════ -->
+    <record id="action_lms_users_send_invitation" model="ir.actions.server">
+        <field name="name">Envoyer une invitation</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="binding_model_id" ref="base.model_res_users"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    records.action_lms_send_invitation()
+        </field>
+    </record>
+
+</odoo>

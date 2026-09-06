@@ -9,6 +9,8 @@
         'website',
         'website_slides',
         'mail',
+        # Fournit action_reset_password : l'invitation native par courriel
+        'auth_signup',
         'base',
         'web',
         'portal',
@@ -30,6 +32,7 @@
         'views/digii_slide_channel_partner_views.xml',
         'views/digii_slide_slide_views.xml',
         'views/lms_users_views.xml',
+        'views/lms_user_invite_action.xml',
         'views/survey_exam_course_views.xml',
         'views/website_templates.xml',
         'templates/home.xml',
