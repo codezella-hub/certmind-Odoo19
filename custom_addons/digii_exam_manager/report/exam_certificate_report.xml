@@ -136,7 +136,14 @@
                              gauche 52mm, largeur 193mm → centre 148,5mm
                              soit exactement 50% des 297mm de la page. */
                         position: absolute;
-                        top: 14mm;
+                        /* top à 22mm plutôt que 14 : le bloc était centré
+                           dans sa propre zone, mais celle-ci commençait trop
+                           haut. Il restait donc plus d'espace vide entre le
+                           QR et le pied de page qu'entre le cadre et le
+                           titre. Descendre le point de départ recentre le
+                           texte dans l'espace réellement disponible, entre
+                           le haut du cadre et le bloc de signatures. */
+                        top: 22mm;
                         left: 52mm;
                         width: 193mm;
                         height: 148mm;
