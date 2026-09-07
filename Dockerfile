@@ -87,6 +87,34 @@ RUN python3 -c "import cv2;         print('cv2        ', cv2.__version__)" \
  && echo "=== Toutes les dépendances Python OK ==="
 
 # ── 8. Application ────────────────────────────────────────────────
+# ── Modèle YOLO embarqué dans l'image ────────────────────────────
+#
+# Ultralytics télécharge yolov8n.pt (~6 Mo) au premier usage. Sur Azure
+# Container Apps, ce téléchargement échoue :
+#
+#   ConnectionError: Download failure for .../yolov8n.pt
+#   Retry limit reached. Curl return value 23
+#
+# Le code 23 de curl signifie « échec d'écriture » : le processus Odoo
+# n'a pas de droit d'écriture dans le répertoire de cache d'Ultralytics.
+#
+# On récupère donc le fichier au build, où l'on est encore root, et on
+# le place dans le dossier que la bibliothèque consulte en premier.
+# L'analyse n'a alors plus besoin d'accès réseau.
+# PROCTOR_YOLO_MODEL est lu par pipeline/proctoring_config.py :
+# en pointant vers un chemin absolu, Ultralytics charge le fichier
+# local au lieu de tenter un téléchargement.
+ENV YOLO_CONFIG_DIR=/var/lib/odoo/.config/Ultralytics \
+    PROCTOR_YOLO_MODEL=/opt/models/yolov8n.pt
+RUN mkdir -p /opt/models /var/lib/odoo/.config/Ultralytics \
+    && curl -fSL --retry 3 \
+       https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt \
+       -o /opt/models/yolov8n.pt \
+    && cp /opt/models/yolov8n.pt /var/lib/odoo/yolov8n.pt \
+    && chown -R odoo:odoo /opt/models /var/lib/odoo/.config \
+    && ls -lh /opt/models/yolov8n.pt \
+    && echo "=== Modèle YOLO embarqué ==="
+
 COPY ./custom_addons /mnt/extra-addons
 COPY ./config/odoo.conf.template /etc/odoo/odoo.conf.template
 COPY ./entrypoint.sh /entrypoint.sh
