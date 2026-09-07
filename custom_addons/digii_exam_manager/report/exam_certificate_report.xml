@@ -14,8 +14,22 @@
         <field name="margin_right">0</field>
         <field name="header_line" eval="False"/>
         <field name="header_spacing">0</field>
-        <field name="disable_shrinking" eval="True"/>
-        <field name="dpi">96</field>
+        <!-- disable_shrinking DOIT rester à False.
+             À True, wkhtmltopdf rend le contenu à sa taille en pixels
+             sans l'ajuster à la page : il convertit les millimètres du
+             gabarit selon le DPI déclaré, mais génère la page PDF à une
+             autre résolution. Le certificat se retrouve alors calé en
+             haut à gauche, occupant environ 77 % de la feuille.
+             À False, wkhtmltopdf met le contenu à l'échelle de la page. -->
+        <field name="disable_shrinking" eval="False"/>
+        <!-- 90 et non 96.
+             wkhtmltopdf génère le PDF en points, à 72 dpi. Déclarer 96
+             fait rendre le contenu à une résolution supérieure à celle
+             de la page : le rapport 72/96 vaut 0,75, ce qui correspond
+             exactement à la portion de feuille occupée par un certificat
+             décalé. 90 est la valeur employée par les formats standards
+             d'Odoo. -->
+        <field name="dpi">90</field>
     </record>
 
     <template id="report_exam_certificate_document">
