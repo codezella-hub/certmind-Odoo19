@@ -22,14 +22,22 @@
              haut à gauche, occupant environ 77 % de la feuille.
              À False, wkhtmltopdf met le contenu à l'échelle de la page. -->
         <field name="disable_shrinking" eval="False"/>
-        <!-- 90 et non 96.
-             wkhtmltopdf génère le PDF en points, à 72 dpi. Déclarer 96
-             fait rendre le contenu à une résolution supérieure à celle
-             de la page : le rapport 72/96 vaut 0,75, ce qui correspond
-             exactement à la portion de feuille occupée par un certificat
-             décalé. 90 est la valeur employée par les formats standards
-             d'Odoo. -->
-        <field name="dpi">90</field>
+        <!-- DPI calibré empiriquement pour wkhtmltopdf 0.12.6.1.
+             wkhtmltopdf convertit les millimètres du gabarit selon cette
+             valeur, mais génère la page PDF à une autre résolution. Le
+             contenu se retrouve alors trop petit et calé en haut à gauche.
+
+             Mesures relevées sur le certificat déployé :
+                 dpi 96 → 80,5 % de la feuille
+                 dpi 90 → 86,2 % de la feuille
+             Le produit (dpi × taux) reste constant, autour de 77,4 :
+             c'est donc la valeur qui remplit la page entière.
+
+             Cette constante dépend de la version de wkhtmltopdf. Elle
+             diffère entre 0.12.6 (poste de développement) et 0.12.6.1
+             (image Docker) — d'où un rendu correct en local avec 96 et
+             décalé en production. À revérifier si l'image de base change. -->
+        <field name="dpi">77</field>
     </record>
 
     <template id="report_exam_certificate_document">
@@ -109,7 +117,10 @@
                         top: 0; left: 0;
                         width: 297mm;
                         height: 209mm;
-                        padding: 30mm 52mm 26mm 52mm;
+                        /* Marges resserrées pour loger le bloc QR sans
+                           comprimer le reste : 56 mm de marges verticales
+                           ne laissaient pas la place aux 46 mm du QR. */
+                        padding: 18mm 52mm 14mm 52mm;
                         text-align: center;
                     }
                     .cert-logo { max-height: 60px; max-width: 150px; margin-bottom: 6px; }
@@ -129,7 +140,7 @@
                     }
                     .cert-title-sub {
                         font-family: Arial, Helvetica, sans-serif;
-                        font-size: 13px; color: #666666; margin-bottom: 20px;
+                        font-size: 13px; color: #666666; margin-bottom: 14px;
                     }
                     .cert-presented {
                         font-family: Arial, Helvetica, sans-serif;
@@ -139,19 +150,19 @@
                         font-size: 38px; font-weight: 700; color: <t t-out="txtcol"/>;
                         border-bottom: 3px solid <t t-out="accent"/>;
                         display: inline-block; padding: 0 18px 6px;
-                        margin-bottom: 18px;
+                        margin-bottom: 12px;
                     }
                     .cert-body-text {
                         font-size: 14px; line-height: 1.6; color: #444;
-                        max-width: 170mm; margin: 0 auto 16px;
+                        max-width: 170mm; margin: 0 auto 10px;
                     }
                     .cert-domain {
                         font-size: 19px; font-weight: 700; color: <t t-out="hcolor"/>;
-                        margin-bottom: 14px; text-transform: capitalize;
+                        margin-bottom: 10px; text-transform: capitalize;
                     }
-                    .cert-badges { margin: 0 auto 18px; }
-                    .cert-verify { margin: 14px auto 0; }
-                    .cert-qr { width: 24mm; height: 24mm; display: block; margin: 0 auto 5px; }
+                    .cert-badges { margin: 0 auto 10px; }
+                    .cert-verify { margin: 6px auto 0; }
+                    .cert-qr { width: 22mm; height: 22mm; display: block; margin: 0 auto 4px; }
                     .cert-verify-text {
                         font-family: Arial, Helvetica, sans-serif;
                         font-size: 10px; color: #555555; line-height: 1.4;
