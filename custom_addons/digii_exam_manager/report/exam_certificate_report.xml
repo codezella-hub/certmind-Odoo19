@@ -121,14 +121,29 @@
                     }
                     /* Zone de contenu centree dans la partie claire du fond */
                     .cert-content {
+                        /* Géométrie EXPLICITE, sans padding.
+
+                           La version précédente déclarait width: 297mm avec
+                           52mm de padding latéral, en comptant sur
+                           box-sizing: border-box pour que le total reste à
+                           297mm. Le WebKit de wkhtmltopdf ne l'applique pas :
+                           l'élément occupait 401mm et le texte se retrouvait
+                           centré à 200mm, soit 68% de la page.
+
+                           On pose donc directement la position et la taille
+                           de la zone de texte. Aucune dépendance à
+                           box-sizing, donc un rendu identique quel que soit
+                           le moteur.
+
+                             gauche  52mm      largeur 193mm  → 52 + 193 = 245
+                             centre  52 + 96,5 = 148,5mm      → 50% de 297  ✓
+                             haut    18mm      hauteur 177mm  → 18 + 177 = 195 */
                         position: absolute;
-                        top: 0; left: 0;
-                        width: 297mm;
-                        height: 209mm;
-                        /* Marges resserrées pour loger le bloc QR sans
-                           comprimer le reste : 56 mm de marges verticales
-                           ne laissaient pas la place aux 46 mm du QR. */
-                        padding: 18mm 52mm 14mm 52mm;
+                        top: 18mm;
+                        left: 52mm;
+                        width: 193mm;
+                        height: 177mm;
+                        padding: 0;
                         text-align: center;
                     }
                     .cert-logo { max-height: 60px; max-width: 150px; margin-bottom: 6px; }
