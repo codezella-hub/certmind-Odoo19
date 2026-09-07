@@ -85,6 +85,14 @@
                        force le paysage, marges nulles et l'impression des fonds. */
                     @media print {
                         @page { size: A4 landscape; margin: 0; }
+                        /* box-sizing: border-box est indispensable ici.
+                           Par défaut, `width` ne couvre que la zone de
+                           contenu : le padding s'y AJOUTE. .cert-content,
+                           déclaré à 297mm avec 52mm de padding latéral,
+                           occupait donc 401mm de large, ce qui décalait
+                           tout le texte vers la droite — son centre
+                           tombait à 68% de la page au lieu de 50%. */
+                        *, *::before, *::after { box-sizing: border-box; }
                         body { margin: 0; padding: 0; }
                     }
                     html, body, .cert-wrap, .cert-bg, .cert-score, .cert-mention {
