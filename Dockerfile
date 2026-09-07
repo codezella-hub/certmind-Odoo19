@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gettext-base curl wget ca-certificates \
     ffmpeg \
     xfonts-base xfonts-75dpi fontconfig \
-    libjpeg62-turbo libxrender1 libxext6 libx11-6 \
+    libxrender1 libxext6 libx11-6 \
     libgl1 libglib2.0-0 libsm6 libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -35,6 +35,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # « smart shrinking ». Conséquence : un rapport parfaitement cadré en
 # développement se retrouve décalé en haut à gauche une fois déployé,
 # n'occupant qu'une fraction de la feuille.
+#
+# Les dépendances natives du paquet (libjpeg, Qt patché…) sont résolues
+# automatiquement par `apt-get install` sur le .deb : inutile de les
+# lister à la main, leurs noms varient d'une distribution à l'autre.
 #
 # On installe donc la version officielle patchée. Le dépôt de packaging
 # ne publie pas toujours un build pour la version d'Ubuntu la plus
