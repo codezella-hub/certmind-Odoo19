@@ -15,17 +15,52 @@ USER root
 # ── 1. Outils système ─────────────────────────────────────────────
 # gettext-base : fournit envsubst (génération de odoo.conf)
 # ffmpeg       : conversion WebM→MP4 du pipeline proctoring
-# wkhtmltopdf  : rapports PDF Odoo (certificats)
 # libgl1 etc.  : dépendances natives d'OpenCV et MediaPipe
+# xfonts-*     : polices bitmap requises par wkhtmltopdf
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gettext-base curl \
+    gettext-base curl wget ca-certificates \
     ffmpeg \
-    wkhtmltopdf xfonts-base xfonts-75dpi \
-    libgl1 libglib2.0-0 libsm6 libxext6 libxrender1 libgomp1 \
+    xfonts-base xfonts-75dpi fontconfig \
+    libjpeg62-turbo libxrender1 libxext6 libx11-6 \
+    libgl1 libglib2.0-0 libsm6 libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN ffmpeg -version | head -1 && wkhtmltopdf --version \
-    && echo "=== Outils système OK ==="
+# ── wkhtmltopdf avec Qt patché ───────────────────────────────────
+#
+# Le paquet Ubuntu `wkhtmltopdf` est compilé contre un Qt STANDARD.
+# La documentation Ubuntu le dit explicitement : « not built against a
+# forked version of Qt hence some options are not supported ».
+#
+# Parmi ces options, celles qui gouvernent les dimensions de page et le
+# « smart shrinking ». Conséquence : un rapport parfaitement cadré en
+# développement se retrouve décalé en haut à gauche une fois déployé,
+# n'occupant qu'une fraction de la feuille.
+#
+# On installe donc la version officielle patchée. Le dépôt de packaging
+# ne publie pas toujours un build pour la version d'Ubuntu la plus
+# récente ; le paquet `jammy` fonctionne sur 24.04, d'où la bascule.
+ENV WKHTMLTOPDF_VERSION=0.12.6.1-3
+RUN set -eux; \
+    base="https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}"; \
+    for codename in noble jammy; do \
+        if wget -q -O /tmp/wkhtmltox.deb \
+             "${base}/wkhtmltox_${WKHTMLTOPDF_VERSION}.${codename}_amd64.deb"; then \
+            echo "wkhtmltopdf : paquet ${codename} retenu"; \
+            break; \
+        fi; \
+    done; \
+    test -s /tmp/wkhtmltox.deb; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends /tmp/wkhtmltox.deb; \
+    rm -f /tmp/wkhtmltox.deb; \
+    rm -rf /var/lib/apt/lists/*
+
+# La mention « with patched qt » doit apparaître. Si elle manque, le
+# build échoue ici plutôt que de produire des PDF mal cadrés en silence.
+RUN ffmpeg -version | head -1 \
+    && wkhtmltopdf --version \
+    && wkhtmltopdf --version | grep -q "patched qt" \
+    && echo "=== Outils système OK (wkhtmltopdf patché) ==="
 
 # ── 2. Configuration pip (connexions lentes) ─────────────────────
 ENV PIP_DEFAULT_TIMEOUT=600 \

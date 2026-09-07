@@ -14,14 +14,7 @@
         <field name="margin_right">0</field>
         <field name="header_line" eval="False"/>
         <field name="header_spacing">0</field>
-        <!-- disable_shrinking DOIT rester à False.
-             À True, wkhtmltopdf rend le contenu à sa taille en pixels
-             sans l'ajuster à la page : il convertit les millimètres du
-             gabarit selon le DPI déclaré, mais génère la page PDF à une
-             autre résolution. Le certificat se retrouve alors calé en
-             haut à gauche, occupant environ 77 % de la feuille.
-             À False, wkhtmltopdf met le contenu à l'échelle de la page. -->
-        <field name="disable_shrinking" eval="False"/>
+        <field name="disable_shrinking" eval="True"/>
         <field name="dpi">96</field>
     </record>
 
