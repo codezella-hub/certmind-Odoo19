@@ -9,7 +9,7 @@ from . import blog
 from . import forum
 from . import digii_class
 from . import survey_survey_course
-from . import slide_https
+
 #from . import digii_exam_attempt
 #from . import digii_exam_certificate
 #from . import survey_question
