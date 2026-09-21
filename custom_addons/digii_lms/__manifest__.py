@@ -40,6 +40,7 @@
         'views/portal_exam_filter_templates.xml',
         'views/digii_menu_views.xml',
         'views/lms_menu_access.xml',
+        'views/force_https_assets.xml',
     ],    'assets': {
     'web.assets_backend': [
         'digii_lms/static/src/scss/digii_dashboard.css',
