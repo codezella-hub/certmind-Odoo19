@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Digii Exam AI Agent',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Education',
     'summary': "Agent IA pour la generation de questions et l'assistance a la creation d'examens",
     'description': """

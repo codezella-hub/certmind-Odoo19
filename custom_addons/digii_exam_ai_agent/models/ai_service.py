@@ -5,7 +5,7 @@ Service d'appel a l'API Groq (compatible OpenAI SDK).
 Toute la configuration passe par ir.config_parameter :
 
     digii_exam_ai_agent.api_key     cle API Groq (jamais en dur)
-    digii_exam_ai_agent.model       defaut: llama-3.3-70b-versatile
+    digii_exam_ai_agent.model       defaut: openai/gpt-oss-120b
     digii_exam_ai_agent.base_url    defaut: https://api.groq.com/openai/v1
 
 Le service expose une seule methode publique : `chat_json(system_prompt,
@@ -20,7 +20,10 @@ from odoo import api, models, _
 
 _logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = 'llama-3.3-70b-versatile'
+# llama-3.3-70b-versatile a ete deprecie par Groq (erreur 404) : ne plus
+# l'utiliser comme repli. Ce defaut ne sert que si le parametre systeme
+# digii_exam_ai_agent.model est vide.
+DEFAULT_MODEL = 'openai/gpt-oss-120b'
 DEFAULT_BASE_URL = 'https://api.groq.com/openai/v1'
 DEFAULT_TEMPERATURE = 0.3
 REQUEST_TIMEOUT = 60

@@ -149,13 +149,25 @@ class SurveyQuestionAi(models.Model):
         return True
 
     def ai_reject(self):
-        """Rejette : la question est archivee (active=False)."""
+        """
+        Rejette une question proposee par l'IA.
+
+        La question n'est PAS archivee : survey.question n'a pas de champ
+        `active` (seul survey.survey est archivable). Elle est simplement
+        sortie de la banque via is_bank_question=False. Comme elle est
+        creee avec survey_id=False, elle devient invisible partout :
+        la vue banque filtre sur is_bank_question=True et le pool de
+        generation (exam.generation.rule._get_question_pool) aussi.
+        Elle reste consultable depuis sa session IA, ce qui preserve
+        la tracabilite de la revue.
+        """
         for q in self:
             q._check_bank_write_access()
+            if q.ai_validation_state == 'rejected':
+                continue  # deja rejetee : action idempotente
             q.write({
                 'ai_validation_state': 'rejected',
                 'is_bank_question': False,
-                'active': False,
             })
         return True
 
