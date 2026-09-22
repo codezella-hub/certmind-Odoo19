@@ -8,9 +8,7 @@
  *   - The proctor dashboard is already subscribed to the same room, so the
  *     feed appears automatically with zero custom signaling code.
  *   - If record_video=1, a local MediaRecorder archives the same MediaStream
- *     and uploads it IN CHUNKS (every 15 s) during the exam. At the end, the
- *     server assembles the chunks (/exam/proctoring/finalize-recording).
- *     If the tab is closed, a server cron assembles what was received.
+ *     and uploads a WebM blob on submit / pagehide.
  */
 (function () {
     "use strict";
@@ -44,14 +42,9 @@
     var localTracks = [];
     var recorderStream = null;
     var mediaRecorder = null;
+    var recordedChunks = [];
+    var uploaded = false;
     var stopped = false;
-
-    // Envoi par morceaux
-    var CHUNK_MS = 15000;          // un morceau toutes les 15 s (~1 Mo)
-    var chunkIndex = 0;            // numero du prochain morceau
-    var pendingChunks = 0;         // morceaux pas encore confirmes par Odoo
-    var uploadChain = Promise.resolve();  // envois sequentiels, dans l'ordre
-    var finishPromise = null;      // fin d'examen (une seule fois)
 
     function rpc(url, params) {
         return fetch(url, {
@@ -231,10 +224,10 @@
         }
         mediaRecorder.ondataavailable = function (evt) {
             if (evt.data && evt.data.size > 0) {
-                enqueueChunk(evt.data);
+                recordedChunks.push(evt.data);
             }
         };
-        mediaRecorder.start(CHUNK_MS);
+        mediaRecorder.start(5000);
         console.log('[ExamLive] MediaRecorder started');
     }
 
@@ -248,106 +241,65 @@
         hideLiveBadge();
     }
 
-    function sleep(ms) {
-        return new Promise(function (r) { setTimeout(r, ms); });
-    }
-
-    function sendChunk(blob, index, attempt) {
-        var fd = new FormData();
-        fd.append('session_id', PROC_SESSION_ID);
-        fd.append('index', index);
-        fd.append('chunk', blob, 'chunk_' + index + '.webm');
-        return fetch('/exam/proctoring/upload-chunk', {
-            method: 'POST',
-            body: fd,
-            credentials: 'same-origin',
-        })
-        .then(function (r) {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.json();
-        })
-        .then(function (d) {
-            if (!d || d.status !== 'ok') throw new Error((d && d.error) || 'reponse invalide');
-        })
-        .catch(function (e) {
-            if (attempt >= 5) {
-                console.error('[ExamLive] Morceau ' + index + ' abandonne:', e);
-                return;
-            }
-            console.warn('[ExamLive] Morceau ' + index + ' KO, nouvel essai:', e);
-            return sleep(2000 * attempt).then(function () {
-                return sendChunk(blob, index, attempt + 1);
-            });
-        });
-    }
-
-    function enqueueChunk(blob) {
-        var index = chunkIndex++;
-        pendingChunks++;
-        uploadChain = uploadChain.then(function () {
-            return sendChunk(blob, index, 1);
-        }).then(function () { pendingChunks--; });
-    }
-
-    // Arrete l'enregistrement, attend l'envoi du dernier morceau,
-    // puis demande a Odoo d'assembler la video. Appelable plusieurs fois.
     function stopAndUpload() {
-        if (finishPromise) return finishPromise;
-        finishPromise = new Promise(function (resolve) {
+        return new Promise(function (resolve) {
             stopAll();
             if (!mediaRecorder || mediaRecorder.state === 'inactive') {
                 stopLocalTracks();
                 resolve(false);
                 return;
             }
-            showUploadOverlay();
-            // Le dernier ondataavailable est emis AVANT onstop :
-            // le dernier morceau est donc deja dans la file.
             mediaRecorder.onstop = function () {
                 stopLocalTracks();
-                uploadChain
-                    .then(function () {
-                        return rpc('/exam/proctoring/finalize-recording',
-                                   { session_id: PROC_SESSION_ID });
-                    })
-                    .then(function (res) {
-                        console.log('[ExamLive] Video finalisee', res);
-                        resolve(!!(res && res.has_video));
-                    })
-                    .catch(function (e) {
-                        // Le CRON serveur assemblera les morceaux recus.
-                        console.error('[ExamLive] Finalisation KO', e);
-                        resolve(false);
-                    })
-                    .then(hideUploadOverlay);
+                uploadBlob().then(resolve).catch(function () { resolve(false); });
             };
             try { mediaRecorder.stop(); }
-            catch (e) { hideUploadOverlay(); resolve(false); }
+            catch (e) { resolve(false); }
         });
-        return finishPromise;
     }
 
-    function uploadInProgress() {
-        return pendingChunks > 0 ||
-            (mediaRecorder && mediaRecorder.state === 'recording' && finishPromise);
+    function stopLocalTracks() {
+        if (recorderStream) {
+            recorderStream.getTracks().forEach(function (t) {
+                try { t.stop(); } catch (e) { /* ignore */ }
+            });
+        }
+        localTracks.forEach(function (t) {
+            try {
+                if (t.stop) t.stop();
+                else if (t.mediaStreamTrack && t.mediaStreamTrack.stop) {
+                    t.mediaStreamTrack.stop();
+                }
+            } catch (e) { /* ignore */ }
+        });
     }
 
-    function showUploadOverlay() {
-        if (document.getElementById('examUploadOverlay')) return;
-        var o = document.createElement('div');
-        o.id = 'examUploadOverlay';
-        o.style.cssText =
-            'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);' +
-            'z-index:99998;background:#1f2937;color:#fff;padding:12px 20px;' +
-            'border-radius:10px;font-family:system-ui,sans-serif;font-size:14px;' +
-            'box-shadow:0 6px 20px rgba(0,0,0,.3);';
-        o.textContent = "Envoi de la video en cours, merci de ne pas fermer cette page...";
-        document.body.appendChild(o);
-    }
+    function uploadBlob() {
+        if (uploaded) return Promise.resolve(true);
+        uploaded = true;
+        if (recordedChunks.length === 0) return Promise.resolve(false);
 
-    function hideUploadOverlay() {
-        var o = document.getElementById('examUploadOverlay');
-        if (o) o.remove();
+        var blob = new Blob(recordedChunks, { type: 'video/webm' });
+        console.log('[ExamLive] Upload ' + Math.round(blob.size / 1024) + 'ko');
+
+        var fd = new FormData();
+        fd.append('session_id', PROC_SESSION_ID);
+        fd.append('video_blob', blob, 'recording.webm');
+
+        return fetch('/exam/proctoring/upload-recording', {
+            method: 'POST',
+            body: fd,
+            credentials: 'same-origin',
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+            console.log('[ExamLive] Upload OK', d);
+            return true;
+        })
+        .catch(function (e) {
+            console.error('[ExamLive] Upload KO', e);
+            return false;
+        });
     }
 
     // ---- End triggers ----
@@ -358,23 +310,20 @@
         }
     }, 1000);
 
-    // Avertit le candidat s'il quitte la page pendant l'envoi.
-    window.addEventListener('beforeunload', function (e) {
-        if (uploadInProgress()) {
-            e.preventDefault();
-            e.returnValue = '';
-        }
-    });
-
     window.addEventListener('pagehide', function () {
         stopped = true;
         if (room) { try { room.disconnect(); } catch (e) {} }
-        // Les morceaux deja envoyes sont sur le serveur : le CRON les
-        // assemblera. On ne perd au pire que le dernier morceau (15 s).
+        if (uploaded || recordedChunks.length === 0) return;
         try {
             if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                 mediaRecorder.stop();
             }
+            var blob = new Blob(recordedChunks, { type: 'video/webm' });
+            var fd = new FormData();
+            fd.append('session_id', PROC_SESSION_ID);
+            fd.append('video_blob', blob, 'recording.webm');
+            navigator.sendBeacon('/exam/proctoring/upload-recording', fd);
+            uploaded = true;
         } catch (e) { /* ignore */ }
     });
 
@@ -400,7 +349,7 @@
                     params: {
                         model: 'exam.proctoring.session',
                         method: 'read',
-                        args: [[PROC_SESSION_ID], ['state', 'rejection_reason']],
+                        args: [[PROC_SESSION_ID], ['state']],
                         kwargs: {},
                     }
                 }),
@@ -410,22 +359,12 @@
             .then(function (d) {
                 if (!d.result || !d.result[0]) return;
                 var state = d.result[0].state;
-                // Fin NORMALE : la session passe aussi a 'completed' quand le
-                // candidat soumet l'examen. Seule une exclusion renseigne
-                // rejection_reason (action_exclude). Avant ce correctif, la
-                // fin normale etait prise pour une exclusion : redirection
-                // apres 4 s, qui coupait l'envoi de la video.
-                var excluded = state === 'rejected' ||
-                    (state === 'completed' && !!d.result[0].rejection_reason);
-                if (state === 'completed' && !excluded) {
-                    clearInterval(excludePollTimer);  // watcher gere la fin
-                    return;
-                }
-                if (excluded) {
+                if (state === 'completed' || state === 'rejected') {
                     clearInterval(excludePollTimer);
-                    // Vraie exclusion : on envoie d'abord la video (preuve),
-                    // puis on affiche le bandeau et on redirige.
-                    stopAndUpload().then(showExclusionBanner);
+                    stopped = true;
+                    stopAll();
+                    // Show exclusion banner and redirect after delay
+                    showExclusionBanner();
                 }
             })
             .catch(function () { /* silent */ });

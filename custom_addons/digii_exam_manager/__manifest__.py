@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Digii Exam Manager',
-    'version': '19.0.6.1.0',
+    'version': '19.0.6.0.0',
     'summary': 'Digii - Banque de questions avec sous-categories, examens, certification, proctoring LiveKit, panneau lateral - v6.0: hierarchie 2 niveaux pour categorisation fine + design moderne arrondi des boutons natifs',
     'category': 'Education',
     'depends': ['survey', 'mail', 'portal', 'website', 'bus'],
@@ -16,7 +16,6 @@
         'data/livekit_config_data.xml',
         'data/website_menu_data.xml',
         'data/proctoring_ai_cron.xml',
-        'data/proctoring_video_cron.xml',
         # Reports
         'report/exam_certificate_report.xml',
         'report/exam_certificate_report_action.xml',

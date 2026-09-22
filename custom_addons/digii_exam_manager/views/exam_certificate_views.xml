@@ -86,10 +86,8 @@
                     <div class="alert alert-info" role="alert"
                          invisible="has_video or not proctoring_session_id">
                         <i class="fa fa-clock-o me-2"/>
-                        Aucune video recue pour le moment. Si l'examen vient de se
-                        terminer, la video est en cours d'assemblage : rafraichissez
-                        la page dans une a trois minutes. Sinon, l'enregistrement
-                        video n'etait pas active pour cet examen.
+                        La video est en cours de traitement par LiveKit.
+                        Rafraichissez la page dans quelques instants.
                     </div>
 
                     <!-- ============================================= -->
