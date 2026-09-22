@@ -113,6 +113,29 @@ class ResUsers(models.Model):
         ajustees.append((4, souhaite.id))
         return ajustees
 
+    # ── Karma du forum ───────────────────────────────────────────────
+    # Odoo cree les comptes avec 0 karma, alors que le forum en exige 3
+    # pour poser une question et 30 pour creer un tag. Sans karma, un
+    # etudiant ne peut donc rien publier. On attribue un minimum par role :
+    #   Etudiant   :   50  (questions, reponses, commentaires, votes, tags)
+    #   Professeur : 1000  (moderation : edition, fermeture, acceptation...)
+    KARMA_ETUDIANT = 50
+    KARMA_PROFESSEUR = 1000
+
+    def _lms_assurer_karma_forum(self):
+        etudiant = self.env.ref('digii_lms.group_lms_student', raise_if_not_found=False)
+        professeur = self.env.ref('digii_lms.group_lms_professor', raise_if_not_found=False)
+        for user in self.sudo():
+            if professeur and professeur in user.all_group_ids:
+                cible = self.KARMA_PROFESSEUR
+            elif etudiant and etudiant in user.all_group_ids:
+                cible = self.KARMA_ETUDIANT
+            else:
+                continue
+            if (user.karma or 0) < cible:
+                user._add_karma(cible - (user.karma or 0),
+                                reason="Karma initial Smart LMS")
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -121,7 +144,9 @@ class ResUsers(models.Model):
                     vals['group_ids'])
                 if ajustees is not None:
                     vals['group_ids'] = ajustees
-        return super().create(vals_list)
+        users = super().create(vals_list)
+        users._lms_assurer_karma_forum()
+        return users
 
     def write(self, vals):
         if vals.get('group_ids'):
@@ -132,6 +157,7 @@ class ResUsers(models.Model):
                 if ajustees is not None:
                     v['group_ids'] = ajustees
                 super(ResUsers, user).write(v)
+            self._lms_assurer_karma_forum()
             return True
         return super().write(vals)
 

@@ -44,6 +44,17 @@
                 </button>
             </xpath>
 
+            <!-- Candidats autorises (portail) + clarification du champ natif -->
+            <xpath expr="//field[@name='restrict_user_ids']" position="attributes">
+                <attribute name="string">Gestionnaires (back-office)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='restrict_user_ids']" position="after">
+                <field name="allowed_user_ids" widget="many2many_tags_avatar"
+                       string="Candidats autorises"
+                       placeholder="Vide = ouvert a tous les utilisateurs"
+                       invisible="not is_exam"/>
+            </xpath>
+
             <!-- 3. Champ is_exam + alerte info + alertes état génération -->
             <xpath expr="//div[@class='oe_title']" position="after">
                 <group invisible="not allowed_survey_types">

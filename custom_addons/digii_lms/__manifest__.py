@@ -1,6 +1,6 @@
 {
     'name': 'LMS - Learning Management System',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'category': 'Education',
     'summary': 'Système de gestion de l\'apprentissage type Moodle',
     'author': 'Ben Slimen Louay',

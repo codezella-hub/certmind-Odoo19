@@ -71,7 +71,7 @@ class ProctoringController(http.Controller):
         partner = request.env.user.partner_id
         Survey  = request.env['survey.survey'].sudo()
 
-        domain = [('is_exam', '=', True)]
+        domain = [('is_exam', '=', True)] + Survey._exam_visible_domain()
         total  = Survey.search_count(domain)
 
         # ── Pagination ──────────────────────────────────────────────────────
@@ -147,6 +147,8 @@ class ProctoringController(http.Controller):
 
         if not survey.exists() or not survey.is_exam:
             return request.redirect('/my/exams')
+        if not survey._exam_allowed_for_partner(partner):
+            return request.redirect('/my/exams')
 
         existing_done = request.env['survey.user_input'].sudo().search([
             ('survey_id',  '=', survey.id),
@@ -184,7 +186,8 @@ class ProctoringController(http.Controller):
         partner = request.env.user.partner_id
         survey = request.env['survey.survey'].sudo().browse(exam_id)
 
-        if not survey.exists() or not survey.is_exam:
+        if not survey.exists() or not survey.is_exam \
+                or not survey._exam_allowed_for_partner(partner):
             return {'error': "Examen introuvable."}
 
         # Ce mode n'est valide que si record_video est actif ET proctoring inactif.
@@ -246,7 +249,8 @@ class ProctoringController(http.Controller):
         partner = request.env.user.partner_id
         survey = request.env['survey.survey'].sudo().browse(exam_id)
 
-        if not survey.exists() or not survey.is_exam:
+        if not survey.exists() or not survey.is_exam \
+                or not survey._exam_allowed_for_partner(partner):
             return {'error': "Examen introuvable."}
 
         # Verifie qu'il n'a pas deja passe l'examen.

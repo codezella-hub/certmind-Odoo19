@@ -29,7 +29,10 @@ class LmsExamPortal(ProctoringController):
         Survey = request.env['survey.survey'].sudo()
 
         # ── Construction du domaine de recherche/filtre ─────────────────────
-        domain = [('is_exam', '=', True)]
+        # Seuls les examens ouverts a tous ou ou l'utilisateur est candidat
+        # autorise (champ allowed_user_ids de digii_exam_manager).
+        visible = Survey._exam_visible_domain()
+        domain = [('is_exam', '=', True)] + visible
 
         search = (search or '').strip()
         if search:
@@ -56,7 +59,7 @@ class LmsExamPortal(ProctoringController):
         total = Survey.search_count(domain)
 
         # ── Options des filtres (uniquement cours/tags réellement utilisés) ──
-        all_exams = Survey.search([('is_exam', '=', True)])
+        all_exams = Survey.search([('is_exam', '=', True)] + visible)
         filter_courses = all_exams.mapped('course_id').sorted('name')
         filter_tags = all_exams.mapped('exam_tag_ids').sorted('name')
         filter_categories = all_exams.mapped('exam_category_ids').sorted('name')

@@ -24,6 +24,32 @@ class SurveySurveyPatch(models.Model):
     _inherit = 'survey.survey'
 
     # --- Champ flag examen ---
+    # Candidats autorises a voir et passer l'examen (portail).
+    # Vide = tous les utilisateurs. A ne pas confondre avec le champ natif
+    # restrict_user_ids ("Restreint a"), qui limite les GESTIONNAIRES
+    # back-office du sondage et n'accepte que des utilisateurs internes.
+    allowed_user_ids = fields.Many2many(
+        'res.users', 'survey_exam_allowed_user_rel', 'survey_id', 'user_id',
+        string='Candidats autorises',
+        help="Seuls ces utilisateurs voient l'examen dans leur portail et "
+             "peuvent le passer. Laisser vide pour l'ouvrir a tous.",
+    )
+
+    @api.model
+    def _exam_visible_domain(self, user=None):
+        """Domaine des examens visibles par l'utilisateur dans le portail."""
+        user = user or self.env.user
+        return ['|', ('allowed_user_ids', '=', False),
+                     ('allowed_user_ids', 'in', user.ids)]
+
+    def _exam_allowed_for_partner(self, partner):
+        """True si le partenaire (candidat) peut passer cet examen."""
+        self.ensure_one()
+        if not self.allowed_user_ids:
+            return True
+        return bool(self.allowed_user_ids.filtered(
+            lambda u: u.partner_id == partner))
+
     is_exam = fields.Boolean(
         'Est un examen',
         default=False,

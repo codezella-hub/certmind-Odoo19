@@ -208,6 +208,13 @@
               sequence="10"
               groups="base.group_system"/>
 
+    <menuitem id="menu_lms_blogs_config"
+              name="Blogs"
+              parent="menu_digii_lms_config_section_blog"
+              action="action_lms_blogs"
+              sequence="5"
+              groups="digii_lms.group_lms_professor"/>
+
     <!-- ── Forum ── -->
     <menuitem id="menu_digii_lms_config_section_forum"
               name="Forum"

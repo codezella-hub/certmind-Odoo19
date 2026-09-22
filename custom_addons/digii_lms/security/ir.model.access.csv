@@ -4,3 +4,4 @@ access_digii_course_category_manager,digii.course.category manager,model_digii_c
 access_digii_class_all,digii.class all,model_digii_class,base.group_user,1,1,1,1
 access_digii_course_category_professor,digii_course_category professor,model_digii_course_category,digii_lms.group_lms_professor,1,1,1,1
 access_digii_class_professor,digii_class professor,model_digii_class,digii_lms.group_lms_professor,1,1,1,1
+access_forum_forum_lms_professor,forum.forum professor,website_forum.model_forum_forum,digii_lms.group_lms_professor,1,1,1,0

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Digii Exam Manager',
-    'version': '19.0.6.2.0',
+    'version': '19.0.6.3.0',
     'author': 'Ben Slimen Louay',
     'summary': 'Digii - Banque de questions avec sous-categories, examens, certification, proctoring LiveKit, panneau lateral - v6.0: hierarchie 2 niveaux pour categorisation fine + design moderne arrondi des boutons natifs',
     'category': 'Education',

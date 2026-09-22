@@ -106,6 +106,13 @@ class SurveyUserInputPatch(models.Model):
                 continue
             if not (survey.is_exam or survey.is_certification):
                 continue
+            partner = self.env['res.partner'].sudo().browse(partner_id)
+            # Le bouton "Tester" du back-office (test_entry) reste libre.
+            if not vals.get('test_entry') and \
+                    not survey._exam_allowed_for_partner(partner):
+                raise UserError(_(
+                    "Vous n'etes pas autorise a passer cet examen."
+                ))
             existing = self.sudo().search([
                 ('survey_id',  '=', survey_id),
                 ('partner_id', '=', partner_id),

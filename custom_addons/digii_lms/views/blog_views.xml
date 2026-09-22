@@ -40,4 +40,14 @@
         </field>
     </record>
 
+    <!-- ACTION blog.blog : creer / gerer les blogs eux-memes -->
+    <record id="action_lms_blogs" model="ir.actions.act_window">
+        <field name="name">Blogs</field>
+        <field name="res_model">blog.blog</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Creez votre premier blog</p>
+        </field>
+    </record>
+
 </odoo>
