@@ -84,7 +84,7 @@
                     <script type="text/javascript"
                             src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.9/dist/livekit-client.umd.min.js"> </script>
                     <script type="text/javascript"
-                            src="/digii_exam_manager/static/src/js/exam_recording.js"> </script>
+                            src="/digii_exam_manager/static/src/js/exam_recording.js?v=19.0.6.2.0"> </script>
                 </t>
             </t>
         </xpath>

@@ -5,7 +5,7 @@ import logging
 
 from odoo import http
 from odoo.http import request
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -513,6 +513,64 @@ class ProctoringController(http.Controller):
         return request.make_response(
             json.dumps({'status': 'ok', 'size': len(video_data)}),
             headers=[('Content-Type', 'application/json')], status=200)
+
+    # =========================================================================
+    # API: envoi de la video PAR MORCEAUX (pendant l'examen)
+    # =========================================================================
+
+    def _json_response(self, payload, status=200):
+        return request.make_response(
+            json.dumps(payload),
+            headers=[('Content-Type', 'application/json')], status=status)
+
+    def _get_own_session(self, session_id):
+        """Session du candidat connecte, ou None."""
+        try:
+            sid = int(session_id)
+        except (TypeError, ValueError):
+            return None
+        session = request.env['exam.proctoring.session'].sudo().browse(sid)
+        if not session.exists() or session.partner_id != request.env.user.partner_id:
+            return None
+        return session
+
+    @http.route('/exam/proctoring/upload-chunk',
+                type='http', auth='user', methods=['POST'], csrf=False)
+    def upload_chunk(self, session_id=None, recording_id=None, index=None,
+                     chunk=None, **kw):
+        session = self._get_own_session(session_id)
+        if not session:
+            return self._json_response({'error': 'Non autorise'}, 403)
+        try:
+            idx = int(index)
+        except (TypeError, ValueError):
+            return self._json_response({'error': 'index invalide'}, 400)
+        if not chunk:
+            return self._json_response({'error': 'Parametres manquants'}, 400)
+        try:
+            session.store_video_chunk(recording_id, idx, chunk.read())
+        except UserError as exc:
+            return self._json_response({'error': str(exc)}, 400)
+
+        # Examen termine (fin normale ou exclusion) : ce morceau est le
+        # dernier -> on assemble tout de suite, cote serveur, sans attendre
+        # le navigateur. En cas d'echec, le CRON reessaie dans la minute.
+        if session._exam_is_over():
+            try:
+                with request.env.cr.savepoint():
+                    session.finalize_video_chunks()
+            except Exception:  # noqa: BLE001
+                _logger.exception('[Proctoring video] Assemblage immediat KO, '
+                                  'session %s (le CRON reessaiera)', session.id)
+        return self._json_response({'status': 'ok', 'index': idx})
+
+    @http.route('/exam/proctoring/finalize-recording',
+                type='jsonrpc', auth='user', methods=['POST'])
+    def finalize_recording(self, session_id=None, **kw):
+        session = self._get_own_session(session_id)
+        if not session:
+            return {'error': 'Non autorise'}
+        return {'status': 'ok', 'has_video': session.finalize_video_chunks()}
 
     @http.route('/exam/proctoring/recording/<int:session_id>',
                 type='http', auth='user', website=False)

@@ -8,6 +8,7 @@ from . import survey_survey_patch
 from . import survey_user_input_patch
 from . import exam_proctoring_session
 from . import exam_proctoring_ai_cron
+from . import exam_proctoring_video_chunk
 from . import livekit_config
 from . import exam_strike
 from . import res_partner
